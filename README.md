@@ -30,13 +30,29 @@ python3 -m venv esptool-venv
 source esptool-venv/bin/activate
 pip install esptool
 ```
-If you encounter:
->[Errno 13] Permission denied: '/dev/ttyACM0'
+Plug in your ESP to yor computer by USB, and try running
+```
+esp_rfc2217_server.py -v -p 4000 /dev/ttyACM0
+```
+If you encounter an error containing:
+>... [Errno 13] Permission denied: '/dev/ttyACM0'
 
 Add your user to the dialout group.
 ```
 sudo usermod -a -G dialout $USER
 ```
+## Building and Flashing
+Start the frc2217 server.
+```
+source esptool-env/bin/activate && esp_rfc2217_server.py -v -p 4000 /dev/ttyACM0
+```
+In another terminal, start the container.
+```
+source idf.sh
+```
+build, flash and monitor as follows:
+- `idf.py build`
+- `idf.py --port 'rfc2217://host.docker.internal:4000?ign_set_control' flash`
 
 # License
 Firment is licensed under LGPL-3.0-or-later.  A copy of the GPL-3.0 and additional permissions of the lesser GPL are distributed under the names LICENSE and COPYING.LESSER respectively.
