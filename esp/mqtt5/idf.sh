@@ -1,0 +1,1 @@
+docker run --rm --name idf-container -v $PWD:/project -w /project -u $UID -e HOME=/tmp -it espressif/idf:v5.2.1
