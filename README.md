@@ -7,5 +7,17 @@ An opinionated firmware framework that uses web interfaces to ease development a
 - Make a reasonable effort to containerize tools.
 - Be declarative about messages, let message-handling code be generated.
 
+# User Guide
+## Installing Dependencies
+### Docker
+Install Docker Desktop or Docker-CE for your platform.
+
+### ESPTool
+We use 
+- Docker (Docker Desktop is okay)
+- ESPTool
+- Node >=18
+- Playwright. 
+
 # License
-Firment is licensed under GPL-3.0-or-later.  A copy of the applicable license is distributed herewith.
+Firment is licensed under LGPL-3.0-or-later.  A copy of the GPL-3.0 and additional permissions of the lesser GPL are distributed under the names LICENSE and COPYING.LESSER respectively.
