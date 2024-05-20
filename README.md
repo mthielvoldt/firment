@@ -9,15 +9,34 @@ An opinionated firmware framework that uses web interfaces to ease development a
 
 # User Guide
 ## Installing Dependencies
+- Docker (Docker Desktop is okay)
+- ESPTool (a pip package inside a virtual env)
+- Node >=18
+- Playwright
+
 ### Docker
 Install Docker Desktop or Docker-CE for your platform.
 
-### ESPTool
-We use 
-- Docker (Docker Desktop is okay)
-- ESPTool
-- Node >=18
-- Playwright. 
+### Esptool (in a python virtual env)
+If `venv` isn't yet installed, you may first need to do that.
+
+```
+sudo apt install python3-venv
+```
+
+Install esptool in its own virtual environment.
+```
+python3 -m venv esptool-venv
+source esptool-venv/bin/activate
+pip install esptool
+```
+If you encounter:
+>[Errno 13] Permission denied: '/dev/ttyACM0'
+
+Add your user to the dialout group.
+```
+sudo usermod -a -G dialout $USER
+```
 
 # License
 Firment is licensed under LGPL-3.0-or-later.  A copy of the GPL-3.0 and additional permissions of the lesser GPL are distributed under the names LICENSE and COPYING.LESSER respectively.
