@@ -1,0 +1,1 @@
+source esptool-venv/bin/activate && esp_rfc2217_server.py -v -p 4000 /dev/ttyACM0
