@@ -50,6 +50,10 @@ In another terminal, start the container.
 ```
 source idf.sh
 ```
+Configure the SSID, password and spi-flash size with menuconfig.  Note: this will store the SSID and wifi password in the sdkconfig file, which is not tracked.  This will need to be repeated if sdkconfig gets deleted/moved/overwritten.
+```
+idf.py menuconfig
+```
 build, flash and monitor as follows:
 - `idf.py build`
 - `idf.py --port 'rfc2217://host.docker.internal:4000?ign_set_control' flash`
