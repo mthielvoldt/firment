@@ -14,3 +14,4 @@ build/
 *-venv/
 sdkconfig
 sdkconfig.old
+/.vscode/

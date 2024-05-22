@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "esp32s3",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "${HOME}/compilers/xtensa-esp-elf/bin/xtensa-esp32s3-elf-g++",
+            "includePath": [
+              "../esp-idf/components/**",
+              "../esp-idf/components/mqtt/esp-mqtt/include",
+              "../esp-idf/examples/common_components/**"
+            ],
+            "defines": ["CONFIG_MQTT_PROTOCOL_5 1"]
+        }
+    ],
+    "version": 4
+}
