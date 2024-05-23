@@ -1,0 +1,17 @@
+// A message structure to control a signal generator's output waveform.
+
+syntax = "proto3";
+
+enum WaveShape {
+  WAVE_SHAPE_UNSPECIFIED = 0;
+  WAVE_SHAPE_SINE = 1;
+  WAVE_SHAPE_SQUARE = 2;
+}
+
+message WaveformControl {
+  optional float amplitude = 1;
+  optional float frequency = 2;
+  optional float offset = 3;
+  optional WaveShape shape = 4;
+  optional bool enabled = 5;
+}

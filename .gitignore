@@ -18,3 +18,6 @@ sdkconfig.old
 /.vscode/
 
 node_modules/
+
+*.pb.cc
+*.pb.h
