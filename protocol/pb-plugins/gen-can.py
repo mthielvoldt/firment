@@ -14,8 +14,8 @@ def generate_c() -> str:
 if __name__ == "__main__":
   response = CodeGeneratorResponse()
   dot_h_file = response.file.add(name="can.pb.h")
-  dot_h_file.content = "/**\nGenerated file!  Do not track.\nInterface to pack and unpack data structures for CAN tx/rx.\n*/"
-
   dot_c_file = response.file.add(name="can.pb.c")
+  
+  dot_h_file.content = "/**\nGenerated file!  Do not track.\nInterface to pack and unpack data structures for CAN tx/rx.\n*/"
   dot_c_file.content = generate_c()
   sys.stdout.buffer.write(response.SerializeToString())
