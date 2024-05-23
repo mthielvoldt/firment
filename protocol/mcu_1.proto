@@ -9,9 +9,9 @@ enum WaveShape {
 }
 
 message WaveformControl {
-  optional float amplitude = 1;
-  optional float frequency = 2;
-  optional float offset = 3;
-  optional WaveShape shape = 4;
-  optional bool enabled = 5;
+  float amplitude = 1;
+  float frequency = 2;
+  float offset = 3;
+  WaveShape shape = 4;
+  bool enabled = 5;
 }

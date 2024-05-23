@@ -20,4 +20,5 @@ sdkconfig.old
 node_modules/
 
 *.pb.cc
+*.pb.c
 *.pb.h
