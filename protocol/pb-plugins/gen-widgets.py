@@ -44,7 +44,7 @@ def get_message_widget(message: DescriptorProto):
   return f'''
 export function {message_name}({message_name}Props) {{
   return (
-    <div className="widget">
+    <div className={{styles.card}}>
       <h1>{message_name}</h1>
       {field_strings}
     </div>
