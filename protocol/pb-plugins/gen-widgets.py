@@ -9,6 +9,7 @@ from google.protobuf.descriptor import FieldDescriptor
 header = """
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
+import styles from "../styles/Home.module.css";
 """
 
 numeric_fields = (
@@ -34,7 +35,7 @@ def get_message_widget(message: DescriptorProto):
       field_class = message_name + '-' + str(field.number)
       field_strings += f'''
       <div>
-        <p>{field.name + " "}<span className="code {field_class}">{field.default_value}</span></p>
+        <p>{field.name + " "}<span className={{`${{styles.code}} {field_class}`}}>0</span></p>
       </div>
       '''
   # enum_name = ""
