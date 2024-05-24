@@ -15,3 +15,8 @@ message WaveformControl {
   WaveShape shape = 4;
   bool enabled = 5;
 }
+
+message GridStatus {
+  float voltage = 1;
+  int32 current = 2;
+}
