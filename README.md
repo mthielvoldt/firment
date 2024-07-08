@@ -7,6 +7,27 @@ An opinionated firmware framework that uses web interfaces to ease development a
 - Make a reasonable effort to containerize tools.
 - Be declarative about messages, let message-handling code be generated.
 
+## Firment workflow
+- Start services:
+  - Vite (development webserver)
+  - ESP_rfc2217_server
+  - idf container
+  - mosquitto broker container
+- Structure the data you want going in and out of your target device
+  - Restrict yourself to message structures that work for the transport your device uses.  Eg. CAN, SPI, UART.
+  - Write the .proto file(s).
+- Run protoc.  The plugins generate the following code:
+  - C code for your edge MCU to send and receive messages on your edge transport (CAN, SPI, UART)
+  - C++ code for the ESP32 connected to your edge MCU to relay messages to and from the broker.
+  - Front-end Widgets for viewing telemetry and sending commands in the browser.
+  - End-to-end test stub to validate proper handling of the data.
+- Re-flash the ESP32.
+- Position the new widget on your interface webpage.
+- Fill in the test stub with sensible data or command validation.
+- Run playwright to see your new failing tests.
+- Write wnd flash new firmware that makes your tests pass.
+- Re-run playwright to see your tests pass.
+
 # User Guide
 ## Installing Dependencies
 - Docker (Docker Desktop is okay)
