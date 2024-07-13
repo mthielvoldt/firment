@@ -3,4 +3,4 @@ docker run \
   --rm \
   --name mq-client \
   --network host \
-  eclipse-mosquitto:2.0.18 mosquitto_sub --port 1883 -t "/topic/qos0"
+  eclipse-mosquitto:2.0.18 mosquitto_sub --port 1883 -t "paho/test/topic"
