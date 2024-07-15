@@ -19,7 +19,7 @@ We could also try using a list of acknowledged mid rather than removing from pen
 but remember that mid could be re-used !
 """
 unacked_publish = set()
-mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, transport="websockets")
 start_time = time()
 
 def on_publish(client, userdata, mid, reason_code, properties):
