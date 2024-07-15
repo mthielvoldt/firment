@@ -1,4 +1,5 @@
-import time
+from time import sleep, time
+import atexit
 import paho.mqtt.client as mqtt
 
 broker = "localhost"
@@ -17,38 +18,33 @@ The best solution to avoid race-condition is using the msg_info from publish()
 We could also try using a list of acknowledged mid rather than removing from pending list,
 but remember that mid could be re-used !
 """
-
-def on_publish(client, userdata, mid, reason_code, properties):
-    # reason_code and properties will only be present in MQTTv5. It's always unset in MQTTv3
-  print(f"message sent {mid}")
-  try:
-    userdata.remove(mid)
-  except KeyError:
-    print(publish_KeyError_message)
-
-
 unacked_publish = set()
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-mqttc.on_publish = on_publish
+start_time = time()
 
+def on_publish(client, userdata, mid, reason_code, properties):
+  print(f"message sent {mid}")
+
+def cleanup():
+  mqttc.disconnect()
+  mqttc.loop_stop()
+  print("disconnected")
+
+atexit.register(cleanup)
+mqttc.on_publish = on_publish
 mqttc.user_data_set(unacked_publish)
 mqttc.connect(broker, port)
 mqttc.loop_start()
 
-# Our application produce some messages
-msg_info = mqttc.publish("paho/test/topic", "my message", qos=1)
-unacked_publish.add(msg_info.mid)
-
-msg_info2 = mqttc.publish("paho/test/topic", "my message2", qos=1)
-unacked_publish.add(msg_info2.mid)
-
-# Wait for all message to be published
-while len(unacked_publish):
-    time.sleep(0.1)
-
-# Due to race-condition described above, the following way to wait for all publish is safer
-msg_info.wait_for_publish()
-msg_info2.wait_for_publish()
-
-mqttc.disconnect()
-mqttc.loop_stop()
+while True:
+  # Our application produce some messages
+  msg_info = mqttc.publish("paho/test/topic", time() - start_time, qos=1)
+  try:
+    msg_info.wait_for_publish(timeout=1.0)
+  except ValueError:
+    print("message queue full")
+  except RuntimeError as e:
+    print(e)
+  
+  sleep(1.0)
+  
