@@ -9,7 +9,7 @@ from google.protobuf.descriptor import FieldDescriptor
 header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
-import React from "react";"""
+import { useState } from "react";"""
 
 numeric_fields = (
   FieldDescriptor.TYPE_FLOAT,
@@ -28,20 +28,25 @@ def get_message_widget(message: DescriptorProto):
   # spec a div with a name
   message_name = message.name
   field_strings = ""
+  initial_state = {}
+
   # iterate through fields, adding an element for each type.
   for field in message.field:
     if field.type in numeric_fields:
+      initial_state[field.name] = 0.4
       field_class = message_name + '-' + str(field.number)
       field_strings += f'''
       <div className="field">
-        <p>{field.name + " "}<span>0</span></p>
+        <p>{field.name + " "}<span>{{{message_name}State.{field.name}}}</span></p>
       </div>
       '''
   # enum_name = ""
   # enum = next(enum for enum in proto.enum_type if enum.name == enum_name)
   
   return f'''
-export function {message_name}({message_name}Props) {{
+export function {message_name}({{}}) {{
+  const [{message_name}State, set{message_name}State] = useState({initial_state});
+
   return (
     <div className="widget">
       <h4>{message_name}</h4>
