@@ -1,6 +1,7 @@
-import mqtt from "mqtt"; // import namespace "mqtt"
+import mqtt, { MqttClient } from "mqtt"; // import namespace "mqtt"
 
-const topic = 'paho/test/topic';
+let client: MqttClient;
+let callbacks = {}
 let ranOnce = false;
 
 export default function setupMq() {
@@ -9,20 +10,35 @@ export default function setupMq() {
   }
   console.log("Attempting to connect");
   ranOnce = true;
-  const client = mqtt.connect("mqtt://localhost:1883");
+  client = mqtt.connect("mqtt://localhost:1883");
   client.on("connect", () => {
-    console.log(`Subscribing to ${topic}`);
-    client.subscribe(topic, (err) => {
-      if (!err) {
-        client.publish(topic, "Hello mqtt");
-      }
+    const topics = Object.keys(callbacks);
+    console.log(`Subscribing to ${topics}`);
+    topics.forEach(topic => {
+      client.subscribe(topic, (err) => {
+        if (!err) {
+          const testMsg = JSON.stringify({
+            'amplitude': 0.5, 'frequency': 0.5, 'offset': 0.5
+          });
+          client.publish(topic, testMsg);
+        }
+      });
     });
+
   });
 
   client.on("message", (topic, message) => {
     // message is Buffer
     console.log(topic, message.toString());
+    // call the state updater for the widget that subscribes to this topic. 
+    const newState = JSON.parse(message.toString());
+    callbacks[topic](newState);
+
     // client.end();
   });
+}
+
+export function addTopicCallback(topic: string, callback) {
+  callbacks[topic] = callback;
 }
 

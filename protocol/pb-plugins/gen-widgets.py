@@ -9,7 +9,8 @@ from google.protobuf.descriptor import FieldDescriptor
 header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
-import { useState } from "react";"""
+import { useState } from "react";
+import { addTopicCallback } from "../mqclient";"""
 
 numeric_fields = (
   FieldDescriptor.TYPE_FLOAT,
@@ -29,6 +30,7 @@ def get_message_widget(message: DescriptorProto):
   message_name = message.name
   field_strings = ""
   initial_state = {}
+  setState = f"set{message_name}State"
 
   # iterate through fields, adding an element for each type.
   for field in message.field:
@@ -45,7 +47,8 @@ def get_message_widget(message: DescriptorProto):
   
   return f'''
 export function {message_name}({{}}) {{
-  const [{message_name}State, set{message_name}State] = useState({initial_state});
+  const [{message_name}State, {setState}] = useState({initial_state});
+  addTopicCallback("{message_name}", {setState});
 
   return (
     <div className="widget">

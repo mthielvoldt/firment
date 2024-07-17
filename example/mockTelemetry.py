@@ -1,23 +1,16 @@
 from time import sleep, time
 import atexit
+import json
 import paho.mqtt.client as mqtt
 
 broker = "localhost"
 port = 1883
 
-publish_KeyError_message = """
-on_publish() is called with a mid not present in unacked_publish
-This is due to an unavoidable race-condition:
-* publish() return the mid of the message sent.
-* mid from publish() is added to unacked_publish by the main thread
-* on_publish() is called by the loop_start thread
-While unlikely (because on_publish() will be called after a network round-trip),
-  this is a race-condition that COULD happen
+topics = {
+  "WaveformControl": ["amplitude", "frequency", "offset"],
+  "GridStatus": ["voltage", "current"]
+}
 
-The best solution to avoid race-condition is using the msg_info from publish()
-We could also try using a list of acknowledged mid rather than removing from pending list,
-but remember that mid could be re-used !
-"""
 unacked_publish = set()
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, transport="websockets")
 start_time = time()
@@ -38,7 +31,15 @@ mqttc.loop_start()
 
 while True:
   # Our application produce some messages
-  msg_info = mqttc.publish("paho/test/topic", time() - start_time, qos=1)
+  time_running = time() - start_time
+
+  for topic, fields in topics.items():
+    data = {}
+    for field in fields:
+      data[field] = time_running
+    
+    msg_info = mqttc.publish(topic, json.dumps(data), qos=1)
+    print(topic, data)
   try:
     msg_info.wait_for_publish(timeout=1.0)
   except ValueError:
