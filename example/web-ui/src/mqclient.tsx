@@ -10,7 +10,7 @@ export default function setupMq() {
   }
   console.log("Attempting to connect");
   ranOnce = true;
-  client = mqtt.connect("mqtt://localhost:1883");
+  client = mqtt.connect("mqtt://localhost:8080");
   client.on("connect", () => {
     const topics = Object.keys(callbacks);
     console.log(`Subscribing to ${topics}`);
