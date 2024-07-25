@@ -91,6 +91,45 @@ static void print_user_property(mqtt5_user_property_handle_t user_property)
   }
 }
 
+static void print_data(esp_mqtt_event_t *event)
+{
+  ESP_LOGI(TAG, "MQTT_EVENT_DATA");
+  print_user_property(event->property->user_property);
+  ESP_LOGI(TAG, "payload_format_indicator is %d", event->property->payload_format_indicator);
+  ESP_LOGI(TAG, "response_topic is %.*s", event->property->response_topic_len, event->property->response_topic);
+  ESP_LOGI(TAG, "correlation_data is %.*s", event->property->correlation_data_len, event->property->correlation_data);
+  ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
+  ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
+  ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
+}
+
+static void subscribe(esp_mqtt_client_handle_t client, esp_mqtt5_subscribe_property_config_t *sub_prop, char *topic, int qos)
+{
+  esp_mqtt5_client_set_user_property(&sub_prop->user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+  esp_mqtt5_client_set_subscribe_property(client, &subscribe_property);
+  int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
+  esp_mqtt5_client_delete_user_property(subscribe_property.user_property);
+  subscribe_property.user_property = NULL;
+  ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+}
+
+static void publish(esp_mqtt_client_handle_t client)
+{
+  esp_mqtt5_client_set_user_property(&publish_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+  esp_mqtt5_client_set_publish_property(client, &publish_property);
+  int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
+  esp_mqtt5_client_delete_user_property(publish_property.user_property);
+  publish_property.user_property = NULL;
+  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+}
+
+static void subscribe_all(esp_mqtt_client_handle_t client)
+{
+  subscribe(client, &subscribe_property, "/topic/qos0", 0);
+  subscribe(client, &subscribe1_property, "/topic/qos1", 2);
+
+}
+
 /*
  * @brief Event handler registered to receive MQTT events
  *
@@ -167,14 +206,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     print_user_property(event->property->user_property);
     break;
   case MQTT_EVENT_DATA:
-    ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-    print_user_property(event->property->user_property);
-    ESP_LOGI(TAG, "payload_format_indicator is %d", event->property->payload_format_indicator);
-    ESP_LOGI(TAG, "response_topic is %.*s", event->property->response_topic_len, event->property->response_topic);
-    ESP_LOGI(TAG, "correlation_data is %.*s", event->property->correlation_data_len, event->property->correlation_data);
-    ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
-    ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
-    ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
+    print_data(event);
     break;
   case MQTT_EVENT_ERROR:
     ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
