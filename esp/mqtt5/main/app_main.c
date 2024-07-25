@@ -81,7 +81,7 @@ static void print_user_property(mqtt5_user_property_handle_t user_property)
         for (int i = 0; i < count; i++)
         {
           esp_mqtt5_user_property_item_t *t = &item[i];
-          ESP_LOGI(TAG, "key is %s, value is %s", t->key, t->value);
+          ESP_LOGI(TAG, "property %d: (key,val) %s, %s", i, t->key, t->value);
           free((char *)t->key);
           free((char *)t->value);
         }
@@ -153,12 +153,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
   case MQTT_EVENT_CONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
     print_user_property(event->property->user_property);
-    esp_mqtt5_client_set_user_property(&publish_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-    esp_mqtt5_client_set_publish_property(client, &publish_property);
-    msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
-    esp_mqtt5_client_delete_user_property(publish_property.user_property);
-    publish_property.user_property = NULL;
-    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+    publish(client);
 
     esp_mqtt5_client_set_user_property(&subscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
     esp_mqtt5_client_set_subscribe_property(client, &subscribe_property);
