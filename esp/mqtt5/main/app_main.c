@@ -106,10 +106,10 @@ static void print_data(esp_mqtt_event_t *event)
 static void subscribe(esp_mqtt_client_handle_t client, esp_mqtt5_subscribe_property_config_t *sub_prop, char *topic, int qos)
 {
   esp_mqtt5_client_set_user_property(&sub_prop->user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-  esp_mqtt5_client_set_subscribe_property(client, &subscribe_property);
+  esp_mqtt5_client_set_subscribe_property(client, sub_prop);
   int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
-  esp_mqtt5_client_delete_user_property(subscribe_property.user_property);
-  subscribe_property.user_property = NULL;
+  esp_mqtt5_client_delete_user_property(sub_prop->user_property);
+  sub_prop->user_property = NULL;
   ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 }
 
@@ -155,19 +155,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     print_user_property(event->property->user_property);
     publish(client);
 
-    esp_mqtt5_client_set_user_property(&subscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-    esp_mqtt5_client_set_subscribe_property(client, &subscribe_property);
-    msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
-    esp_mqtt5_client_delete_user_property(subscribe_property.user_property);
-    subscribe_property.user_property = NULL;
-    ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
-
-    esp_mqtt5_client_set_user_property(&subscribe1_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-    esp_mqtt5_client_set_subscribe_property(client, &subscribe1_property);
-    msg_id = esp_mqtt_client_subscribe(client, "/topic/qos1", 2);
-    esp_mqtt5_client_delete_user_property(subscribe1_property.user_property);
-    subscribe1_property.user_property = NULL;
-    ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+    subscribe_all(client);
 
     esp_mqtt5_client_set_user_property(&unsubscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
     esp_mqtt5_client_set_unsubscribe_property(client, &unsubscribe_property);

@@ -9,9 +9,9 @@ An opinionated firmware framework that uses web interfaces to ease development a
 
 ## Firment workflow
 - Start services:
-  - Vite (development webserver)
-  - ESP_rfc2217_server
-  - idf container
+  - Dev webserver (Vite in the example)
+  - ESP_rfc2217_server (enables IDF container to flash over USB)
+  - idf container (for re-flashing  )
   - mosquitto broker container
 - Structure the data you want going in and out of your target device
   - Restrict yourself to message structures that work for the transport your device uses.  Eg. CAN, SPI, UART.
@@ -65,7 +65,7 @@ sudo usermod -a -G dialout $USER
 ## Building and Flashing
 Start the frc2217 server.
 ```
-source esptool-env/bin/activate && esp_rfc2217_server.py -v -p 4000 /dev/ttyACM0
+cd esp/mqtt5 && source usb.sh
 ```
 In another terminal, start the container.
 ```
@@ -79,5 +79,13 @@ build, flash and monitor as follows:
 - `idf.py build`
 - `idf.py --port 'rfc2217://host.docker.internal:4000?ign_set_control' flash`
 
+## Working with the Example UI
+This shows how to use the example, which is just illustrative.  The example uses Vite for development tooling, but this isn't prescribed by firment; you can use whatever tooling you want. 
+
+### Start vite dev
+```
+cd example/web-ui
+npm run dev
+```
 # License
 Firment is licensed under LGPL-3.0-or-later.  A copy of the GPL-3.0 and additional permissions of the lesser GPL are distributed under the names LICENSE and COPYING.LESSER respectively.
