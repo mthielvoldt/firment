@@ -51,12 +51,12 @@ static esp_mqtt5_subscribe_property_config_t subscribe_property = {
     .share_name = "group1",
 };
 
-static esp_mqtt5_subscribe_property_config_t subscribe1_property = {
-    .subscribe_id = 25555,
-    .no_local_flag = true,
-    .retain_as_published_flag = false,
-    .retain_handle = 0,
-};
+// static esp_mqtt5_subscribe_property_config_t subscribe1_property = {
+//     .subscribe_id = 25555,
+//     .no_local_flag = true,
+//     .retain_as_published_flag = false,
+//     .retain_handle = 0,
+// };
 
 static esp_mqtt5_unsubscribe_property_config_t unsubscribe_property = {
     .is_share_subscribe = true,
@@ -103,31 +103,41 @@ static void print_data(esp_mqtt_event_t *event)
   ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
 }
 
-static void subscribe(esp_mqtt_client_handle_t client, esp_mqtt5_subscribe_property_config_t *sub_prop, char *topic, int qos)
-{
-  esp_mqtt5_client_set_user_property(&sub_prop->user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-  esp_mqtt5_client_set_subscribe_property(client, sub_prop);
-  int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
-  esp_mqtt5_client_delete_user_property(sub_prop->user_property);
-  sub_prop->user_property = NULL;
-  ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
-}
-
-static void publish(esp_mqtt_client_handle_t client)
+static void setup_users(esp_mqtt_client_handle_t client)
 {
   esp_mqtt5_client_set_user_property(&publish_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+  esp_mqtt5_client_set_user_property(&subscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+  esp_mqtt5_client_set_user_property(&unsubscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+  esp_mqtt5_client_set_user_property(&disconnect_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
+
   esp_mqtt5_client_set_publish_property(client, &publish_property);
-  int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
+  esp_mqtt5_client_set_subscribe_property(client, &subscribe_property);
+  esp_mqtt5_client_set_unsubscribe_property(client, &unsubscribe_property);
+  esp_mqtt5_client_set_disconnect_property(client, &disconnect_property);
+}
+
+static void delete_users(void)
+{
   esp_mqtt5_client_delete_user_property(publish_property.user_property);
+  esp_mqtt5_client_delete_user_property(subscribe_property.user_property);
+  esp_mqtt5_client_delete_user_property(unsubscribe_property.user_property);
+  esp_mqtt5_client_delete_user_property(disconnect_property.user_property);
   publish_property.user_property = NULL;
-  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+  subscribe_property.user_property = NULL;
+  unsubscribe_property.user_property = NULL;
+  disconnect_property.user_property = NULL;
+}
+
+static void subscribe(esp_mqtt_client_handle_t client, char *topic, int qos)
+{
+  int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
+  ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 }
 
 static void subscribe_all(esp_mqtt_client_handle_t client)
 {
-  subscribe(client, &subscribe_property, "/topic/qos0", 0);
-  subscribe(client, &subscribe1_property, "/topic/qos1", 2);
-
+  subscribe(client, "/topic/qos0", 0);
+  subscribe(client, "/topic/qos1", 2);
 }
 
 /*
@@ -152,36 +162,33 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
   {
   case MQTT_EVENT_CONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+    setup_users(client);
+
     print_user_property(event->property->user_property);
-    publish(client);
+    msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
+    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
     subscribe_all(client);
 
-    esp_mqtt5_client_set_user_property(&unsubscribe_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-    esp_mqtt5_client_set_unsubscribe_property(client, &unsubscribe_property);
     msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos0");
     ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
-    esp_mqtt5_client_delete_user_property(unsubscribe_property.user_property);
-    unsubscribe_property.user_property = NULL;
+
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
     print_user_property(event->property->user_property);
+    delete_users();
     break;
   case MQTT_EVENT_SUBSCRIBED:
     ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
     print_user_property(event->property->user_property);
-    esp_mqtt5_client_set_publish_property(client, &publish_property);
     msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
     ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
     break;
   case MQTT_EVENT_UNSUBSCRIBED:
     ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
     print_user_property(event->property->user_property);
-    esp_mqtt5_client_set_user_property(&disconnect_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
-    esp_mqtt5_client_set_disconnect_property(client, &disconnect_property);
-    esp_mqtt5_client_delete_user_property(disconnect_property.user_property);
-    disconnect_property.user_property = NULL;
+
     esp_mqtt_client_disconnect(client);
     break;
   case MQTT_EVENT_PUBLISHED:
