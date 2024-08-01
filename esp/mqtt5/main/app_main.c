@@ -15,6 +15,7 @@
 #include "protocol_examples_common.h"
 #include "esp_log.h"
 #include "mqtt_client.h"
+#include "freertos/task.h"
 
 static const char *TAG = "mqtt5_example";
 
@@ -25,6 +26,8 @@ static void log_error_if_nonzero(const char *message, int error_code)
     ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
   }
 }
+
+static esp_mqtt_client_handle_t client;
 
 static esp_mqtt5_user_property_item_t user_property_arr[] = {
     {"board", "esp32"},
@@ -165,13 +168,11 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     setup_users(client);
 
     print_user_property(event->property->user_property);
-    msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
-    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
     subscribe_all(client);
 
-    msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos0");
-    ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
+    // msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos0");
+    // ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
 
     break;
   case MQTT_EVENT_DISCONNECTED:
@@ -189,7 +190,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
     print_user_property(event->property->user_property);
 
-    esp_mqtt_client_disconnect(client);
+    // esp_mqtt_client_disconnect(client);
     break;
   case MQTT_EVENT_PUBLISHED:
     ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
@@ -278,7 +279,7 @@ static void mqtt5_app_start(void)
   }
 #endif /* CONFIG_BROKER_URL_FROM_STDIN */
 
-  esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt5_cfg);
+  client = esp_mqtt_client_init(&mqtt5_cfg);
 
   /* Set connection properties and user properties */
   esp_mqtt5_client_set_user_property(&connect_property.user_property, user_property_arr, USE_PROPERTY_ARR_SIZE);
@@ -296,8 +297,16 @@ static void mqtt5_app_start(void)
   esp_mqtt_client_start(client);
 }
 
+// void telemetryTask(void *params)
+// {
+  
+// }
+
 void app_main(void)
 {
+  // TaskHandle_t telemHandle = NULL;
+  // BaseType_t xRet;
+  // xRet = xTaskCreatePinnedToCore(telemetryTask, "telem", 2048, (void *)0, tskIDLE_PRIORITY, &telemHandle, 1);
 
   ESP_LOGI(TAG, "[APP] Startup..");
   ESP_LOGI(TAG, "[APP] Free memory: %" PRIu32 " bytes", esp_get_free_heap_size());
@@ -322,4 +331,11 @@ void app_main(void)
   ESP_ERROR_CHECK(example_connect());
 
   mqtt5_app_start();
+  for (;;)
+  {
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
+    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+  }
+
 }
