@@ -32,6 +32,12 @@ An opinionated firmware framework that uses web interfaces to ease development a
 ## Hardware
 Firment's main job is to help you build a web interface to your firmware, which we assume is running target hardware without Wifi/ethernet modules.  To bridge the gap, Firment requires an ESP32 to shuttle data between your target hardware (SPI, UART, CAN) and MQTT over Wifi.
 
+## Launching terminals (to improve)
+1. `cd esp/mqtt5 && . usb.sh`
+2. `cd esp/mqtt5 && . idf.sh` (requires docker to be runing)
+  - `idf.py --port 'rfc2217://host.docker.internal:4000?ign_set_control' flash`
+3. 
+
 Currently we're using [this development board](https://mischianti.org/vcc-gnd-studio-yd-esp32-s3-devkitc-1-clone-high-resolution-pinout-and-specs/)
 
 ## Installing Dependencies

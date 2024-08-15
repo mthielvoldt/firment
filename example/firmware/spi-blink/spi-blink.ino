@@ -29,7 +29,7 @@ const byte WRITE = 0b00000010;   // SCP1000's write command
 // pins used for the connection with the sensor
 // the other you need are controlled by the SPI library):
 const int dataReadyPin = 6;
-const int chipSelectPin = 7;
+const int chipSelectPin = 10;
 const int ledPin = A0;
 
 void setup() {

@@ -17,6 +17,8 @@
 #include "mqtt_client.h"
 #include "freertos/task.h"
 
+#include "spi_app.h"
+
 static const char *TAG = "mqtt5_example";
 
 static void log_error_if_nonzero(const char *message, int error_code)
@@ -297,13 +299,14 @@ static void mqtt5_app_start(void)
   esp_mqtt_client_start(client);
 }
 
+// Try creating a new telemetry task, but task-creation crashes.
 // void telemetryTask(void *params)
 // {
-  
 // }
 
 void app_main(void)
 {
+  // The following block doesn't work.  Core Panics.  No clue why.
   // TaskHandle_t telemHandle = NULL;
   // BaseType_t xRet;
   // xRet = xTaskCreatePinnedToCore(telemetryTask, "telem", 2048, (void *)0, tskIDLE_PRIORITY, &telemHandle, 1);
@@ -320,6 +323,8 @@ void app_main(void)
   esp_log_level_set("transport", ESP_LOG_VERBOSE);
   esp_log_level_set("outbox", ESP_LOG_VERBOSE);
 
+  ESP_ERROR_CHECK(initSpi());
+
   ESP_ERROR_CHECK(nvs_flash_init());
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -333,7 +338,8 @@ void app_main(void)
   mqtt5_app_start();
   for (;;)
   {
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    waitForSpiRx(3000);
+    // vTaskDelay(pdMS_TO_TICKS(2000));
     int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
     ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
   }
