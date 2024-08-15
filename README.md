@@ -29,6 +29,11 @@ An opinionated firmware framework that uses web interfaces to ease development a
 - Re-run playwright to see your tests pass.
 
 # User Guide
+## Hardware
+Firment's main job is to help you build a web interface to your firmware, which we assume is running target hardware without Wifi/ethernet modules.  To bridge the gap, Firment requires an ESP32 to shuttle data between your target hardware (SPI, UART, CAN) and MQTT over Wifi.
+
+Currently we're using [this development board](https://mischianti.org/vcc-gnd-studio-yd-esp32-s3-devkitc-1-clone-high-resolution-pinout-and-specs/)
+
 ## Installing Dependencies
 - Docker (Docker Desktop is okay)
 - ESPTool (a pip package inside a virtual env)
