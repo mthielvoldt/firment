@@ -340,8 +340,8 @@ void app_main(void)
   {
     waitForSpiRx(3000);
     // vTaskDelay(pdMS_TO_TICKS(2000));
-    int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
-    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+    // int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
+    // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
   }
 
 }

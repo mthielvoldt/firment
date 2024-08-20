@@ -59,6 +59,14 @@ static spi_bus_config_t buscfg = {
     .sclk_io_num = GPIO_SCLK,
     .quadwp_io_num = -1,
     .quadhd_io_num = -1,
+    .data4_io_num = -1,
+    .data5_io_num = -1,
+    .data6_io_num = -1,
+    .data7_io_num = -1,
+    .max_transfer_sz = SPI_BUFFER_SZ_BYTES,
+    .flags = 0,
+    .intr_flags = 0,
+    .isr_cpu_id = 0,
 };
 // Configuration for the SPI slave interface
 static spi_slave_interface_config_t slvcfg = {
@@ -75,18 +83,16 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static WORD_ALIGNED_ATTR char sendbuf[129] = "";
-static WORD_ALIGNED_ATTR char recvbuf[129] = "";
+static char sendbuf[SPI_BUFFER_SZ_BYTES] = {}; //{0x01, 0x02, 0x04};
+static char recvbuf[SPI_BUFFER_SZ_BYTES] = "";
 static spi_slave_transaction_t spiTransaction = {
-  .length = 1 * 8,
-  .rx_buffer = recvbuf,
-  .tx_buffer = sendbuf,
-  // .flags = 0,
-  // .trans_len = 0,
-  // .user = NULL
+    .length = MAX_TRANSACTION_LENGTH,
+    .rx_buffer = recvbuf,
+    .tx_buffer = sendbuf,
+    // .flags = 0,
+    // .trans_len = 0,
+    // .user = NULL
 };
-
-
 
 // Main application
 esp_err_t initSpi(void)
@@ -101,19 +107,29 @@ esp_err_t initSpi(void)
   gpio_set_pull_mode(GPIO_CS, GPIO_PULLUP_ONLY);
 
   // Initialize SPI slave interface
-  ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_CH_AUTO);
+  ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_DISABLED);
 
   return ret;
 }
 
 esp_err_t waitForSpiRx(uint32_t msTimeout)
 {
+  static int espErrTotal = 0;
+  static int datErrTotal = 0;
+  static int lenErrCount = 0;
+  const int samplesPerReport = 5000;
+  static int lenTotal = 0;
+  static int lenMin = samplesPerReport;
+  static int lenMax = 0;
+  static int setCount = 0;
   esp_err_t ret;
+  static bool firstSet = true;
 
   // Clear receive buffer, set send buffer to something sane
-  memset(recvbuf, 0xA5, 129);
-  sprintf(sendbuf, "This is the receiver, sending data for transmission number %04d.", spiTxCount++);
-  
+  memset(recvbuf, 0x0, SPI_BUFFER_SZ_BYTES);
+  spiTxCount++;
+  // sprintf(sendbuf, "This is the receiver, sending data for transmission number %04d.", spiTxCount++);
+
   /* This call enables the SPI slave interface to send/receive to the sendbuf and recvbuf. The transaction is
   initialized by the SPI master, however, so it will not actually happen until the master starts a hardware transaction
   by pulling CS low and pulsing the clock etc. In this specific example, we use the handshake line, pulled up by the
@@ -124,10 +140,39 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
 
   // spi_slave_transmit does not return until the master has done a transmission, so by here we have sent our data and
   // received data from the master. Print it.
-  if (ret == ESP_OK) {
-    printf("Received: %s\n", recvbuf);
-  } else {
-    printf("Timed out receiving SPI.");
+  if (ret == ESP_OK)
+  {
+    if (spiTransaction.trans_len != 64)
+    {
+      lenErrCount++;
+    }
+    else
+    {
+      if (*(uint64_t *)recvbuf != 0x01248EDB7FAA5566)
+      {
+        datErrTotal++;
+      }
+    }
+  }
+  else
+  {
+    espErrTotal++;
+  }
+
+  if (spiTxCount >= samplesPerReport)
+  {
+    lenTotal += lenErrCount;
+    setCount++;
+    lenMax = (!firstSet && lenErrCount > lenMax) ? lenErrCount : lenMax;
+    lenMin = (lenErrCount < lenMin) ? lenErrCount : lenMin;
+    float avgLenErrPerSet = (float)lenTotal / setCount;
+    printf("Set %d of %d\n", setCount, samplesPerReport);
+    printf(" Other Errs-> ESP total: %d\t datErr total: %d\n", espErrTotal, datErrTotal);
+    printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\n",
+           lenMax, lenMin, avgLenErrPerSet);
+
+    spiTxCount = lenErrCount = 0;
+    firstSet = false;
   }
   return ret;
 }
