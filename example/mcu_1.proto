@@ -22,6 +22,6 @@ message WaveformTlm {
 }
 
 message Top {
-  optional WaveformCtl WaveformCtl = 1;
-  optional WaveformTlm WaveformTlm = 2;
+  WaveformCtl WaveformCtl = 1;
+  WaveformTlm WaveformTlm = 2;
 }
