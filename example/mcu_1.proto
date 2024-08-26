@@ -8,7 +8,7 @@ enum WaveShape {
   WAVE_SHAPE_SQUARE = 2;
 }
 
-message WaveformControl {
+message WaveformCtl {
   float amplitude = 1;
   float frequency = 2;
   float offset = 3;
@@ -16,7 +16,12 @@ message WaveformControl {
   bool enabled = 5;
 }
 
-message GridStatus {
+message WaveformTlm {
   float voltage = 1;
   int32 current = 2;
+}
+
+message Top {
+  optional WaveformCtl WaveformCtl = 1;
+  optional WaveformTlm WaveformTlm = 2;
 }
