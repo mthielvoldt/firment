@@ -18,6 +18,10 @@ project(spi_example VERSION 0.1 LANGUAGES C ASM)
 
 # target_sources()
 set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
+# set_property(SOURCE
+#   lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/xmc_common_gcc.S
+#   PROPERTY LANGUAGE ASM
+# )
 
 add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections)
 if(DEFINED XMC_LINKER_FILE)
@@ -25,6 +29,7 @@ if(DEFINED XMC_LINKER_FILE)
 endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
+set(XMC_LIB "lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src")
   
 # link_libraries("-lc -lm -lnosys")
 
@@ -32,6 +37,7 @@ add_executable(${EXECUTABLE}
   spi_example.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
+  ${XMC_LIB}/xmc4_gpio.c
 )
 
 target_include_directories(${EXECUTABLE} PRIVATE
@@ -39,6 +45,14 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/inc
   lib/XMC-for-Arduino/cores/xmc_lib/CMSIS/Include
   lib/XMC-for-Arduino/cores
-  lib/XMC-for-Arduino/variants/XMC4700
+  lib/XMC-for-Arduino/variants/${XMC_VARIANT}
 )
 
+
+add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS ${EXECUTABLE})
+add_custom_command(TARGET ${PROJECT_NAME}.hex
+    COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex ${EXECUTABLE} ${PROJECT_NAME}.hex)
+
+add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
+add_custom_command(TARGET ${PROJECT_NAME}.bin
+  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary ${EXECUTABLE} ${PROJECT_NAME}.bin)
