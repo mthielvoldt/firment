@@ -19,7 +19,10 @@ project(spi_example VERSION 0.1 LANGUAGES C ASM)
 # target_sources()
 set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
 
-add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections,-T${XMC_LINKER_FILE})
+add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections)
+if(DEFINED XMC_LINKER_FILE)
+  add_link_options(-T${XMC_LINKER_FILE})
+endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
   
@@ -27,7 +30,7 @@ set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 add_executable(${EXECUTABLE}
   spi_example.c
-  ${XMC_SYSTEM_FILES}.c
+  ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
 )
 
