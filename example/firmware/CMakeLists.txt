@@ -17,7 +17,7 @@ project(spi_example VERSION 0.1 LANGUAGES C ASM)
 # )
 
 # target_sources()
-set_property(SOURCE lib/XMC-for-Arduino/variants/XMC4700/startup_XMC4700.S PROPERTY LANGUAGE ASM)
+set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
 
 add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections
 )
@@ -28,7 +28,7 @@ set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 add_executable(${EXECUTABLE}
   spi_example.c
-  # lib/XMC-for-Arduino/variants/XMC4700/startup_XMC4700.S
+  ${XMC_STARTUP_FILE}
 )
 
 target_include_directories(${EXECUTABLE} PRIVATE

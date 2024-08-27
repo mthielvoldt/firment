@@ -9,7 +9,10 @@ set(CMAKE_C_COMPILER "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
 
-add_compile_definitions(XMC_TARGET)
+set(XMC_STARTUP_FILE "lib/XMC-for-Arduino/variants/XMC4700/startup_XMC4700.S")
+
+# Add any special defines that get passed in through the compiler call. eg."-DHARDWARE_ID=3"
+# add_compile_definitions(XMC_COMPILER_DEFINES)
 
 # Path to pass to the compiler in the --sysroot flag.
 # FROM https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
