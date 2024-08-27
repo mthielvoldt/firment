@@ -9,13 +9,20 @@ set(CMAKE_C_COMPILER "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-
 add_compile_definitions(XMC_TARGET)
 
 # Specify any host-specific compiler flags
-set(XMC_FLAGS
-  -mfloat-abi=hard
-)
+set(XMC_FLAGS "-mfloat-abi=hard" "-mcpu=cortex-m4" "-mthumb")
+
 # Place all objects in separate linker sections.
 set(XMC_LINK_FLAGS
   -fdata-sections
   -ffunction-sections
 )
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XMC_FLAGS} ${XMC_LINK_FLAGS}" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XMC_FLAGS} ${XMC_LINK_FLAGS}" CACHE STRING "" FORCE)
+
+
+
+
+# set(GCC_PATH
+# /home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin)
+# set(CMAKE_C_COMPILER ${GCC_PATH}/arm-none-eabi-gcc CACHE PATH "" FORCE)
+
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XMC_FLAGS} ${XMC_LINK_FLAGS}" CACHE STRING "" FORCE)

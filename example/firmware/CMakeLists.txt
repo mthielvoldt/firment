@@ -20,14 +20,6 @@ add_compile_options(
   -Wall
 )
 
-# set(GCC_PATH
-# /home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin)
-# set(CMAKE_C_COMPILER ${GCC_PATH}/arm-none-eabi-gcc CACHE PATH "" FORCE)
-
-
-
-
-# set(PROJECT_VERSION "0.0.1")
 
 include_directories(
   "lib/XMC-for-Arduino/libraries/SPI/src"
