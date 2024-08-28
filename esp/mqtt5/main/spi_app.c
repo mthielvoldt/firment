@@ -16,6 +16,7 @@
 
 #include "driver/spi_slave.h"
 #include "driver/gpio.h"
+#include "driver/gpio_filter.h"
 
 #include "spi_app.h"
 
@@ -70,7 +71,7 @@ static spi_bus_config_t buscfg = {
 };
 // Configuration for the SPI slave interface
 static spi_slave_interface_config_t slvcfg = {
-    .mode = 0,
+    .mode = 1, // (CPOL, CPHA) = (0,1) Clock is low when Sub enabled, data valid on second edge (falling).
     .spics_io_num = GPIO_CS,
     .queue_size = 3,
     .flags = 0,
@@ -106,6 +107,15 @@ esp_err_t initSpi(void)
   gpio_set_pull_mode(GPIO_SCLK, GPIO_PULLUP_ONLY);
   gpio_set_pull_mode(GPIO_CS, GPIO_PULLUP_ONLY);
 
+  // gpio_glitch_filter_handle_t filter = NULL;
+  // gpio_pin_glitch_filter_config_t config = {
+  //     .clk_src = GLITCH_FILTER_CLK_SRC_DEFAULT,
+  //     .gpio_num = GPIO_SCLK,
+  // };
+
+  // gpio_new_pin_glitch_filter(&config, &filter);
+  // gpio_glitch_filter_enable(filter);
+
   // Initialize SPI slave interface
   ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_DISABLED);
 
@@ -117,9 +127,8 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   static int espErrTotal = 0;
   static int datErrTotal = 0;
   static int lenErrCount = 0;
-  const int samplesPerReport = 5000;
   static int lenTotal = 0;
-  static int lenMin = samplesPerReport;
+  static int lenMin = SAMPLES_PER_REPORT;
   static int lenMax = 0;
   static int setCount = 0;
   esp_err_t ret;
@@ -142,13 +151,13 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   // received data from the master. Print it.
   if (ret == ESP_OK)
   {
-    if (spiTransaction.trans_len != 64)
+    if (spiTransaction.trans_len != EXPECTED_LEN)
     {
       lenErrCount++;
     }
     else
     {
-      if (*(uint64_t *)recvbuf != 0x01248EDB7FAA5566)
+      if (*(uint64_t *)recvbuf != EXPECTED_VALUE)
       {
         datErrTotal++;
       }
@@ -159,14 +168,17 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
     espErrTotal++;
   }
 
-  if (spiTxCount >= samplesPerReport)
+  if (spiTxCount >= SAMPLES_PER_REPORT)
   {
     lenTotal += lenErrCount;
     setCount++;
     lenMax = (!firstSet && lenErrCount > lenMax) ? lenErrCount : lenMax;
     lenMin = (lenErrCount < lenMin) ? lenErrCount : lenMin;
     float avgLenErrPerSet = (float)lenTotal / setCount;
-    printf("Set %d of %d\n", setCount, samplesPerReport);
+    printf("Set %d of %d\n", setCount, SAMPLES_PER_REPORT);
+    printf("Current value: %02X %02X %02X %02X \t Len: %d\n",
+           ((uint8_t *)recvbuf)[0], ((uint8_t *)recvbuf)[1], ((uint8_t *)recvbuf)[2], ((uint8_t *)recvbuf)[3],
+           spiTransaction.trans_len);
     printf(" Other Errs-> ESP total: %d\t datErr total: %d\n", espErrTotal, datErrTotal);
     printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\n",
            lenMax, lenMin, avgLenErrPerSet);
