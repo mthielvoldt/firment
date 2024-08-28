@@ -12,17 +12,19 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 # set(CMAKE_EXE_LINKER_FLAGS "--specs=nosys.specs" CACHE INTERNAL "")
 
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+set(CMAKE_C_OBJCOPY arm-none-eabi-objcopy)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
 
-set(XMC_DIR "lib/XMC-for-Arduino/variants/XMC4700")
-set(XMC_STARTUP_FILE "${XMC_DIR}/startup_XMC4700.S")
-set(XMC_SYSTEM_FILE "${XMC_DIR}/system_XMC4700.c")
-set(XMC_LINKER_FILE "${PROJECT_SOURCE_DIR}/lib/XMC-for-Arduino/variants/XMC4700/linker_script.ld")
-
-# Add any special defines that get passed in through the compiler call. eg."-DHARDWARE_ID=3"
+set(XMC_VARIANT "XMC4700")
 add_compile_definitions(XMC4700_F144x2048)
+# add_compile_definitions(XMC4400_F100x512)
 
-# add_link_options(-T${XMC_LINKER_FILE})
+set(XMC_DIR "lib/XMC-for-Arduino/variants/${XMC_VARIANT}")
+set(XMC_STARTUP_FILE "${XMC_DIR}/startup_${XMC_VARIANT}.S")
+set(XMC_SYSTEM_FILE "${XMC_DIR}/system_${XMC_VARIANT}.c")
+set(XMC_LINKER_FILE "${PROJECT_SOURCE_DIR}/lib/XMC-for-Arduino/variants/${XMC_VARIANT}/linker_script.ld")
+
 
 # Path to pass to the compiler in the --sysroot flag.
 # FROM https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
