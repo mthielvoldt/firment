@@ -38,6 +38,9 @@ add_executable(${EXECUTABLE}
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   ${XMC_LIB}/xmc4_gpio.c
+  ${XMC_LIB}/xmc_spi.c
+  ${XMC_LIB}/xmc_usic.c
+  ${XMC_LIB}/xmc4_scu.c
 )
 
 target_include_directories(${EXECUTABLE} PRIVATE
@@ -46,6 +49,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC-for-Arduino/cores/xmc_lib/CMSIS/Include
   lib/XMC-for-Arduino/cores
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}
+  lib/XMC-for-Arduino/variants/${XMC_VARIANT}/config/XMC4700_Relax_Kit
 )
 
 
