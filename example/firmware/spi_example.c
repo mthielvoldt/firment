@@ -42,12 +42,13 @@ typedef struct
 
 int main(void)
 {
-  XMC_GPIO_PORT_t *const port = XMC_GPIO_PORT0;
-  const uint8_t pin = 13;
-  const XMC_GPIO_CONFIG_t pinConfig = {
+  portPin_t ledPin = {.port = XMC_GPIO_PORT0, .pin = 13U};
+  portPin_t espSelect = {.port = XMC_GPIO_PORT3, .pin = 10U};
+
+  const XMC_GPIO_CONFIG_t gpOutPinConfig = {
       .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL,
       .output_level = XMC_GPIO_OUTPUT_LEVEL_LOW,
-      .output_strength = XMC_GPIO_OUTPUT_STRENGTH_STRONG_SHARP_EDGE,
+      .output_strength = XMC_GPIO_OUTPUT_STRENGTH_MEDIUM,
   };
 
   /* Port 3, pins:
@@ -57,10 +58,10 @@ int main(void)
   10: CS
   */
   const XMC_SPI_CH_CONFIG_t config = {
-      .baudrate = 4000000,
+      .baudrate = 100000,
       .normal_divider_mode = true,
       .bus_mode = XMC_SPI_CH_BUS_MODE_MASTER,
-      .selo_inversion = XMC_SPI_CH_SLAVE_SEL_SAME_AS_MSLS,
+      .selo_inversion = XMC_SPI_CH_SLAVE_SEL_INV_TO_MSLS,
       .parity_mode = XMC_USIC_CH_PARITY_MODE_NONE,
   };
   XMC_USIC_CH_t *const channel = XMC_USIC2_CH0;
@@ -82,9 +83,10 @@ int main(void)
 
   const bool initBrg = true; // Automatically configure the baudrate generator.
 
-  const uint16_t data = 0x0124u;
+  const uint16_t data = 0xA5u;
 
-  XMC_GPIO_Init(port, pin, &pinConfig);
+  XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
+  XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
 
   XMC_SPI_CH_InitEx(channel, &config, initBrg);
   XMC_SPI_CH_SetInputSource(spi20Pins.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)spi20Pins.input_source);
@@ -99,9 +101,13 @@ int main(void)
   for (;;)
   {
 
-    XMC_GPIO_ToggleOutput(port, pin);
-
+    XMC_GPIO_ToggleOutput(ledPin.port, ledPin.pin);
+    
+    XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
     XMC_SPI_CH_Transmit(channel, data, XMC_SPI_CH_MODE_STANDARD);
+    for (volatile int i = 0; i < 1200; i++)
+      ;
+    XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
     for (volatile int i = 0; i < 400000; i++)
       ;
   }
