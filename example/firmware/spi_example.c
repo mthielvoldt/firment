@@ -61,7 +61,7 @@ int main(void)
   10: CS
   */
   const XMC_SPI_CH_CONFIG_t config = {
-      .baudrate = 100000,
+      .baudrate = 1000000,
       .normal_divider_mode = true,
       .bus_mode = XMC_SPI_CH_BUS_MODE_MASTER,
       .selo_inversion = XMC_SPI_CH_SLAVE_SEL_INV_TO_MSLS,
@@ -116,13 +116,13 @@ int main(void)
     XMC_SPI_CH_Transmit(channel, data, XMC_SPI_CH_MODE_STANDARD);
     // XMC_SPI_CH_Transmit(channel, data, XMC_SPI_CH_MODE_STANDARD);
 
-    for (volatile int i = 0; i < 5000; i++)
+    for (volatile int i = 0; i < 500; i++)
       ;
     XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
 
     // XMC_SPI_CH_DisableSlaveSelect(channel);
 
-    for (volatile int i = 0; i < 500000; i++)
+    for (volatile int i = 0; i < 500; i++)
       ;
   }
 }

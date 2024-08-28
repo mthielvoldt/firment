@@ -12,7 +12,8 @@
 #define EXPECTED_VALUE 0xA5u //24u
 
 #define EXPECTED_LEN 8
-#define SAMPLES_PER_REPORT 5
+#define SAMPLES_PER_REPORT 5000
+#define MAX_BAD_DAT_TO_STORE 10U
 
 esp_err_t initSpi(void);
 esp_err_t waitForSpiRx(uint32_t msTimeout);

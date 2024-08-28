@@ -107,14 +107,21 @@ esp_err_t initSpi(void)
   gpio_set_pull_mode(GPIO_SCLK, GPIO_PULLUP_ONLY);
   gpio_set_pull_mode(GPIO_CS, GPIO_PULLUP_ONLY);
 
-  // gpio_glitch_filter_handle_t filter = NULL;
-  // gpio_pin_glitch_filter_config_t config = {
-  //     .clk_src = GLITCH_FILTER_CLK_SRC_DEFAULT,
-  //     .gpio_num = GPIO_SCLK,
-  // };
+  gpio_glitch_filter_handle_t sck_filter;
+  gpio_pin_glitch_filter_config_t sck_filter_config = {
+      .clk_src = GLITCH_FILTER_CLK_SRC_DEFAULT,
+      .gpio_num = GPIO_SCLK,
+  };
+  gpio_new_pin_glitch_filter(&sck_filter_config, &sck_filter);
+  gpio_glitch_filter_enable(sck_filter);
 
-  // gpio_new_pin_glitch_filter(&config, &filter);
-  // gpio_glitch_filter_enable(filter);
+  // gpio_glitch_filter_handle_t mosi_filter;
+  // gpio_pin_glitch_filter_config_t mosi_filter_config = {
+  //     .clk_src = GLITCH_FILTER_CLK_SRC_DEFAULT,
+  //     .gpio_num = GPIO_MOSI,
+  // };
+  // gpio_new_pin_glitch_filter(&mosi_filter_config, &mosi_filter);
+  // gpio_glitch_filter_enable(mosi_filter);
 
   // Initialize SPI slave interface
   ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_DISABLED);
@@ -126,6 +133,8 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
 {
   static int espErrTotal = 0;
   static int datErrTotal = 0;
+  static uint16_t badDat[MAX_BAD_DAT_TO_STORE] = {};
+  static uint32_t badDati = 0;
   static int lenErrCount = 0;
   static int lenTotal = 0;
   static int lenMin = SAMPLES_PER_REPORT;
@@ -160,6 +169,11 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
       if (*(uint64_t *)recvbuf != EXPECTED_VALUE)
       {
         datErrTotal++;
+        if (badDati < MAX_BAD_DAT_TO_STORE)
+        {
+          badDat[badDati] = *(uint16_t *)recvbuf;
+          badDati++;
+        }
       }
     }
   }
@@ -182,6 +196,17 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
     printf(" Other Errs-> ESP total: %d\t datErr total: %d\n", espErrTotal, datErrTotal);
     printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\n",
            lenMax, lenMin, avgLenErrPerSet);
+
+    if (badDati)
+    {
+      printf("Bad Data: ");
+      for (uint32_t i = 0; i < badDati; i++)
+      {
+        printf("%02X ", badDat[i]);
+      }
+      printf("\n");
+      badDati = 0;
+    }
 
     spiTxCount = lenErrCount = 0;
     firstSet = false;
