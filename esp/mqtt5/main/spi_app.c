@@ -84,7 +84,7 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static char sendbuf[SPI_BUFFER_SZ_BYTES] = {}; //{0x01, 0x02, 0x04};
+static char sendbuf[SPI_BUFFER_SZ_BYTES] = {0x04, 0x02, 0x01};
 static char recvbuf[SPI_BUFFER_SZ_BYTES] = "";
 static spi_slave_transaction_t spiTransaction = {
     .length = MAX_TRANSACTION_LENGTH,
@@ -166,7 +166,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
     }
     else
     {
-      if (*(uint64_t *)recvbuf != EXPECTED_VALUE)
+      if (*(uint8_t *)recvbuf != EXPECTED_VALUE)
       {
         datErrTotal++;
         if (badDati < MAX_BAD_DAT_TO_STORE)
