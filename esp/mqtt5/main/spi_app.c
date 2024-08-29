@@ -148,7 +148,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   static int setCount = 0;
   static bool firstSet = true;
   spi_slave_transaction_t *rxdTransaction = NULL;
-  uint8_t *rxbuf = NULL;
+  uint16_t *rxbuf = NULL;
 
   // Clear receive buffer, set send buffer to something sane
   // memset(rxBufs, 0x0, SPI_BUFFER_SZ_BYTES);
@@ -185,7 +185,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   if (ret == ESP_OK)
   {
     spiTxCount++;
-    rxbuf = (uint8_t *)(rxdTransaction->rx_buffer);
+    rxbuf = (rxdTransaction->rx_buffer);
     transmissionsInQueue--;
     // re-queue a TX if there's space.
 
@@ -200,7 +200,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
         datErrTotal++;
         if (badDati < MAX_BAD_DAT_TO_STORE)
         {
-          badDat[badDati] = *(uint16_t *)rxBufs;
+          badDat[badDati] = *rxbuf;
           badDati++;
         }
       }

@@ -82,13 +82,13 @@ int main(void)
       .sclkout = {.port = XMC_GPIO_PORT3, .pin = 9U},
       .miso_config = {.mode = XMC_GPIO_MODE_INPUT_TRISTATE},
       .input_source = USIC_INPUT_C,
-      .word_length = 8,
-      .frame_length = 8,
+      .word_length = 16,
+      .frame_length = 16,
   };
 
   const bool initBrg = true; // Automatically configure the baudrate generator.
 
-  const uint16_t data = 0xA5u; //24u;
+  const uint16_t data = 0xA524u; //24u;
 
   XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
   XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
