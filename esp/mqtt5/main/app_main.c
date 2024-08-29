@@ -338,7 +338,12 @@ void app_main(void)
   mqtt5_app_start();
   for (;;)
   {
-    waitForSpiRx(3000);
+    // drain the RX queue.  
+    if (waitForSpiRx(3000) == ESP_ERR_TIMEOUT) {
+      printf("timed out 3000ms");
+    }
+    // Now that it's empty, it's a good time to yield to lower priority tasks? 
+
     // vTaskDelay(pdMS_TO_TICKS(2000));
     // int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
     // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);

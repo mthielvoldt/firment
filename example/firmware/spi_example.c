@@ -122,7 +122,7 @@ int main(void)
 
     // XMC_SPI_CH_DisableSlaveSelect(channel);
 
-    for (volatile int i = 0; i < 50000; i++)
+    for (volatile int i = 0; i < 10000; i++)
       ;
   }
 }

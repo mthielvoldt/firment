@@ -69,14 +69,17 @@ static spi_bus_config_t buscfg = {
     .intr_flags = 0,
     .isr_cpu_id = 0,
 };
+
 // Configuration for the SPI slave interface
 static spi_slave_interface_config_t slvcfg = {
     .mode = 1, // (CPOL, CPHA) = (0,1) Clock is low when Sub enabled, data valid on second edge (falling).
     .spics_io_num = GPIO_CS,
-    .queue_size = 3,
+    .queue_size = SPI_QUEUE_LEN,
     .flags = 0,
     .post_setup_cb = my_post_setup_cb,
-    .post_trans_cb = my_post_trans_cb};
+    .post_trans_cb = my_post_trans_cb,
+};
+
 // Configuration for the handshake line
 static gpio_config_t io_conf = {
     .intr_type = GPIO_INTR_DISABLE,
@@ -84,21 +87,23 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static char sendbuf[SPI_BUFFER_SZ_BYTES] = {0x04, 0x02, 0x01};
-static char recvbuf[SPI_BUFFER_SZ_BYTES] = "";
-static spi_slave_transaction_t spiTransaction = {
-    .length = MAX_TRANSACTION_LENGTH,
-    .rx_buffer = recvbuf,
-    .tx_buffer = sendbuf,
-    // .flags = 0,
-    // .trans_len = 0,
-    // .user = NULL
-};
+static char txBufs[SPI_BUFFER_SZ_BYTES][SPI_QUEUE_LEN] = {};
+static char rxBufs[SPI_BUFFER_SZ_BYTES][SPI_QUEUE_LEN] = {};
+static spi_slave_transaction_t spiTransactions[SPI_QUEUE_LEN] = {};
 
 // Main application
 esp_err_t initSpi(void)
 {
   esp_err_t ret;
+
+  for (int i = 0; i < SPI_QUEUE_LEN; i++)
+  {
+    spiTransactions[i] = (spi_slave_transaction_t){
+        .length = MAX_TRANSACTION_LENGTH,
+        .rx_buffer = &rxBufs[0][i],
+        .tx_buffer = &txBufs[0][i],
+    };
+  }
 
   // Configure handshake line as output
   gpio_config(&io_conf);
@@ -131,7 +136,8 @@ esp_err_t initSpi(void)
 
 esp_err_t waitForSpiRx(uint32_t msTimeout)
 {
-  static int espErrTotal = 0;
+  static uint32_t transmissionsInQueue = 0;
+  static uint32_t nextTransIndex = 0;
   static int datErrTotal = 0;
   static uint16_t badDat[MAX_BAD_DAT_TO_STORE] = {};
   static uint32_t badDati = 0;
@@ -140,62 +146,78 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   static int lenMin = SAMPLES_PER_REPORT;
   static int lenMax = 0;
   static int setCount = 0;
-  esp_err_t ret;
   static bool firstSet = true;
+  spi_slave_transaction_t *rxdTransaction = NULL;
+  uint8_t *rxbuf = NULL;
 
   // Clear receive buffer, set send buffer to something sane
-  memset(recvbuf, 0x0, SPI_BUFFER_SZ_BYTES);
-  spiTxCount++;
-  // sprintf(sendbuf, "This is the receiver, sending data for transmission number %04d.", spiTxCount++);
+  // memset(rxBufs, 0x0, SPI_BUFFER_SZ_BYTES);
+  // sprintf(txBufs, "This is the receiver, sending data for transmission number %04d.", spiTxCount++);
 
-  /* This call enables the SPI slave interface to send/receive to the sendbuf and recvbuf. The transaction is
+  /* This call enables the SPI slave interface to send/receive to the txBufs and rxBufs. The transaction is
   initialized by the SPI master, however, so it will not actually happen until the master starts a hardware transaction
   by pulling CS low and pulsing the clock etc. In this specific example, we use the handshake line, pulled up by the
   .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
   data.
   */
-  ret = spi_slave_transmit(RCV_HOST, &spiTransaction, pdMS_TO_TICKS(msTimeout));
+  // ret = spi_slave_transmit(RCV_HOST, &spiTransaction, pdMS_TO_TICKS(msTimeout));
 
-  // spi_slave_transmit does not return until the master has done a transmission, so by here we have sent our data and
-  // received data from the master. Print it.
+  // Fill the queue all the way up.
+  // while (spi_slave_queue_trans(RCV_HOST, &spiTransaction, 0) == ESP_OK);
+
+  // (re)fill txQueue
+  while (transmissionsInQueue < TARGET_TX_QUEUE_DEPTH)
+  {
+    if (spi_slave_queue_trans(RCV_HOST, &spiTransactions[nextTransIndex], 0) == ESP_OK)
+    {
+      transmissionsInQueue++;
+      if (++nextTransIndex == SPI_QUEUE_LEN)
+        nextTransIndex = 0;
+    }
+    else {
+      // Getting here means the queue is full.  So process receive.
+      break;
+    }
+  }
+
+  // The timeout is important so lower priority tasks can breathe when there isn't data.
+  esp_err_t ret = spi_slave_get_trans_result(RCV_HOST, &rxdTransaction, pdMS_TO_TICKS(msTimeout));
   if (ret == ESP_OK)
   {
-    if (spiTransaction.trans_len != EXPECTED_LEN)
+    spiTxCount++;
+    rxbuf = (uint8_t *)(rxdTransaction->rx_buffer);
+    transmissionsInQueue--;
+    // re-queue a TX if there's space.
+
+    if (rxdTransaction->trans_len != EXPECTED_LEN)
     {
       lenErrCount++;
     }
     else
     {
-      if (*(uint8_t *)recvbuf != EXPECTED_VALUE)
+      if (*rxbuf != EXPECTED_VALUE)
       {
         datErrTotal++;
         if (badDati < MAX_BAD_DAT_TO_STORE)
         {
-          badDat[badDati] = *(uint16_t *)recvbuf;
+          badDat[badDati] = *(uint16_t *)rxBufs;
           badDati++;
         }
       }
     }
   }
-  else
-  {
-    espErrTotal++;
-  }
 
-  if (spiTxCount >= SAMPLES_PER_REPORT)
+  if (spiTxCount >= SAMPLES_PER_REPORT) // If this passes, we Rx'd something, so rxbuf not NULL.
   {
     lenTotal += lenErrCount;
     setCount++;
     lenMax = (!firstSet && lenErrCount > lenMax) ? lenErrCount : lenMax;
     lenMin = (lenErrCount < lenMin) ? lenErrCount : lenMin;
     float avgLenErrPerSet = (float)lenTotal / setCount;
-    printf("Set %d of %d\n", setCount, SAMPLES_PER_REPORT);
-    printf("Current value: %02X %02X %02X %02X \t Len: %d\n",
-           ((uint8_t *)recvbuf)[0], ((uint8_t *)recvbuf)[1], ((uint8_t *)recvbuf)[2], ((uint8_t *)recvbuf)[3],
-           spiTransaction.trans_len);
-    printf(" Other Errs-> ESP total: %d\t datErr total: %d\n", espErrTotal, datErrTotal);
-    printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\n",
-           lenMax, lenMin, avgLenErrPerSet);
+    printf("Set %d with %d\n", setCount, spiTxCount);
+    printf("Current value: %02X %02X\tLen: %d\n", rxbuf[0], rxbuf[1], rxdTransaction->trans_len);
+    printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\tDat errors total: %d\n",
+           lenMax, lenMin, avgLenErrPerSet, datErrTotal);
 
     if (badDati)
     {
