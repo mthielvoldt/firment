@@ -77,6 +77,35 @@ The steps are as follows:
  - Install CMake `sudo apt install cmake`
  - Download appropriate Segger [JLink tools](https://www.segger.com/downloads/jlink).  **Note:** Recommend v7.52d.  Experienced issues flashing with v7.98.
 
+ ### Firmware Conveniences
+ - Install Cortex-Debug extension if you're using VSCode.
+ - Install libncurses5, a dependency of arm-none-eabi-gdb.\
+ `sudo apt install libncurses5`
+ - Add a configuration to `.vscode/launch.json` such as:
+ ```
+ {
+  "configurations": [
+    {
+      "name": "XMC",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/example/firmware/build/xmc",
+      "servertype": "jlink",
+      "serverpath": "/usr/bin/JLinkGDBServerExe",
+      "executable": "spi_example.elf",
+      "interface": "swd",
+      "device": "XMC4700_F144x2048",
+      "preLaunchTask": "",
+      "svdFile": "",
+      "showDevDebugOutput": "raw"
+    },
+    [...]
+  ]
+ }
+ ```
+ - Add a symlink hack to get gdb back to working. \
+ `cd /usr/lib/x86_64-linux-gnu && sudo ln -s libncursesw.so.6 libncursesw.so.5`
+
 # Using Firment
 This assumes you are making changes to your message definitions in the .proto files, which requires:
 - Regenerating code for Target, ESP, and Web interface

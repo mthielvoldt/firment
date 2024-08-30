@@ -1,0 +1,46 @@
+{
+  "configurations": [
+    {
+      "name": "XMC",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "request": "launch",
+      "serverpath": "JLinkGDBServerCLExe",
+      "executable": "example/firmware/build/xmc/spi_example.elf",
+      "interface": "swd",
+      "device": "XMC4700-2048",
+      "armToolchainPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/",
+      "preLaunchTask": "",
+      "svdFile": "",
+      "showDevDebugOutput": "raw",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "cppdbg",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${fileDirname}/${fileBasenameNoExtension}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/example/firmware",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "C/C++: arm-none-eabi-gcc build active file",
+      "miDebuggerPath": "gdb"
+    }
+  ],
+  "version": "2.0.0"
+}

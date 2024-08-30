@@ -3,18 +3,17 @@ cmake_minimum_required(VERSION 3.22.1)
 # Disables CXX (C++)
 project(spi_example VERSION 0.1 LANGUAGES C ASM)
 
-# set(DEBUG_INFO_OPTIONS
-#   -g3
-#   -gdwarf-2
-# )
-# set(OPTIMIZATION_OPTIONS
-#   -o0
-# )
-# add_compile_options(
-#   ${DEBUG_INFO_OPTIONS}
-#   ${OPTIMIZATION_OPTIONS}
-#   -Wall
-# )
+set(DEBUG_INFO_OPTIONS -g)
+  # -g3
+  # -gdwarf-2
+
+set(OPTIMIZATION_OPTIONS -O0)
+
+add_compile_options(
+  ${DEBUG_INFO_OPTIONS}
+  ${OPTIMIZATION_OPTIONS}
+  -Wall
+)
 
 # target_sources()
 set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
@@ -55,6 +54,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC-for-Arduino/cores
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}/config/XMC4700_Relax_Kit
+  ${NANOPB}
 )
 
 

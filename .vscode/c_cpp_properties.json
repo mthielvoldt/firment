@@ -1,0 +1,63 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+          "name": "esp32s3-xmc4700",
+          "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
+          "compilerArgs": [],
+          "intelliSenseMode": "gcc-arm",
+          "includePath": [
+            "esp/mqtt5/build/config",
+            "../esp-idf/components/esp_driver_gpio/include",
+            "../esp-idf/components/esp_driver_spi/include/**",
+            "../esp-idf/components/esp_system/include/*",
+            "../esp-idf/components/esp_timer/include",
+            "../esp-idf/components/esp_common/include",
+            "../esp-idf/components/esp_hw_support/include",
+            "../esp-idf/components/hal/include",
+            "../esp-idf/components/mqtt/esp-mqtt/include",
+            "../esp-idf/components/soc/esp32s3/include",
+            "../esp-idf/components/freertos/FreeRTOS-Kernel/include",
+            "../esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/include/freertos",
+            "../esp-idf/examples/common_components/protocol_examples_common/include",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/libraries/SPI/src",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/inc",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/cores/xmc_lib/CMSIS/Include",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/cores",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700",
+            "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700/config/XMC4700_Relax_Kit",
+            "protocol/nanopb"
+          ],
+          "forcedInclude": [],
+          "cStandard": "c11",
+          "cppStandard": "c++11",
+          "defines": [
+              "CONFIG_MQTT_PROTOCOL_5 1", 
+              "XMC4700_F144x2048"
+          ]
+        },
+        {
+          "name": "XMC4700",
+          "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
+          "compilerArgs": [
+              "-w",
+              "-std=gnu++11",
+              "-fpermissive",
+              "-fno-exceptions",
+              "-ffunction-sections",
+              "-fdata-sections",
+              "-fno-threadsafe-statics",
+              "-Wno-error=narrowing"
+          ],
+          "intelliSenseMode": "gcc-arm",          
+          "includePath": [
+              
+          ],
+          "cStandard": "c11",
+          "cppStandard": "c++11",
+          "defines": [
+              "XMC4700_F144x2048"
+          ]
+        }
+    ]
+}
