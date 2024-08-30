@@ -9,16 +9,16 @@ enum WaveShape {
 }
 
 message WaveformCtl {
-  float amplitude = 1;
-  float frequency = 2;
-  float offset = 3;
+  float amplitude_v = 1;
+  float frequency_hz = 2;
+  float offset_v = 3;
   WaveShape shape = 4;
   bool enabled = 5;
 }
 
 message WaveformTlm {
-  float voltage = 1;
-  int32 current = 2;
+  float voltage_v = 1;
+  int32 current_ma = 2;
 }
 
 message Top {

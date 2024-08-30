@@ -30,6 +30,7 @@ endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(XMC_LIB "lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src")
+set(NANOPB "../../protocol/nanopb")
   
 # link_libraries("-lc -lm -lnosys")
 
@@ -41,6 +42,10 @@ add_executable(${EXECUTABLE}
   ${XMC_LIB}/xmc_spi.c
   ${XMC_LIB}/xmc_usic.c
   ${XMC_LIB}/xmc4_scu.c
+  generated/mcu_1.pb.c
+  ${NANOPB}/pb_encode.c
+  ${NANOPB}/pb_decode.c
+  ${NANOPB}/pb_common.c
 )
 
 target_include_directories(${EXECUTABLE} PRIVATE

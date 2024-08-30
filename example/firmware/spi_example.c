@@ -7,9 +7,11 @@
 #include "XMC4700.h"
 #endif
 
-// #include "Arduino.h"
 #include "xmc_gpio.h"
 #include "xmc_spi.h"
+#include <pb_encode.h>
+#include <pb_decode.h>
+#include "generated/mcu_1.pb.h"
 
 typedef enum
 {
@@ -107,6 +109,19 @@ int main(void)
   XMC_GPIO_Init((XMC_GPIO_PORT_t *)spi20Pins.miso.port, (uint8_t)spi20Pins.miso.pin, &(spi20Pins.miso_config));
   /* Configure the output pin properties */
   XMC_GPIO_Init((XMC_GPIO_PORT_t *)spi20Pins.mosi.port, (uint8_t)spi20Pins.mosi.pin, &spiOutPinConfig);
+
+  Top message = Top_init_default;
+  uint8_t buffer[64];
+  size_t msg_len;
+  pb_ostream_t ostream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+
+  message.WaveformTlm.current_ma = 5;
+  message.WaveformTlm.voltage_v = 4.2;
+
+  bool success = pb_encode(&ostream, Top_fields, &message);
+  msg_len = ostream.bytes_written;
+
+
 
   for (;;)
   {
