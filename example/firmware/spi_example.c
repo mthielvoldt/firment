@@ -83,12 +83,14 @@ int main(void)
       .miso_config = {.mode = XMC_GPIO_MODE_INPUT_TRISTATE},
       .input_source = USIC_INPUT_C,
       .word_length = 16,
-      .frame_length = 16,
+      .frame_length = 32,
   };
 
   const bool initBrg = true; // Automatically configure the baudrate generator.
 
-  const uint16_t data = 0xA524u; //24u;
+  const uint32_t data = 0x01378EDBu;
+  const uint16_t data0 = data; // take LSBs, which come first in this SPI config. 
+  const uint16_t data1 = data >> 16; // MSBs
 
   XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
   XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
@@ -97,6 +99,7 @@ int main(void)
   XMC_SPI_CH_SetWordLength(channel, spi20Pins.word_length);
   XMC_SPI_CH_SetFrameLength(channel, spi20Pins.frame_length);
   XMC_SPI_CH_SetInputSource(spi20Pins.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)spi20Pins.input_source);
+  XMC_SPI_CH_SetBitOrderLsbFirst(channel);
   XMC_SPI_CH_Start(channel);
   /* Initialize SPI SCLK out pin */
   XMC_GPIO_Init((XMC_GPIO_PORT_t *)spi20Pins.sclkout.port, (uint8_t)spi20Pins.sclkout.pin, &spiOutPinConfig);
@@ -113,8 +116,8 @@ int main(void)
     XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
     // XMC_SPI_CH_EnableSlaveSelect(channel, XMC_SPI_CH_SLAVE_SELECT_0);
 
-    XMC_SPI_CH_Transmit(channel, data, XMC_SPI_CH_MODE_STANDARD);
-    // XMC_SPI_CH_Transmit(channel, data, XMC_SPI_CH_MODE_STANDARD);
+    XMC_SPI_CH_Transmit(channel, data0, XMC_SPI_CH_MODE_STANDARD);
+    XMC_SPI_CH_Transmit(channel, data1, XMC_SPI_CH_MODE_STANDARD);
 
     for (volatile int i = 0; i < 500; i++)
       ;

@@ -75,7 +75,7 @@ static spi_slave_interface_config_t slvcfg = {
     .mode = 1, // (CPOL, CPHA) = (0,1) Clock is low when Sub enabled, data valid on second edge (falling).
     .spics_io_num = GPIO_CS,
     .queue_size = SPI_QUEUE_LEN,
-    .flags = 0,
+    .flags = SPI_SLAVE_BIT_LSBFIRST,
     .post_setup_cb = my_post_setup_cb,
     .post_trans_cb = my_post_trans_cb,
 };
@@ -148,7 +148,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   static int setCount = 0;
   static bool firstSet = true;
   spi_slave_transaction_t *rxdTransaction = NULL;
-  uint16_t *rxbuf = NULL;
+  uint32_t *rxbuf = NULL;
 
   // Clear receive buffer, set send buffer to something sane
   // memset(rxBufs, 0x0, SPI_BUFFER_SZ_BYTES);
@@ -215,7 +215,7 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
     lenMin = (lenErrCount < lenMin) ? lenErrCount : lenMin;
     float avgLenErrPerSet = (float)lenTotal / setCount;
     printf("Set %d with %d\n", setCount, spiTxCount);
-    printf("Current value: %02X %02X\tLen: %d\n", rxbuf[0], rxbuf[1], rxdTransaction->trans_len);
+    printf("Current value: %04lX\tLen: %d\n", rxbuf[0], rxdTransaction->trans_len);
     printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\tDat errors total: %d\n",
            lenMax, lenMin, avgLenErrPerSet, datErrTotal);
 
