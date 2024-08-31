@@ -134,21 +134,12 @@ esp_err_t initSpi(void)
   return ret;
 }
 
-esp_err_t waitForSpiRx(uint32_t msTimeout)
+esp_err_t waitForSpiRx(uint32_t *rxWord, uint32_t msTimeout)
 {
   static uint32_t transmissionsInQueue = 0;
   static uint32_t nextTransIndex = 0;
-  static int datErrTotal = 0;
-  static uint16_t badDat[MAX_BAD_DAT_TO_STORE] = {};
-  static uint32_t badDati = 0;
-  static int lenErrCount = 0;
-  static int lenTotal = 0;
-  static int lenMin = SAMPLES_PER_REPORT;
-  static int lenMax = 0;
-  static int setCount = 0;
-  static bool firstSet = true;
+
   spi_slave_transaction_t *rxdTransaction = NULL;
-  uint32_t *rxbuf = NULL;
 
   // Clear receive buffer, set send buffer to something sane
   // memset(rxBufs, 0x0, SPI_BUFFER_SZ_BYTES);
@@ -160,10 +151,6 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
   data.
   */
-  // ret = spi_slave_transmit(RCV_HOST, &spiTransaction, pdMS_TO_TICKS(msTimeout));
-
-  // Fill the queue all the way up.
-  // while (spi_slave_queue_trans(RCV_HOST, &spiTransaction, 0) == ESP_OK);
 
   // (re)fill txQueue
   while (transmissionsInQueue < TARGET_TX_QUEUE_DEPTH)
@@ -174,9 +161,9 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
       if (++nextTransIndex == SPI_QUEUE_LEN)
         nextTransIndex = 0;
     }
-    else {
-      // Getting here means the queue is full.  So process receive.
-      break;
+    else
+    {
+      break; // Getting here means the queue is full, so move on to processing Rx.
     }
   }
 
@@ -184,25 +171,46 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
   esp_err_t ret = spi_slave_get_trans_result(RCV_HOST, &rxdTransaction, pdMS_TO_TICKS(msTimeout));
   if (ret == ESP_OK)
   {
-    spiTxCount++;
-    rxbuf = (rxdTransaction->rx_buffer);
-    transmissionsInQueue--;
-    // re-queue a TX if there's space.
-
-    if (rxdTransaction->trans_len != EXPECTED_LEN)
+    if (rxdTransaction->trans_len == EXPECTED_LEN)
     {
-      lenErrCount++;
+      spiTxCount++;
+      transmissionsInQueue--;
+      *rxWord = *(uint32_t *)(rxdTransaction->rx_buffer);
     }
     else
     {
-      if (*rxbuf != EXPECTED_VALUE)
+      ret = ESP_ERR_INVALID_SIZE;
+    }
+  }
+  return ret;
+}
+
+void checkForSPIErrors(spi_slave_transaction_t *rxdTransaction)
+{
+  static int datErrTotal = 0;
+  static uint16_t badDat[MAX_BAD_DAT_TO_STORE] = {};
+  static uint32_t badDati = 0;
+  static int lenErrCount = 0;
+  static int lenTotal = 0;
+  static int lenMin = SAMPLES_PER_REPORT;
+  static int lenMax = 0;
+  static int setCount = 0;
+  static bool firstSet = true;
+  uint32_t *rxbuf = (rxdTransaction->rx_buffer);
+
+  if (rxdTransaction->trans_len != EXPECTED_LEN)
+  {
+    lenErrCount++;
+  }
+  else
+  {
+    if (*rxbuf != EXPECTED_VALUE)
+    {
+      datErrTotal++;
+      if (badDati < MAX_BAD_DAT_TO_STORE)
       {
-        datErrTotal++;
-        if (badDati < MAX_BAD_DAT_TO_STORE)
-        {
-          badDat[badDati] = *rxbuf;
-          badDati++;
-        }
+        badDat[badDati] = *rxbuf;
+        badDati++;
       }
     }
   }
@@ -233,5 +241,4 @@ esp_err_t waitForSpiRx(uint32_t msTimeout)
     spiTxCount = lenErrCount = 0;
     firstSet = false;
   }
-  return ret;
 }

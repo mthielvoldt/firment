@@ -19,6 +19,9 @@
 
 #include "spi_app.h"
 
+#define MAX_PAYLOAD_BYTES 60
+#define START_KEY 0xABCDEF00
+
 static const char *TAG = "mqtt5_example";
 
 static void log_error_if_nonzero(const char *message, int error_code)
@@ -73,6 +76,8 @@ static esp_mqtt5_disconnect_property_config_t disconnect_property = {
     .disconnect_reason = 0,
 };
 
+bool collateMessage(char *msgBuffer, size_t *msgLength, uint32_t newWord);
+
 static void print_user_property(mqtt5_user_property_handle_t user_property)
 {
   if (user_property)
@@ -98,14 +103,14 @@ static void print_user_property(mqtt5_user_property_handle_t user_property)
 
 static void print_data(esp_mqtt_event_t *event)
 {
-  ESP_LOGI(TAG, "MQTT_EVENT_DATA");
   print_user_property(event->property->user_property);
-  ESP_LOGI(TAG, "payload_format_indicator is %d", event->property->payload_format_indicator);
-  ESP_LOGI(TAG, "response_topic is %.*s", event->property->response_topic_len, event->property->response_topic);
-  ESP_LOGI(TAG, "correlation_data is %.*s", event->property->correlation_data_len, event->property->correlation_data);
-  ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
+  // ESP_LOGI(TAG, "payload_format_indicator is %d", event->property->payload_format_indicator);
+  // ESP_LOGI(TAG, "response_topic is %.*s", event->property->response_topic_len, event->property->response_topic);
+  // ESP_LOGI(TAG, "correlation_data is %.*s", event->property->correlation_data_len, event->property->correlation_data);
+  // ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
   ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
-  ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
+  // ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
+  ESP_LOGI(TAG, "len=%d Dat=%02x %02x %02x %02x", event->data_len, event->data[0], event->data[1], event->data[2], event->data[3]);
 }
 
 static void setup_users(esp_mqtt_client_handle_t client)
@@ -204,7 +209,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
   case MQTT_EVENT_ERROR:
     ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
     print_user_property(event->property->user_property);
-    ESP_LOGI(TAG, "MQTT5 return code is %d", event->error_handle->connect_return_code);
+    ESP_LOGI(TAG, "MQTT5 return code %d", event->error_handle->connect_return_code);
     if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
     {
       log_error_if_nonzero("reported from esp-tls", event->error_handle->esp_tls_last_esp_err);
@@ -338,15 +343,60 @@ void app_main(void)
   mqtt5_app_start();
   for (;;)
   {
-    // drain the RX queue.  
-    if (waitForSpiRx(3000) == ESP_ERR_TIMEOUT) {
+    uint32_t wordFromSpi;
+    bool msgReady = false;
+    char pbMsg[MAX_PAYLOAD_BYTES];
+    size_t msgLength;
+    // drain the RX queue.
+    esp_err_t ret = waitForSpiRx(&wordFromSpi, 2000);
+    if (ret == ESP_OK)
+    {
+      msgReady = collateMessage(pbMsg, &msgLength, wordFromSpi);
+    }
+    else if (ret == ESP_ERR_TIMEOUT)
+    {
       printf("timed out 3000ms");
     }
-    // Now that it's empty, it's a good time to yield to lower priority tasks? 
 
+    if (msgReady)
+    {
+      int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", pbMsg, msgLength, 1, 1);
+      ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
+    }
     // vTaskDelay(pdMS_TO_TICKS(2000));
-    // int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 1);
-    // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
   }
+}
 
+bool collateMessage(char *msgBuffer, size_t *msgLength, uint32_t newWord)
+{
+  bool msgReady = false;
+  static enum collationState {
+    WAITING_FOR_START_WORD,
+    COLLECTING_PAYLOAD_WORDS,
+  } state = WAITING_FOR_START_WORD;
+  static uint32_t bytesReceived = 0;
+
+  if (state == WAITING_FOR_START_WORD)
+  {
+    if ((newWord & 0xFFFFFF00) == START_KEY)
+    {
+      *msgLength = newWord & 0xFF;
+      if (*msgLength <= MAX_PAYLOAD_BYTES)
+      {
+        bytesReceived = 0;
+        state = COLLECTING_PAYLOAD_WORDS;
+      }
+    }
+  }
+  else if (state == COLLECTING_PAYLOAD_WORDS)
+  {
+    // store this word into the msgBuffer buffer.
+    // We don't worry about
+    *(uint32_t *)(msgBuffer + bytesReceived) = newWord;
+    bytesReceived += 4;
+    if (bytesReceived >= *msgLength)
+      state = WAITING_FOR_START_WORD;
+    msgReady = true;
+  }
+  return msgReady;
 }

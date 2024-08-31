@@ -124,8 +124,9 @@ int main(void)
   message.has_WaveformTlm = true;
 
   bool success = pb_encode(&ostream, Top_fields, &message);
+  pb_encode_delimited();
   buffer[0] = msg_len = ostream.bytes_written;
-  (void) success; // suppress warning.
+  (void)success; // suppress warning.
 
   for (;;)
   {
@@ -134,19 +135,31 @@ int main(void)
 
     for (int i = 0; i < (msg_len + HEADER_SIZE_BYTES); i += 4)
     {
+      XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
       XMC_SPI_CH_Transmit(channel, *(int16_t *)(buffer + i), XMC_SPI_CH_MODE_STANDARD);
       XMC_SPI_CH_Transmit(channel, *(int16_t *)(buffer + i + 2), XMC_SPI_CH_MODE_STANDARD);
-
-      XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
-
-      for (volatile int i = 0; i < 500; i++)
+      for (volatile int i = 0; i < 250; i++)
         ;
       XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
 
       // XMC_SPI_CH_DisableSlaveSelect(channel);
 
-      for (volatile int i = 0; i < 10000; i++)
+      for (volatile int i = 0; i < 1000000; i++)
         ;
     }
   }
+}
+
+Top decode(uint8_t *buffer, size_t msg_len)
+{
+  Top msg = Top_init_zero;
+  /* Create a stream that reads from the buffer. */
+  pb_istream_t stream = pb_istream_from_buffer(buffer + HEADER_SIZE_BYTES, msg_len);
+
+  /* Now we are ready to decode the message. */
+  if (pb_decode(&stream, Top_fields, &msg))
+  {
+    // handle an error
+  }
+  return msg;
 }
