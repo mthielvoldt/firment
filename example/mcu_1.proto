@@ -18,7 +18,7 @@ message WaveformCtl {
 
 message WaveformTlm {
   float voltage_v = 1;
-  int32 current_ma = 2;
+  sint32 current_ma = 2;
 }
 
 message Top {

@@ -9,11 +9,10 @@
       "executable": "example/firmware/build/xmc/spi_example.elf",
       "interface": "swd",
       "device": "XMC4700-2048",
-      "armToolchainPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/",
       "preLaunchTask": "",
       "svdFile": "",
       "showDevDebugOutput": "raw",
-      "runToEntryPoint": "main"
+      // "runToEntryPoint": "main"
     },
     {
       "name": "cppdbg",

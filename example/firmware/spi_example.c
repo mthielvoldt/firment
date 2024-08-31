@@ -13,6 +13,10 @@
 #include <pb_decode.h>
 #include "generated/mcu_1.pb.h"
 
+#define HEADER_SIZE_BYTES 4U
+#define BUFFER_SIZE_BYTES 64U
+#define PAYLOAD_SIZE_BYTES (BUFFER_SIZE_BYTES - HEADER_SIZE_BYTES)
+
 typedef enum
 {
   USIC_INPUT_A = 0U, /*< Input-A */
@@ -90,10 +94,6 @@ int main(void)
 
   const bool initBrg = true; // Automatically configure the baudrate generator.
 
-  const uint32_t data = 0x01378EDBu;
-  const uint16_t data0 = data; // take LSBs, which come first in this SPI config. 
-  const uint16_t data1 = data >> 16; // MSBs
-
   XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
   XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
 
@@ -102,6 +102,9 @@ int main(void)
   XMC_SPI_CH_SetFrameLength(channel, spi20Pins.frame_length);
   XMC_SPI_CH_SetInputSource(spi20Pins.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)spi20Pins.input_source);
   XMC_SPI_CH_SetBitOrderLsbFirst(channel);
+
+  // Configure the FIFO
+
   XMC_SPI_CH_Start(channel);
   /* Initialize SPI SCLK out pin */
   XMC_GPIO_Init((XMC_GPIO_PORT_t *)spi20Pins.sclkout.port, (uint8_t)spi20Pins.sclkout.pin, &spiOutPinConfig);
@@ -111,36 +114,39 @@ int main(void)
   XMC_GPIO_Init((XMC_GPIO_PORT_t *)spi20Pins.mosi.port, (uint8_t)spi20Pins.mosi.pin, &spiOutPinConfig);
 
   Top message = Top_init_default;
-  uint8_t buffer[64];
+  uint8_t buffer[BUFFER_SIZE_BYTES] = {0x00, 0xEF, 0xCD, 0xAB}; // Initialize with the start sequence in header.
+  uint8_t *payload = buffer + HEADER_SIZE_BYTES;
   size_t msg_len;
-  pb_ostream_t ostream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+  pb_ostream_t ostream = pb_ostream_from_buffer(payload, PAYLOAD_SIZE_BYTES);
 
   message.WaveformTlm.current_ma = 5;
   message.WaveformTlm.voltage_v = 4.2;
+  message.has_WaveformTlm = true;
 
   bool success = pb_encode(&ostream, Top_fields, &message);
-  msg_len = ostream.bytes_written;
-
-
+  buffer[0] = msg_len = ostream.bytes_written;
+  (void) success; // suppress warning.
 
   for (;;)
   {
 
     XMC_GPIO_ToggleOutput(ledPin.port, ledPin.pin);
-    
-    XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
-    // XMC_SPI_CH_EnableSlaveSelect(channel, XMC_SPI_CH_SLAVE_SELECT_0);
 
-    XMC_SPI_CH_Transmit(channel, data0, XMC_SPI_CH_MODE_STANDARD);
-    XMC_SPI_CH_Transmit(channel, data1, XMC_SPI_CH_MODE_STANDARD);
+    for (int i = 0; i < (msg_len + HEADER_SIZE_BYTES); i += 4)
+    {
+      XMC_SPI_CH_Transmit(channel, *(int16_t *)(buffer + i), XMC_SPI_CH_MODE_STANDARD);
+      XMC_SPI_CH_Transmit(channel, *(int16_t *)(buffer + i + 2), XMC_SPI_CH_MODE_STANDARD);
 
-    for (volatile int i = 0; i < 500; i++)
-      ;
-    XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
+      XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
 
-    // XMC_SPI_CH_DisableSlaveSelect(channel);
+      for (volatile int i = 0; i < 500; i++)
+        ;
+      XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
 
-    for (volatile int i = 0; i < 10000; i++)
-      ;
+      // XMC_SPI_CH_DisableSlaveSelect(channel);
+
+      for (volatile int i = 0; i < 10000; i++)
+        ;
+    }
   }
 }
