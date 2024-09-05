@@ -12,9 +12,11 @@ header = """\
 import { useState } from "react";
 import { addTopicCallback } from "../mqclient";"""
 
-numeric_fields = (
+float_fields = (
   FieldDescriptor.TYPE_FLOAT,
-  FieldDescriptor.TYPE_DOUBLE,
+  FieldDescriptor.TYPE_DOUBLE
+)
+integer_fields = (
   FieldDescriptor.TYPE_INT32,
   FieldDescriptor.TYPE_INT64,
   FieldDescriptor.TYPE_SINT32,
@@ -34,12 +36,18 @@ def get_message_widget(message: DescriptorProto):
 
   # iterate through fields, adding an element for each type.
   for field in message.field:
-    if field.type in numeric_fields:
-      initial_state[field.name] = 0.4
-      field_class = message_name + '-' + str(field.number)
+    if field.type in integer_fields:
+      initial_state[field.name] = 0  
       field_strings += f'''
       <div className="field">
         <p>{field.name + " "}<span>{{{message_name}State.{field.name}}}</span></p>
+      </div>
+      '''
+    if field.type in float_fields:
+      initial_state[field.name] = 0.0  
+      field_strings += f'''
+      <div className="field">
+        <p>{field.name + " "}<span>{{{message_name}State.{field.name}.toPrecision(4)}}</span></p>
       </div>
       '''
   # enum_name = ""

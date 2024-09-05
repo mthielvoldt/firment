@@ -19,7 +19,7 @@ export default function setupMq() {
     })
   });
 
-  client.on("message", (buffer) => {
+  client.on("message", (topic, buffer) => {
     // Parse the protobuf buffer
     let message = pb.Top.decode(buffer, buffer.length);
     console.log("decoded = ", JSON.stringify(message));

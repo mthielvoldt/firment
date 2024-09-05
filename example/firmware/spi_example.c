@@ -119,8 +119,8 @@ int main(void)
   size_t msg_len;
   pb_ostream_t ostream = pb_ostream_from_buffer(payload, PAYLOAD_SIZE_BYTES);
 
-  message.WaveformTlm.current_ma = 5;
-  message.WaveformTlm.voltage_v = 4.2;
+  message.WaveformTlm.currentMa = 5;
+  message.WaveformTlm.voltageV = 4.2;
   message.has_WaveformTlm = true;
 
   bool success = pb_encode(&ostream, Top_fields, &message);
