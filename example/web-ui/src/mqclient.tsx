@@ -20,17 +20,13 @@ export default function setupMq() {
   });
 
   client.on("message", (topic, buffer) => {
-    // message is Buffer
-    console.log(topic, buffer);
-    
     // Parse the protobuf buffer
     let message = pb.Top.decode(buffer, 9);
     console.log("decoded = ", JSON.stringify(message));
 
-    
     // call the state updater for the widget this message addresses. 
-    const subMsgType = "WaveformTlm"; // MOCK
-    const newState = {'voltage_v': 0.4, 'current_ma': 5}; // MOCK
+    const subMsgType = Object.keys(message)[0];
+    const newState = message[subMsgType];
     callbacks[subMsgType](newState);
 
     // client.end();
