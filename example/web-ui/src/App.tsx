@@ -13,11 +13,11 @@ function App() {
       <div className="row-container">
         <div>
           <h2>Commands</h2>
-          <widgets.WaveformControl />
+          <widgets.WaveformCtl />
         </div>
         <div>
           <h2>Telemetry</h2>
-          <widgets.GridStatus />
+          <widgets.WaveformTlm />
         </div>
       </div>
     </>

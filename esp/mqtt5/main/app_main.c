@@ -360,7 +360,7 @@ void app_main(void)
 
     if (msgReady)
     {
-      int msg_id = esp_mqtt_client_publish(client, "/topic/qos1", pbMsg, msgLength, 1, 1);
+      int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
       ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
     }
     // vTaskDelay(pdMS_TO_TICKS(2000));
