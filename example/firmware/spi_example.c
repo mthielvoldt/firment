@@ -124,7 +124,7 @@ int main(void)
   message.has_WaveformTlm = true;
 
   bool success = pb_encode(&ostream, Top_fields, &message);
-  pb_encode_delimited();
+  
   buffer[0] = msg_len = ostream.bytes_written;
   (void)success; // suppress warning.
 

@@ -117,6 +117,7 @@ This assumes you are making changes to your message definitions in the .proto fi
 1. (no terminal rq'd) Start Docker desktop if not already running.
 1. (no terminal rq'd) Start mosquitto broker docker container\
 `cd broker && broker.sh`
+1. Plug in your ESP32-S3 to your computer's USB.
 1. Start rfc2217 server to provide USB serial port access to the idf docker container (next step)\
 `cd esp/mqtt5 && . usb.sh`
 1. Start the ESP's idf docker container \

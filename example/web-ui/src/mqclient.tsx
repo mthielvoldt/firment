@@ -1,4 +1,5 @@
 import mqtt, { MqttClient } from "mqtt"; // import namespace "mqtt"
+import * as pb from "./generated/mcu_1.es6.js";
 
 let client: MqttClient;
 let callbacks = {}
@@ -23,10 +24,11 @@ export default function setupMq() {
     console.log(topic, buffer);
     
     // Parse the protobuf buffer
-    // let message = TopMsg.decode(buffer);
+    let message = pb.Top.decode(buffer, 9);
+    console.log("decoded = ", JSON.stringify(message));
 
     
-    // call the state updater for the widget that subscribes to this topic. 
+    // call the state updater for the widget this message addresses. 
     const subMsgType = "WaveformTlm"; // MOCK
     const newState = {'voltage_v': 0.4, 'current_ma': 5}; // MOCK
     callbacks[subMsgType](newState);
