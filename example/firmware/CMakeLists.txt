@@ -35,13 +35,16 @@ set(NANOPB "../../protocol/nanopb")
 
 add_executable(${EXECUTABLE}
   spi_example.c
+  example_comms.c
+  generated/mcu_1.pb.c
+  fmt_spi.c
+  fmt_types.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   ${XMC_LIB}/xmc4_gpio.c
   ${XMC_LIB}/xmc_spi.c
   ${XMC_LIB}/xmc_usic.c
   ${XMC_LIB}/xmc4_scu.c
-  generated/mcu_1.pb.c
   ${NANOPB}/pb_encode.c
   ${NANOPB}/pb_decode.c
   ${NANOPB}/pb_common.c

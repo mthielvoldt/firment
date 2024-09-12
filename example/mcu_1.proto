@@ -21,7 +21,27 @@ message WaveformTlm {
   sint32 currentMa = 2;
 }
 
+message Ack {
+  fixed32 refCRC = 1;
+}
+
+enum ParamOperation {
+  CURRENT_VAL = 0;
+  GET = 1;
+  SET = 2;
+}
+
+message TouchParam {
+  ParamOperation operation = 1;
+  oneof param {
+    float paramA = 2;
+    int32 paramB = 3;
+  }
+}
+
 message Top {
-  WaveformCtl WaveformCtl = 1;
-  WaveformTlm WaveformTlm = 2;
+  oneof sub {
+    WaveformCtl WaveformCtl = 1;
+    WaveformTlm WaveformTlm = 2;
+  }
 }
