@@ -4,15 +4,19 @@
 
 // Storage
 
-bool initQueue(
-    size_t itemSize, uint32_t length, queue_t *queue, uint8_t *itemsStorage)
+void initQueue(
+    size_t itemSize, 
+    uint32_t length, 
+    queue_t *queue, 
+    uint8_t *itemsStorage, 
+    uint32_t highestSenderPriority)
 {
   queue->items = itemsStorage;
   queue->itemSize = itemSize;
   queue->maxNumItems = length;
   queue->numSlotsClaimed = 0;
   queue->front = 0;
-  queue->highestSenderPriority;
+  queue->highestSenderPriority = highestSenderPriority;
 }
 
 bool enqueueBack(queue_t *queue, void *src)
@@ -39,7 +43,7 @@ bool enqueueBack(queue_t *queue, void *src)
     memcpy(dest, src, queue->itemSize);
 
     // A barrier to keep the compiler from re-ordering the next line.
-    asm volatile("" ::: "memory");
+    __asm volatile("" ::: "memory");
 
     // Signal to any context wanting to dequeue this item that it's ready.
     queue->numItemsWaiting = queue->numSlotsClaimed;
@@ -49,10 +53,14 @@ bool enqueueBack(queue_t *queue, void *src)
 
 bool enqueueFront(queue_t *queue, void *src)
 {
+  bool success = false;
+  return success;
 }
 
 bool peekFront(queue_t *queue, void *result)
 {
+  bool success = false;
+  return success;
 }
 
 bool dequeueFront(queue_t *queue, void *result)
@@ -80,12 +88,16 @@ bool dequeueFront(queue_t *queue, void *result)
 
 bool dequeueBack(queue_t *queue, void *result)
 {
+  bool success = false;
+  return success;
 }
 
 uint32_t numItemsInQueue(queue_t *queue)
 {
+  return queue->numItemsWaiting;
 }
 
 uint32_t emptySpacesInQueue(queue_t *queue)
 {
+  return queue->maxNumItems - queue->numSlotsClaimed;
 }

@@ -11,7 +11,7 @@
  */
 inline static void disableLowPriorityInterrupts( uint32_t leastDisabledNVIC_prio )
 {
-	asm volatile
+	__asm volatile
 	(
 		"	msr basepri, %0								\n" \
 		"	isb														\n" \

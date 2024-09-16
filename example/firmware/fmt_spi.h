@@ -4,8 +4,11 @@
 #include "fmt_types.h"
 
 #define HEADER_SIZE_BYTES 4U
-#define BUFFER_SIZE_BYTES 64U
-#define PAYLOAD_SIZE_BYTES (BUFFER_SIZE_BYTES - HEADER_SIZE_BYTES)
+#define MAX_PACKET_SIZE_BYTES 64U // Must be less than 259; len sent in 1 byte.
+#define SEND_QUEUE_LENGTH 4U
+#define MAX_SENDER_PRIORITY 16U
+
+#define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - HEADER_SIZE_BYTES)
 
 // TODO: Abstract this away from XMC.
 typedef enum

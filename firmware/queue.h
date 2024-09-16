@@ -13,8 +13,9 @@ typedef struct
   uint8_t *items;
 } queue_t;
 
-bool initQueue(
-    size_t itemSize, uint32_t length, queue_t *queue, uint8_t *itemsStore);
+void initQueue(
+    size_t itemSize, uint32_t length, queue_t *queue, uint8_t *itemsStore, 
+    uint32_t highestSenderPriority);
 
 bool enqueueBack(queue_t *queue, void *src);
 

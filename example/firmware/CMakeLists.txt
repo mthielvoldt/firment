@@ -39,6 +39,7 @@ add_executable(${EXECUTABLE}
   generated/mcu_1.pb.c
   fmt_spi.c
   fmt_types.c
+  ../../firmware/queue.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   ${XMC_LIB}/xmc4_gpio.c
@@ -58,6 +59,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}/config/XMC4700_Relax_Kit
   ${NANOPB}
+  ../../firmware
 )
 
 
