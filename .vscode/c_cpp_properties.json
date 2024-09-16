@@ -26,7 +26,8 @@
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/cores",
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700",
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700/config/XMC4700_Relax_Kit",
-            "protocol/nanopb"
+            "protocol/nanopb", 
+            "firmware"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
@@ -57,6 +58,19 @@
           "cppStandard": "c++11",
           "defines": [
               "XMC4700_F144x2048"
+          ]
+        },
+        {
+          "name": "host-lin",
+          "compilerPath": "/urs/bin/gcc",
+          "compilerArgs": [],
+          "intelliSenseMode": "linux-gcc-x64",
+          "includePath": [
+          ],
+          "forcedInclude": [],
+          "cStandard": "c11",
+          "cppStandard": "c++11",
+          "defines": [
           ]
         }
     ]
