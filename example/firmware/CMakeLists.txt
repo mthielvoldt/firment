@@ -41,6 +41,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/fmt_types.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
+  ../../firmware/fmt_hardfault.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   ${XMC_LIB}/xmc4_gpio.c
