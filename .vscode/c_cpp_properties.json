@@ -62,7 +62,7 @@
         },
         {
           "name": "host-lin",
-          "compilerPath": "/urs/bin/gcc",
+          "compilerPath": "/usr/bin/gcc",
           "compilerArgs": [],
           "intelliSenseMode": "linux-gcc-x64",
           "includePath": [

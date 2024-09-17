@@ -37,12 +37,12 @@ void initNVIC()
 
   XMC_CCU4_Init(module, XMC_CCU4_SLICE_MCMS_ACTION_TRANSFER_PR_CR);
   XMC_CCU4_SLICE_CompareInit(slice, &compareCfg);
+  XMC_CCU4_SLICE_SetPrescaler(slice, XMC_CCU4_SLICE_PRESCALER_1024);
   XMC_CCU4_SLICE_SetTimerPeriodMatch(slice, period);
   XMC_CCU4_SetModuleClock(module, XMC_CCU4_CLOCK_SCU);
 
+  // Trigger CCU40_0_IRQHandler() on Period match event.
   XMC_CCU4_SLICE_EnableEvent(slice, XMC_CCU4_SLICE_IRQ_ID_PERIOD_MATCH);
-
-  // what is an sr id (0-3)?
   XMC_CCU4_SLICE_SetInterruptNode(
       slice, XMC_CCU4_SLICE_IRQ_ID_PERIOD_MATCH, XMC_CCU4_SLICE_SR_ID_0);
 
@@ -52,7 +52,6 @@ void initNVIC()
   // kick it off.
   XMC_CCU4_EnableClock(module, 0);
   XMC_CCU4_EnableShadowTransfer(module, XMC_CCU4_SHADOW_TRANSFER_SLICE_0);
-  XMC_CCU4_SLICE_SetPrescaler(slice, XMC_CCU4_SLICE_PRESCALER_1024);
   XMC_CCU4_SLICE_StartTimer(slice);
 }
 
