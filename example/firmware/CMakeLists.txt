@@ -45,6 +45,7 @@ add_executable(${EXECUTABLE}
   ${XMC_LIB}/xmc4_gpio.c
   ${XMC_LIB}/xmc_spi.c
   ${XMC_LIB}/xmc_usic.c
+  ${XMC_LIB}/xmc_ccu4.c
   ${XMC_LIB}/xmc4_scu.c
   ${NANOPB}/pb_encode.c
   ${NANOPB}/pb_decode.c

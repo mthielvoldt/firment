@@ -82,6 +82,12 @@ bool dequeueFront(queue_t *queue, void *result)
 
     if (++queue->front == queue->maxNumItems)
       queue->front = 0;
+    
+    // A barrier to keep the compiler from re-ordering the next line.
+    __asm volatile("" ::: "memory");
+    // And, finally, mark this slot as free for writing.  This must be last so
+    // enqueue doesn't start writing this last slot before we're done. 
+    queue->numSlotsClaimed--;
   }
   return success;
 }

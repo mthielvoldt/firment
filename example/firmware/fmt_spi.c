@@ -23,7 +23,7 @@ bool initFirment_spi(void)
   7:  MISO
   8:  MOSI
   9:  SCK
-  10: CS
+  10: CS: USIC2_CH0.SELO0 (ALT1 output)
   */
   const XMC_SPI_CH_CONFIG_t config = {
       .baudrate = 1000000,
@@ -33,6 +33,8 @@ bool initFirment_spi(void)
       .parity_mode = XMC_USIC_CH_PARITY_MODE_NONE,
   };
   XMC_USIC_CH_t *const channel = XMC_USIC2_CH0;
+  XMC_SPI_CH_SLAVE_SELECT_t sub = XMC_SPI_CH_SLAVE_SELECT_0;
+
   XMC_GPIO_CONFIG_t spiOutPinConfig = {
       .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1,
       .output_level = XMC_GPIO_OUTPUT_LEVEL_HIGH,
@@ -54,14 +56,23 @@ bool initFirment_spi(void)
   const bool initBrg = true; // Automatically configure the baudrate generator.
 
   XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
-  XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
+  // No longer needed as it's under USIC control. 
+  // XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
 
-  XMC_SPI_CH_InitEx(channel, &config, initBrg);
+  XMC_SPI_CH_InitEx(channel, &config, initBrg); // first among XMC_SPI calls.
   XMC_SPI_CH_SetWordLength(channel, spi20Pins.word_length);
   XMC_SPI_CH_SetFrameLength(channel, spi20Pins.frame_length);
   XMC_SPI_CH_SetInputSource(
       spi20Pins.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)spi20Pins.input_source);
   XMC_SPI_CH_SetBitOrderLsbFirst(channel);
+
+  /** MSLS master slave select. 
+   * SELCFG block: supports SELOx output signals.
+   * - Direct select mode = connect each SELOx line to sub device.
+   *   - a SELOx output pin driven by MSLS signal if PCR.SELOx is 1. 
+   * PCR.SELCTR: choose direct or coded select mode
+  */
+  XMC_SPI_CH_EnableSlaveSelect(channel, sub);
 
   // Configure the FIFO
 
@@ -81,6 +92,9 @@ bool initFirment_spi(void)
       (XMC_GPIO_PORT_t *)spi20Pins.mosi.port,
       (uint8_t)spi20Pins.mosi.pin,
       &spiOutPinConfig);
+
+  /* Pin under USIC control as ALT1 output */
+  XMC_GPIO_Init(espSelect.port, espSelect.pin, &spiOutPinConfig);
 
   initQueue(
       MAX_PACKET_SIZE_BYTES, 
