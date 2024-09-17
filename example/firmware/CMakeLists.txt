@@ -37,8 +37,8 @@ add_executable(${EXECUTABLE}
   spi_example.c
   example_comms.c
   generated/mcu_1.pb.c
-  fmt_spi.c
-  fmt_types.c
+  ../../firmware/fmt_spi.c
+  ../../firmware/fmt_types.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
   ${XMC_SYSTEM_FILE}
@@ -62,6 +62,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC-for-Arduino/variants/${XMC_VARIANT}/config/XMC4700_Relax_Kit
   ${NANOPB}
   ../../firmware
+  .
 )
 
 
