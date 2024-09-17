@@ -7,6 +7,8 @@
           "compilerArgs": [],
           "intelliSenseMode": "gcc-arm",
           "includePath": [
+            "example/firmware", 
+            "firmware",
             "esp/mqtt5/build/config",
             "../esp-idf/components/esp_driver_gpio/include",
             "../esp-idf/components/esp_driver_spi/include/**",
@@ -26,8 +28,7 @@
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/cores",
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700",
             "${workspaceFolder}/example/firmware/lib/XMC-for-Arduino/variants/XMC4700/config/XMC4700_Relax_Kit",
-            "protocol/nanopb", 
-            "firmware"
+            "protocol/nanopb"
           ],
           "forcedInclude": [],
           "cStandard": "c11",

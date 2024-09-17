@@ -7,8 +7,8 @@
 #include "XMC4700.h"
 #endif
 
-#include "fmt_spi.h"
-#include "port/fmt_periodic_xmc.h"
+#include <fmt_spi.h>
+#include <port/fmt_periodic_xmc.h>
 #include "example_comms.h"
 
 #define periodicA CCU40_0_IRQHandler
