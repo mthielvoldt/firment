@@ -50,7 +50,7 @@ bool initFirment_spi(void)
       .miso_config = {.mode = XMC_GPIO_MODE_INPUT_TRISTATE},
       .input_source = USIC_INPUT_C,
       .word_length = 16,
-      .frame_length = 32,
+      .frame_length = 16,
   };
 
   const bool initBrg = true; // Automatically configure the baudrate generator.
