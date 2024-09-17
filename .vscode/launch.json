@@ -9,7 +9,7 @@
       "executable": "example/firmware/build/xmc/spi_example.elf",
       "interface": "swd",
       "device": "XMC4700-2048",
-      "preLaunchTask": "",
+      "preLaunchTask": "cmake build xmc",
       "svdFile": "",
       "showDevDebugOutput": "raw",
       // "runToEntryPoint": "main"
@@ -37,7 +37,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "C/C++: arm-none-eabi-gcc build active file",
+      "preLaunchTask": "arm-none-eabi-gcc active file",
       "miDebuggerPath": "gdb"
     }
   ],
