@@ -5,104 +5,84 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
-// TODO: write this block in init.
-static XMC_USIC_CH_t *const channel = XMC_USIC2_CH0;
-static portPin_t ledPin = {.port = XMC_GPIO_PORT0, .pin = 13U};
-static portPin_t espSelect = {.port = XMC_GPIO_PORT3, .pin = 10U};
-
 // Initialize with the start sequence in header.
-
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
 
-// TODO: take in board parameters from caller.
-bool initFirment_spi(void)
+// optimization: stop storing the config.
+static portPin_t led = {};
+static XMC_USIC_CH_t *channel = NULL;
+
+// Private Declarations
+static void initSpiGpio(spiCfg_t cfg);
+
+bool initFirment_spi(spiCfg_t cfg)
 {
-  // TODO: generalize this to any processor.
-  /* Port 3, pins:
-  7:  MISO
-  8:  MOSI
-  9:  SCK
-  10: CS: USIC2_CH0.SELO0 (ALT1 output)
-  */
-  const XMC_SPI_CH_CONFIG_t config = {
-      .baudrate = 1000000,
-      .normal_divider_mode = true,
-      .bus_mode = XMC_SPI_CH_BUS_MODE_MASTER,
-      .selo_inversion = XMC_SPI_CH_SLAVE_SEL_INV_TO_MSLS,
-      .parity_mode = XMC_USIC_CH_PARITY_MODE_NONE,
-  };
-  XMC_USIC_CH_t *const channel = XMC_USIC2_CH0;
-  XMC_SPI_CH_SLAVE_SELECT_t sub = XMC_SPI_CH_SLAVE_SELECT_0;
-
-  XMC_GPIO_CONFIG_t spiOutPinConfig = {
-      .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1,
-      .output_level = XMC_GPIO_OUTPUT_LEVEL_HIGH,
-      .output_strength = XMC_GPIO_OUTPUT_STRENGTH_MEDIUM,
-  };
-
-  spiChannel_t spi20Pins = {
-      .channel = channel,
-      .channel_config = config,
-      .mosi = {.port = XMC_GPIO_PORT3, .pin = 8U},
-      .miso = {.port = XMC_GPIO_PORT3, .pin = 7U},
-      .sclkout = {.port = XMC_GPIO_PORT3, .pin = 9U},
-      .miso_config = {.mode = XMC_GPIO_MODE_INPUT_TRISTATE},
-      .input_source = USIC_INPUT_C,
-      .word_length = 16,
-      .frame_length = 16,
-  };
-
   const bool initBrg = true; // Automatically configure the baudrate generator.
+  led = cfg.led;
+  channel = cfg.channel;
 
-  XMC_GPIO_Init(ledPin.port, ledPin.pin, &gpOutPinConfig);
-  // No longer needed as it's under USIC control. 
-  // XMC_GPIO_Init(espSelect.port, espSelect.pin, &gpOutPinConfig);
-
-  XMC_SPI_CH_InitEx(channel, &config, initBrg); // first among XMC_SPI calls.
-  XMC_SPI_CH_SetWordLength(channel, spi20Pins.word_length);
-  XMC_SPI_CH_SetFrameLength(channel, spi20Pins.frame_length);
+  // InitEx() must come first among XMC_SPI calls as subsequent "Set" functions
+  // replace the defaults set by InitEx.
+  XMC_SPI_CH_InitEx(cfg.channel, &cfg.channel_config, initBrg);
+  XMC_SPI_CH_SetWordLength(cfg.channel, cfg.word_length);
+  XMC_SPI_CH_SetFrameLength(cfg.channel, cfg.frame_length);
   XMC_SPI_CH_SetInputSource(
-      spi20Pins.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)spi20Pins.input_source);
-  XMC_SPI_CH_SetBitOrderLsbFirst(channel);
+      cfg.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)cfg.input_source);
+  XMC_SPI_CH_SetBitOrderLsbFirst(cfg.channel);
 
-  /** MSLS master slave select. 
+  /** MSLS master slave select.
    * SELCFG block: supports SELOx output signals.
    * - Direct select mode = connect each SELOx line to sub device.
-   *   - a SELOx output pin driven by MSLS signal if PCR.SELOx is 1. 
+   *   - a SELOx output pin driven by MSLS signal if PCR.SELOx is 1.
    * PCR.SELCTR: choose direct or coded select mode
-  */
-  XMC_SPI_CH_EnableSlaveSelect(channel, sub);
+   */
+  XMC_SPI_CH_EnableSlaveSelect(cfg.channel, cfg.sub);
 
-  // Configure the FIFO
+  // Rig up interrupt
+  XMC_SPI_CH_SelectInterruptNodePointer(
+      cfg.channel,
+      XMC_SPI_CH_INTERRUPT_NODE_POINTER_TRANSMIT_BUFFER,
+      cfg.serviceRequest);
+  XMC_SPI_CH_EnableEvent(cfg.channel, XMC_SPI_CH_EVENT_TRANSMIT_BUFFER);
+  NVIC_SetPriority(cfg.IRQn, cfg.priority);
+  NVIC_EnableIRQ(cfg.IRQn);
 
-  XMC_SPI_CH_Start(channel);
-  /* Initialize SPI SCLK out pin */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)spi20Pins.sclkout.port,
-      (uint8_t)spi20Pins.sclkout.pin,
-      &spiOutPinConfig);
-  /* Configure the input pin properties */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)spi20Pins.miso.port,
-      (uint8_t)spi20Pins.miso.pin,
-      &(spi20Pins.miso_config));
-  /* Configure the output pin properties */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)spi20Pins.mosi.port,
-      (uint8_t)spi20Pins.mosi.pin,
-      &spiOutPinConfig);
+  XMC_SPI_CH_Start(cfg.channel);
 
-  /* Pin under USIC control as ALT1 output */
-  XMC_GPIO_Init(espSelect.port, espSelect.pin, &spiOutPinConfig);
+  initSpiGpio(cfg);
 
   initQueue(
-      MAX_PACKET_SIZE_BYTES, 
-      SEND_QUEUE_LENGTH, 
-      &sendQueue, 
+      MAX_PACKET_SIZE_BYTES,
+      SEND_QUEUE_LENGTH,
+      &sendQueue,
       sendQueueStore,
       MAX_SENDER_PRIORITY);
   return true;
+}
+
+static void initSpiGpio(spiCfg_t cfg)
+{
+
+  XMC_GPIO_Init(cfg.led.port, cfg.led.pin, &gpOutPinConfig);
+  /* Initialize SPI SCLK out pin */
+  XMC_GPIO_Init(
+      (XMC_GPIO_PORT_t *)cfg.sclk.port,
+      (uint8_t)cfg.sclk.pin,
+      &cfg.sclk.config);
+  /* Configure the input pin properties */
+  XMC_GPIO_Init(
+      (XMC_GPIO_PORT_t *)cfg.miso.port,
+      (uint8_t)cfg.miso.pin,
+      &(cfg.miso.config));
+  /* Configure the output pin properties */
+  XMC_GPIO_Init(
+      (XMC_GPIO_PORT_t *)cfg.mosi.port,
+      (uint8_t)cfg.mosi.pin,
+      &cfg.mosi.config);
+
+  /* Pin under USIC control as ALT1 output */
+  XMC_GPIO_Init(cfg.ss0.port, cfg.ss0.pin, &cfg.ss0.config);
 }
 
 bool sendMsg(Top message)
@@ -116,6 +96,9 @@ bool sendMsg(Top message)
   {
     txPacket[0] = ostream.bytes_written;
     enqueueBack(&sendQueue, txPacket);
+
+    // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
+    ISR_handleTx_spi();
   }
   else // message possibly bigger than PAYLOAD_SIZE_BYTES?
   {
@@ -133,8 +116,9 @@ void ISR_handleTx_spi(void)
   static uint_fast16_t currentPacketSize = 0;
   static uint_fast16_t bytesSent = 0;
 
-  // look for HW-ready flag
-  // check that there is stuff in the queue
+  /*
+  If we've finished transmitting the previous message, but there are still
+  messages in the queue, pull a new packet out of the queue and keep Txing. */
   if (bytesSent >= currentPacketSize)
   {
     if (dequeueFront(&sendQueue, txPacket))
@@ -142,28 +126,26 @@ void ISR_handleTx_spi(void)
       // dequeue successful.  Starting tx of new packet.
       currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
       bytesSent = 0;
-      XMC_GPIO_ToggleOutput(ledPin.port, ledPin.pin);
-      XMC_GPIO_SetOutputLow(espSelect.port, espSelect.pin);
+      XMC_GPIO_ToggleOutput(led.port, led.pin);
     }
   }
 
-  // passes packet size by 1 for odd-size packets.  That's ok. 
-  // MAX_PACKET_SIZE_BYTES is even, so we'll never reach past the buffer.
-
-  // Auto-cleared when data transfers from TXBUF to TX shift reg (in SSC?)
-  // auto-set when TXBUF is written to.  Making this the easiest!
-  #define TX_DATA_VALID (channel->TCSR & USIC_CH_TCSR_TDV_Msk)
-  #define TXBUF_INTERRUPT_FLAG (channel->PSR & USIC_CH_PSR_TBIF_Msk)
-
-  while (!TX_DATA_VALID && (bytesSent < currentPacketSize))
+  /*
+  We send 2 bytes at a time, so we Tx 1 extra byte for odd-size packets.
+  MAX_PACKET_SIZE_BYTES is even, so we'll never read past the buffer.
+  This Fn, being interrupt-driven, rapidly gets re-called until _Transmit() is
+  skipped, which only happens when sendQueue is empty. */
+  if (bytesSent < currentPacketSize)
   {
-    // channel->PSCR |= USIC_CH_PSCR_CTBIF_Msk;  // clear the TBIF.
+    /* The next line clears the Tx Buff Interrupt Flag (TBIF) so a new IRQ fires
+    as soon as Tx Buff is ready again for a new word.
+    It also blocks (spinlock) to wait for TBUF to become available in case it is
+    called before the Tx Buff is ready.  Note: this assumes one-shot mode*/
     XMC_SPI_CH_Transmit(
         channel, *(int16_t *)(txPacket + bytesSent), XMC_SPI_CH_MODE_STANDARD);
 
+    // Because the previous blocks until TBUF ready, we assume Tx happened.
     bytesSent += 2;
-
-    // XMC_GPIO_SetOutputHigh(espSelect.port, espSelect.pin);
   }
 }
 

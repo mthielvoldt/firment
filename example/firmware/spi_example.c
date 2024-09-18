@@ -14,10 +14,25 @@
 #define periodicA CCU40_0_IRQHandler
 #define periodicA_IRQn CCU40_0_IRQn
 #define periodicA_priority 30
+#define spiTxBuf_priority 25
+
+
+// Todo: specify size of SendQueue, and pass to initSpi().
+// Todo: specify HW resources for spi (channel, etc.)
 
 int main(void)
 {
-  initFirment_spi();
+  /* Port 3, pins:
+  7:  MISO
+  8:  MOSI
+  9:  SCK
+  10: CS: USIC2_CH0.SELO0 (ALT1 output)
+  */
+  spiCfg_t spiConfig = getDefaultSpiCfg();
+
+  spiConfig.priority = spiTxBuf_priority;
+
+  initFirment_spi(spiConfig);
   initPeriodicISR(
       CCU40,
       CCU40_CC40,
@@ -38,11 +53,16 @@ int main(void)
      *  -
      */
 
-    ISR_handleTx_spi();
+    // ISR_handleTx_spi();
   }
 }
 
 void periodicA()
 {
   genTelem_periodic();
+}
+
+void USIC2_0_IRQHandler(void)
+{
+  ISR_handleTx_spi();
 }
