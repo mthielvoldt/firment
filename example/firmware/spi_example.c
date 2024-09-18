@@ -41,11 +41,6 @@ int main(void)
       periodicA_IRQn,
       periodicA_priority);
 
-  NVIC_EnableIRQ(HardFault_IRQn);
-  NVIC_EnableIRQ(BusFault_IRQn);
-  NVIC_EnableIRQ(MemoryManagement_IRQn);
-  NVIC_EnableIRQ(UsageFault_IRQn);
-
   for (;;)
   {
     /** Do some intelligent housekeeping. For example:
@@ -53,7 +48,6 @@ int main(void)
      *  -
      */
 
-    // ISR_handleTx_spi();
   }
 }
 
