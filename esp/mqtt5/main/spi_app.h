@@ -5,7 +5,7 @@
 #define GPIO_MOSI 11
 #define GPIO_MISO 12
 #define GPIO_SCLK 13
-#define SPI_BUFFER_SZ_BYTES 8
+#define SPI_BUFFER_SZ_BYTES 8 // Double the size we expect (32 bits).
 #define MAX_TRANSACTION_LENGTH (SPI_BUFFER_SZ_BYTES * 8)
 #define SPI_QUEUE_LEN 12
 #define TARGET_TX_QUEUE_DEPTH 8
@@ -13,7 +13,7 @@
 // #define EXPECTED_VALUE 0x01248EDB 7FAA5566
 #define EXPECTED_VALUE 0x01378EDBu //24u
 
-#define EXPECTED_LEN 16
+#define EXPECTED_LEN 32
 
 // These are only used for testing SPI
 #define SAMPLES_PER_REPORT 5000

@@ -358,6 +358,14 @@ void app_main(void)
     {
       ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
     }
+    else if (ret == ESP_ERR_INVALID_SIZE)
+    {
+      ESP_LOGE(TAG, "invalid size error");
+    }
+    else
+    {
+      ESP_LOGE(TAG, "unknown error: %d", ret);
+    }
 
     if (msgReady)
     {
