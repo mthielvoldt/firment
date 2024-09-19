@@ -81,7 +81,7 @@ static inline spiCfg_t getDefaultSpiCfg(void)
       .led = {.port = XMC_GPIO_PORT0, .pin = 13U},
       .input_source = USIC_INPUT_C,
       .word_length = 16,
-      .frame_length = 16,
+      .frame_length = 32,
       .priority = 32,
   };
 }

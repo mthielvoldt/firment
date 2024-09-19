@@ -48,6 +48,10 @@ bool initFirment_spi(spiCfg_t cfg)
   NVIC_SetPriority(cfg.IRQn, cfg.priority);
   NVIC_EnableIRQ(cfg.IRQn);
 
+  // The second parameter passed in seems to have no effect. 
+  // The result of this call is that frames come in every 98us (with 64us gap).
+  // The ESP dropps full messages if this isn't enabled (with DMA on).
+  XMC_SPI_CH_SetInterwordDelay(cfg.channel, 2);
   XMC_SPI_CH_Start(cfg.channel);
 
   initSpiGpio(cfg);
@@ -124,7 +128,10 @@ void ISR_handleTx_spi(void)
     if (dequeueFront(&sendQueue, txPacket))
     {
       // dequeue successful.  Starting tx of new packet.
-      currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
+
+      // relying on integer division to truncate remainder.
+      uint32_t num4ByteFrames = (txPacket[0] + HEADER_SIZE_BYTES + 3) / 4;
+      currentPacketSize = num4ByteFrames * 4;
       bytesSent = 0;
       XMC_GPIO_ToggleOutput(led.port, led.pin);
     }
