@@ -21,6 +21,7 @@
 
 #define MAX_PAYLOAD_BYTES 60
 #define START_KEY 0xABCDEF00
+#define MSG_TIMEOUT_MS 2000
 
 static const char *TAG = "mqtt5_example";
 
@@ -348,14 +349,14 @@ void app_main(void)
     char pbMsg[MAX_PAYLOAD_BYTES];
     size_t msgLength;
     // drain the RX queue.
-    esp_err_t ret = waitForSpiRx(&wordFromSpi, 2000);
+    esp_err_t ret = waitForSpiRx(&wordFromSpi, MSG_TIMEOUT_MS);
     if (ret == ESP_OK)
     {
       msgReady = collateMessage(pbMsg, &msgLength, wordFromSpi);
     }
     else if (ret == ESP_ERR_TIMEOUT)
     {
-      printf("timed out 3000ms");
+      ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
     }
 
     if (msgReady)

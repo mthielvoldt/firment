@@ -13,7 +13,9 @@
 // #define EXPECTED_VALUE 0x01248EDB 7FAA5566
 #define EXPECTED_VALUE 0x01378EDBu //24u
 
-#define EXPECTED_LEN 32
+#define EXPECTED_LEN 16
+
+// These are only used for testing SPI
 #define SAMPLES_PER_REPORT 5000
 #define MAX_BAD_DAT_TO_STORE 10U
 
