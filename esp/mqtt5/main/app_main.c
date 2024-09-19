@@ -342,6 +342,8 @@ void app_main(void)
   ESP_ERROR_CHECK(example_connect());
 
   mqtt5_app_start();
+
+  unsigned int msgNum = 0;
   for (;;)
   {
     uint32_t wordFromSpi;
@@ -369,8 +371,13 @@ void app_main(void)
 
     if (msgReady)
     {
-      int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
-      ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
+      msgReady = false;
+      msgNum++;
+      // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
+      // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
+
+      ESP_LOGI(TAG, "msg: %u len: %d, %lx %lx %lx", msgNum, msgLength,
+               *(uint32_t *)&pbMsg[0], *(uint32_t *)&pbMsg[4], *(uint32_t *)&pbMsg[8]);
     }
     // vTaskDelay(pdMS_TO_TICKS(2000));
   }
@@ -404,8 +411,10 @@ bool collateMessage(char *msgBuffer, size_t *msgLength, uint32_t newWord)
     *(uint32_t *)(msgBuffer + bytesReceived) = newWord;
     bytesReceived += 4;
     if (bytesReceived >= *msgLength)
+    {
       state = WAITING_FOR_START_WORD;
-    msgReady = true;
+      msgReady = true;
+    }
   }
   return msgReady;
 }

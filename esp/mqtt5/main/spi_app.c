@@ -87,8 +87,8 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static char txBufs[SPI_BUFFER_SZ_BYTES][SPI_QUEUE_LEN] = {};
-static char rxBufs[SPI_BUFFER_SZ_BYTES][SPI_QUEUE_LEN] = {};
+static WORD_ALIGNED_ATTR char txBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {};
+static WORD_ALIGNED_ATTR char rxBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {};
 static spi_slave_transaction_t spiTransactions[SPI_QUEUE_LEN] = {};
 
 // Main application
@@ -100,8 +100,8 @@ esp_err_t initSpi(void)
   {
     spiTransactions[i] = (spi_slave_transaction_t){
         .length = MAX_TRANSACTION_LENGTH,
-        .rx_buffer = &rxBufs[0][i],
-        .tx_buffer = &txBufs[0][i],
+        .rx_buffer = &rxBufs + (i * SPI_BUFFER_SZ_BYTES),
+        .tx_buffer = &txBufs + (i * SPI_BUFFER_SZ_BYTES),
     };
   }
 
@@ -129,7 +129,7 @@ esp_err_t initSpi(void)
   // gpio_glitch_filter_enable(mosi_filter);
 
   // Initialize SPI slave interface
-  ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_DISABLED);
+  ret = spi_slave_initialize(RCV_HOST, &buscfg, &slvcfg, SPI_DMA_CH_AUTO);
 
   return ret;
 }
