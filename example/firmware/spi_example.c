@@ -10,6 +10,7 @@
 #include <fmt_spi.h>
 #include <port/fmt_periodic_xmc.h>
 #include "example_comms.h"
+#include "frequency.h"
 
 #define periodicA CCU40_0_IRQHandler
 #define periodicA_IRQn CCU40_0_IRQn
@@ -33,11 +34,13 @@ int main(void)
   spiConfig.priority = spiTxBuf_priority;
 
   initFirment_spi(spiConfig);
+
+  // Set periodicA to 1kHz frequency.
   initPeriodicISR(
       CCU40,
       CCU40_CC40,
-      XMC_CCU4_SLICE_PRESCALER_1024,
-      10000,
+      XMC_CCU4_SLICE_PRESCALER_128,
+      PRESCALE_128_TICKS_IN_1MS,
       periodicA_IRQn,
       periodicA_priority);
 
@@ -51,6 +54,7 @@ int main(void)
   }
 }
 
+// 1kHz
 void periodicA()
 {
   genTelem_periodic();
