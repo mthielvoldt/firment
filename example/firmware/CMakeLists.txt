@@ -30,18 +30,21 @@ endif()
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(XMC_LIB "lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src")
 set(NANOPB "../../protocol/nanopb")
-  
+
+link_libraries("-lm")
 # link_libraries("-lc -lm -lnosys")
 
 add_executable(${EXECUTABLE}
   spi_example.c
   example_comms.c
+  control.c
   generated/mcu_1.pb.c
   ../../firmware/fmt_spi.c
   ../../firmware/fmt_types.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
   ../../firmware/fmt_hardfault.c
+  ../../firmware/fmt_waveform.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   ${XMC_LIB}/xmc4_gpio.c

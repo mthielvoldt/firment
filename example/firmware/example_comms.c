@@ -14,10 +14,11 @@
  * - conditional-triggered alerts
  */
 #include "example_comms.h"
+#include "control.h"
 #include "fmt_spi.h"
 
 // This must be a power of 2.
-#define CALLS_PER_FULL_ROTATION 512U
+#define CALLS_PER_FULL_ROTATION 1024U
 
 void genTelem_periodic(void)
 {
@@ -28,12 +29,13 @@ void genTelem_periodic(void)
   {
   case 0:
   {
+    telem_t telem = ctl_getTelem();
     sendMsg((const Top){
         .which_sub = Top_WaveformTlm_tag,
         .sub = {
             .WaveformTlm = {
-                .currentMa = 5,
-                .voltageV = 4.3}}});
+                .currentMa = telem.currentMa,
+                .voltageV = telem.voltage}}});
     break;
   }
   case 20:

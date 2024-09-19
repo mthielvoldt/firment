@@ -9,6 +9,7 @@
 
 #include <fmt_spi.h>
 #include <port/fmt_periodic_xmc.h>
+#include "control.h"
 #include "example_comms.h"
 #include "frequency.h"
 
@@ -44,6 +45,8 @@ int main(void)
       periodicA_IRQn,
       periodicA_priority);
 
+  ctl_init(WAVE_UPDATE_FREQ);
+
   for (;;)
   {
     /** Do some intelligent housekeeping. For example:
@@ -58,6 +61,7 @@ int main(void)
 void periodicA()
 {
   genTelem_periodic();
+  ctl_updateVoltageISR();
 }
 
 void USIC2_0_IRQHandler(void)
