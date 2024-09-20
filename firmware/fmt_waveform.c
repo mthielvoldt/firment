@@ -47,6 +47,7 @@ void wave_setPhase(wave_t *wave, float phaseRad)
     // neg. example: floor(-7/(2pi)) = -2.  -7 - (-2 * 2pi) = 5.56. (in range)
     phaseRad -= floorf(phaseRad / TWO_PI) * TWO_PI;
   }
+  wave->phase = phaseRad;
 }
 
 float wave_getValue(wave_t *wave)
