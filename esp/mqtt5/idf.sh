@@ -7,4 +7,5 @@ docker run \
   -u $UID \
   -e HOME=/tmp \
   -e ESPPORT=rfc2217://host.docker.internal:4000?ign_set_control \
+  --add-host host.docker.internal:host-gateway \
   espressif/idf:v5.2.1
