@@ -4,6 +4,3 @@
 [submodule "protocol/nanopb"]
 	path = protocol/nanopb
 	url = https://github.com/nanopb/nanopb.git
-[submodule "example/firmware/lib/XMC-for-Arduino"]
-	path = example/firmware/lib/XMC-for-Arduino
-	url = https://github.com/Infineon/XMC-for-Arduino.git

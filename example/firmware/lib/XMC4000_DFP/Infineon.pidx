@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<index schemaVersion="1.1.0" xs:noNamespaceSchemaLocation="PackIndex.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+  <vendor>Infineon</vendor>
+  <url>http://dave.infineon.com/Libraries/CMSIS_PACK/</url>
+  <timestamp>2017-08-07T04:01:10.2976828+00:00</timestamp>
+  <pindex>
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.9.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.8.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.7.1" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.7.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.6.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.5.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.4.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.3.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.2.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.1.1" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.1.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.0.1" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="2.0.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="1.5.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC4000_DFP" version="1.0.2" />
+
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.7.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.6.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.5.1" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.4.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.3.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.2.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.1.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="2.0.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="1.6.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="1.5.2" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="1.5.1" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="1.5.0" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="XMC1000_DFP" version="1.0.2" />
+
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="TLE987x_DFP" version="1.3.2" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="TLE987x_DFP" version="1.2.4" />
+
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="TLE986x_DFP" version="1.3.2" />
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="TLE986x_DFP" version="1.2.4" />
+
+    <pdsc url="http://dave.infineon.com/Libraries/CMSIS_PACK/" vendor="Infineon" name="TLE984x_DFP" version="1.0.0" />
+  </pindex>
+</index>
