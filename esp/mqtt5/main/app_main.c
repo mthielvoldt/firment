@@ -373,7 +373,7 @@ void app_main(void)
     {
       msgReady = false;
       msgNum++;
-      int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
+      // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
       // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
 
       ESP_LOGI(TAG, "msg: %u len: %d, %lx %lx %lx", msgNum, msgLength,
