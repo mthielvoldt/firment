@@ -9,8 +9,9 @@ The ESP wifi bridge code is intended to work as-is without user modification, bu
 *Note:* this requires you to install Espressif's fork of OpenOCD on your host (dev) machine, which is additional to the Esp-idf docker container and RFC2217 python script that are required for flashing and monitoring the ESP32S3.  The IDF install includes this, so if you opted to install IDF on your host (not use the container) you already have this.  If, like me, you've been avoiding that, proceed.
 
 ## Installing OpenOCD
-ESP maintains a fork of the OpenOCD project [here](https://github.com/espressif/openocd-esp32).  Clone this to get the .cfg files you need. 
-Download the appropriate pre-build binary from [Releases](https://github.com/espressif/openocd-esp32/releases) for your system and extract it.
+1. ESP maintains a fork of the OpenOCD project [here](https://github.com/espressif/openocd-esp32).  Clone this to get the .cfg files you need. 
+2. Download the appropriate pre-build binary from [Releases](https://github.com/espressif/openocd-esp32/releases) for your system and extract it.
+3. [Configure USB Drivers](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/jtag-debugging/configure-builtin-jtag.html#configure-usb-drivers) Add the file: `openocd-esp32/contrib/60-openocd.rules` to your `/etc/udev/rules.d` (linux)
 
 ### To Launch OpenOCD
 1. plug in your ESP32S3 Dev kit using the left USB-C port (with USB conectors at the bottom).
