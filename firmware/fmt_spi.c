@@ -18,13 +18,12 @@ static void initSpiGpio(spiCfg_t cfg);
 
 bool initFirment_spi(spiCfg_t cfg)
 {
-  const bool initBrg = true; // Automatically configure the baudrate generator.
   led = cfg.led;
   channel = cfg.channel;
 
   // InitEx() must come first among XMC_SPI calls as subsequent "Set" functions
   // replace the defaults set by InitEx.
-  XMC_SPI_CH_InitEx(cfg.channel, &cfg.channel_config, initBrg);
+  XMC_SPI_CH_Init(cfg.channel, &cfg.channel_config);
   XMC_SPI_CH_SetWordLength(cfg.channel, cfg.word_length);
   XMC_SPI_CH_SetFrameLength(cfg.channel, cfg.frame_length);
   XMC_SPI_CH_SetInputSource(

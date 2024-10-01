@@ -17,13 +17,15 @@ set(CMAKE_C_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
 
 set(XMC_VARIANT "XMC4700")
-add_compile_definitions(XMC4700_F144x2048)
+set(XMC_SPEED_VARIANT "F144")
+set(XMC_MEM_VARIANT "2048")
+add_compile_definitions(${XMC_VARIANT}_${XMC_SPEED_VARIANT}x${XMC_MEM_VARIANT})
 # add_compile_definitions(XMC4400_F100x512)
 
-set(XMC_DIR "lib/XMC-for-Arduino/variants/${XMC_VARIANT}")
-set(XMC_STARTUP_FILE "${XMC_DIR}/startup_${XMC_VARIANT}.S")
-set(XMC_SYSTEM_FILE "${XMC_DIR}/system_${XMC_VARIANT}.c")
-set(XMC_LINKER_FILE "${PROJECT_SOURCE_DIR}/lib/XMC-for-Arduino/variants/${XMC_VARIANT}/linker_script.ld")
+set(XMC_DIR "lib/XMC4000_DFP/Device/${XMC_VARIANT}_series")
+set(XMC_STARTUP_FILE "${XMC_DIR}/Source/GCC/startup_${XMC_VARIANT}.S")
+set(XMC_SYSTEM_FILE  "${XMC_DIR}/Source/system_${XMC_VARIANT}.c")
+set(XMC_LINKER_FILE  "${PROJECT_SOURCE_DIR}/${XMC_DIR}/Source/GCC/${XMC_VARIANT}x${XMC_MEM_VARIANT}.ld")
 
 
 # Path to pass to the compiler in the --sysroot flag.

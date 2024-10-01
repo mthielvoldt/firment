@@ -16,7 +16,7 @@ add_compile_options(
 )
 
 # target_sources()
-set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
+# set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
 # set_property(SOURCE
 #   lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/xmc_common_gcc.S
 #   PROPERTY LANGUAGE ASM
@@ -28,7 +28,7 @@ if(DEFINED XMC_LINKER_FILE)
 endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
-set(XMC_LIB "lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src")
+set(XMC_LIB "lib/XMC4000_DFP/Device/XMClib/src")
 set(NANOPB "../../protocol/nanopb")
 
 link_libraries("-lm")
@@ -58,12 +58,9 @@ add_executable(${EXECUTABLE}
 )
 
 target_include_directories(${EXECUTABLE} PRIVATE
-  lib/XMC-for-Arduino/libraries/SPI/src
-  lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/inc
-  lib/XMC-for-Arduino/cores/xmc_lib/CMSIS/Include
-  lib/XMC-for-Arduino/cores
-  lib/XMC-for-Arduino/variants/${XMC_VARIANT}
-  lib/XMC-for-Arduino/variants/${XMC_VARIANT}/config/XMC4700_Relax_Kit
+  lib/XMC4000_DFP/Device/XMClib/inc
+  lib/XMC4000_DFP/Device/XMC4700_series/Include
+  lib/CMSIS-6.1.0/Core/Include
   ${NANOPB}
   ../../firmware
   .

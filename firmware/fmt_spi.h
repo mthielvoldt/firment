@@ -64,7 +64,6 @@ static inline spiCfg_t getDefaultSpiCfg(void)
       .serviceRequest = 0,
       .channel_config = {
           .baudrate = 1000000,
-          .normal_divider_mode = true,
           .bus_mode = XMC_SPI_CH_BUS_MODE_MASTER,
           .selo_inversion = XMC_SPI_CH_SLAVE_SEL_INV_TO_MSLS,
           .parity_mode = XMC_USIC_CH_PARITY_MODE_NONE,

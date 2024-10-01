@@ -4,3 +4,6 @@ The Infineon libraries used can be found at https://github.com/Infineon/cmsis_pa
 These libraries have been hand-stripped to only those files relevant to:
 - XMC4700F144-2048 device
 - GCC
+
+## Building Firmware
+`source build-xmc.sh`
