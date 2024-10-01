@@ -7,6 +7,7 @@ An opinionated firmware framework that uses web interfaces to ease development a
 - Facilitate end-to-end testing early in the project to exercise and stabilize interfaces.
 - Make a reasonable effort to containerize tools.
 - Be declarative about messages; generate message-handling code.
+- Use existing abstractions (CMSIS) to generalize this project.
 
 ## Firment-assisted workflow
 1. Start services:
@@ -31,8 +32,13 @@ An opinionated firmware framework that uses web interfaces to ease development a
 ## Required Hardware
 Firment's main job is to help you build a web interface to your firmware, which we assume runs on hardware without Wifi/ethernet modules.  To bridge the target <-> web gap, Firment generates code for an [ESP32 dev kit](https://www.amazon.com/dp/B0CNGF6S3F) to shuttle data between your target hardware (SPI, UART, CAN) and MQTT over Wifi.
 
-# Setting Up for Development
+## Integrating Firment
+### CMSIS Drivers
+Firment firmware is middleware that expects a CMSIS driver under it.  To integrate CMSIS Drivers in your project: 
+- Download the [CMSIS pack](https://www.keil.arm.com/packs/) for your processor and add the relevant include folders / c files to CMakeLists.txt.  Often you only need a few of the folders in a pack. See `example/firmware/lib`
+- Download [CMSIS Driver headers](https://github.com/ARM-software/CMSIS_6/tree/main/CMSIS/Driver/Include) and add to your include paths.
 
+# Setting Up for Development
 Currently we're using [this development board](https://mischianti.org/vcc-gnd-studio-yd-esp32-s3-devkitc-1-clone-high-resolution-pinout-and-specs/)
 
 ## Installing Dependencies
