@@ -54,6 +54,7 @@
 #ifndef __RTE_DEVICE_H
 #define __RTE_DEVICE_H
 
+#include "RTE_ProjectConfig.h"
 #include "xmc_device.h"
 #include "xmc4_gpio_map.h"
 #include "xmc4_usic_map.h"
@@ -67,10 +68,7 @@
 
 // <e> CAN0 (Controller area network) [Driver_CAN0]
 // <i> Configuration settings for Driver_CAN0 in component ::Drivers:CAN
-#define RTE_CAN0                      0
-
 //   <o> CAN0 TX Pin <0=>P0_0 <1=>P1_4 <2=>P2_0 <3=>P3_2 <4=>P3_10
-#define RTE_CAN0_TX_ID                0
 #if    (RTE_CAN0_TX_ID == 0)
 #define RTE_CAN0_TX_PORT              P0_0
 #define RTE_CAN0_TX_AF                P0_0_AF_CAN_N0_TXD
@@ -91,7 +89,6 @@
 #endif
 
 //   <o> CAN0 RX Pin <0=>P1_5 <1=>P3_12 <2=>P14_3
-#define RTE_CAN0_RX_ID                0
 #if    (RTE_CAN0_RX_ID == 0)
 #define RTE_CAN0_RX_PORT              P1_5
 #define RTE_CAN0_RX_INPUT             CAN_NODE0_RXD_P1_5
@@ -108,10 +105,7 @@
 
 // <e> CAN1 (Controller area network) [Driver_CAN1]
 // <i> Configuration settings for Driver_CAN1 in component ::Drivers:CAN
-#define RTE_CAN1                      0
-
 //   <o> CAN1 TX Pin <0=>P1_5 <1=>P1_12 <2=>P2_7 <3=>P3_9
-#define RTE_CAN1_TX_ID                0
 #if    (RTE_CAN1_TX_ID == 0)
 #define RTE_CAN1_TX_PORT              P1_5
 #define RTE_CAN1_TX_AF                P1_5_AF_CAN_N1_TXD
@@ -129,7 +123,6 @@
 #endif
 
 //   <o> CAN1 RX Pin <0=>P1_4 <1=>P1_13 <2=>P2_6 <3=>P3_11
-#define RTE_CAN1_RX_ID                0
 #if    (RTE_CAN1_RX_ID == 0)
 #define RTE_CAN1_RX_PORT              P1_4
 #define RTE_CAN1_RX_INPUT             CAN_NODE1_RXD_P1_4
@@ -149,10 +142,7 @@
 
 // <e> CAN2 (Controller area network) [Driver_CAN2]
 // <i> Configuration settings for Driver_CAN2 in component ::Drivers:CAN
-#define RTE_CAN2                      0
-
 //   <o> CAN2 TX Pin <0=>P1_9 <1=>P3_7 <2=>P4_7
-#define RTE_CAN2_TX_ID                0
 #if    (RTE_CAN2_TX_ID == 0)
 #define RTE_CAN2_TX_PORT              P1_9
 #define RTE_CAN2_TX_AF                P1_9_AF_CAN_N2_TXD
@@ -167,7 +157,6 @@
 #endif
 
 //   <o> CAN2 RX Pin <0=>P1_8 <1=>P3_8 <2=>P4_6
-#define RTE_CAN2_RX_ID                0
 #if    (RTE_CAN2_RX_ID == 0)
 #define RTE_CAN2_RX_PORT              P1_8
 #define RTE_CAN2_RX_INPUT             CAN_NODE2_RXD_P1_8
@@ -184,10 +173,7 @@
 
 // <e> CAN3 (Controller area network) [Driver_CAN3]
 // <i> Configuration settings for Driver_CAN3 in component ::Drivers:CAN
-#define RTE_CAN3                      0
-
 //   <o> CAN3 TX Pin <0=>P4_0 <1=>P6_5
-#define RTE_CAN3_TX_ID                0
 #if    (RTE_CAN3_TX_ID == 0)
 #define RTE_CAN3_TX_PORT              P4_0
 #define RTE_CAN3_TX_AF                P4_0_AF_CAN_N3_TXD
@@ -199,7 +185,6 @@
 #endif
 
 //   <o> CAN3 RX Pin <0=>P0_8 <1=>P6_6
-#define RTE_CAN3_RX_ID                0
 #if    (RTE_CAN3_RX_ID == 0)
 #define RTE_CAN3_RX_PORT              P0_8
 #define RTE_CAN3_RX_INPUT             CAN_NODE3_RXD_P0_8
@@ -213,10 +198,7 @@
 
 // <e> CAN4 (Controller area network) [Driver_CAN4]
 // <i> Configuration settings for Driver_CAN4 in component ::Drivers:CAN
-#define RTE_CAN4                      0
-
 //   <o> CAN4 TX Pin <0=>P2_14 <1=>P5_8
-#define RTE_CAN4_TX_ID                0
 #if    (RTE_CAN4_TX_ID == 0)
 #define RTE_CAN4_TX_PORT              P2_14
 #define RTE_CAN4_TX_AF                P2_14_AF_CAN_N4_TXD
@@ -228,7 +210,6 @@
 #endif
 
 //   <o> CAN4 RX Pin <0=>P2_15 <2=>P14_4
-#define RTE_CAN4_RX_ID                0
 #if    (RTE_CAN4_RX_ID == 0)
 #define RTE_CAN4_RX_PORT              P2_15
 #define RTE_CAN4_RX_INPUT             CAN_NODE4_RXD_P2_15
@@ -242,10 +223,7 @@
 
 // <e> CAN5 (Controller area network) [Driver_CAN5]
 // <i> Configuration settings for Driver_CAN5 in component ::Drivers:CAN
-#define RTE_CAN5                      0
-
 //   <o> CAN5 TX Pin <0=>P2_1 <1=>P5_11
-#define RTE_CAN5_TX_ID                0
 #if    (RTE_CAN5_TX_ID == 0)
 #define RTE_CAN5_TX_PORT              P2_1
 #define RTE_CAN5_TX_AF                P2_1_AF_CAN_N5_TXD
@@ -257,7 +235,6 @@
 #endif
 
 //   <o> CAN5 RX Pin <0=>P2_6 <1=>P5_10
-#define RTE_CAN5_RX_ID                0
 #if    (RTE_CAN5_RX_ID == 0)
 #define RTE_CAN5_RX_PORT              P2_6
 #define RTE_CAN5_RX_INPUT             CAN_NODE5_RXD_P2_6
@@ -271,10 +248,7 @@
 
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:UART
-#define RTE_UART0                      0
-
 //   <o> UART0_TX Pin <0=>P1_5 <1=>P1_7 <2=>P5_1
-#define RTE_UART0_TX_ID                0
 #if    (RTE_UART0_TX_ID == 0)
 #define RTE_UART0_TX_PORT              P1_5
 #define RTE_UART0_TX_AF                P1_5_AF_U0C0_DOUT0
@@ -289,7 +263,6 @@
 #endif
 
 //   <o> UART0_RX Pin <0=>P1_4 <1=>P1_5 <2=>P4_7 <3=>P5_0
-#define RTE_UART0_RX_ID                0
 #if    (RTE_UART0_RX_ID == 0)
 #define RTE_UART0_RX_PORT              P1_4
 #define RTE_UART0_RX_INPUT             USIC0_C0_DX0_P1_4
@@ -307,7 +280,6 @@
 #endif
 
 //   <o> UART0_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART0_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART0_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART0_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART0_RX_FIFO_SIZE_NUM     0
@@ -331,7 +303,6 @@
 #endif
 
 //   <o> UART0_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32 
-#define RTE_UART0_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART0_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART0_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART0_TX_FIFO_SIZE_NUM     0
@@ -357,10 +328,7 @@
 
 // <e> UART1 (Universal asynchronous receiver transmitter) [Driver_USART1]
 // <i> Configuration settings for Driver_USART1 in component ::Drivers:UART
-#define RTE_UART1                      0
-
 //   <o> UART1_TX Pin <0=>P2_5 <1=>P3_5 <2=>P3_13 <3=>P6_4
-#define RTE_UART1_TX_ID                0
 #if    (RTE_UART1_TX_ID == 0)
 #define RTE_UART1_TX_PORT              P2_5
 #define RTE_UART1_TX_AF                P2_5_AF_U0C1_DOUT0
@@ -378,7 +346,6 @@
 #endif
 
 //   <o> UART1_RX Pin <0=>P2_2 <1=>P2_5 <2=>P3_13 <3=>P4_0 <4=>P6_3
-#define RTE_UART1_RX_ID                0
 #if    (RTE_UART1_RX_ID == 0)
 #define RTE_UART1_RX_PORT              P2_2
 #define RTE_UART1_RX_INPUT             USIC0_C1_DX0_P2_2
@@ -399,7 +366,6 @@
 #endif
 
 //   <o> UART1_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART1_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART1_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART1_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART1_RX_FIFO_SIZE_NUM     0
@@ -423,7 +389,6 @@
 #endif
 
 //   <o> UART1_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32 
-#define RTE_UART1_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART1_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART1_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART1_TX_FIFO_SIZE_NUM     0
@@ -448,10 +413,7 @@
 //</e>
 // <e> UART2 (Universal asynchronous receiver transmitter) [Driver_USART2]
 // <i> Configuration settings for Driver_USART2 in component ::Drivers:UART
-#define RTE_UART2                      0
-
 //   <o> UART2_TX Pin <0=>P0_5 <1=>P1_15 <2=>P2_14
-#define RTE_UART2_TX_ID                0
 #if    (RTE_UART2_TX_ID == 0)
 #define RTE_UART2_TX_PORT              P0_5
 #define RTE_UART2_TX_AF                P0_5_AF_U1C0_DOUT0
@@ -466,7 +428,6 @@
 #endif
 
 //   <o> UART2_RX Pin <0=>P0_4 <1=>P0_5 <2=>P1_14 <3=>P2_14 <4=>P2_15
-#define RTE_UART2_RX_ID                0
 #if    (RTE_UART2_RX_ID == 0)
 #define RTE_UART2_RX_PORT              P0_4
 #define RTE_UART2_RX_INPUT             USIC1_C0_DX0_P0_4
@@ -487,7 +448,6 @@
 #endif
 
 //   <o> UART2_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART2_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART2_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART2_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART2_RX_FIFO_SIZE_NUM     0
@@ -511,7 +471,6 @@
 #endif
 
 //   <o> UART2_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32 
-#define RTE_UART2_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART2_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART2_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART2_TX_FIFO_SIZE_NUM     0
@@ -536,10 +495,7 @@
 //</e>
 // <e> UART3 (Universal asynchronous receiver transmitter) [Driver_USART3]
 // <i> Configuration settings for Driver_USART3 in component ::Drivers:UART
-#define RTE_UART3                      0
-
 //   <o> UART3_TX Pin <0=>P0_1 <1=>P1_9 <2=>P3_15 <3=>P4_2
-#define RTE_UART3_TX_ID                0
 #if    (RTE_UART3_TX_ID == 0)
 #define RTE_UART3_TX_PORT              P0_1
 #define RTE_UART3_TX_AF                P0_1_AF_U1C1_DOUT0
@@ -557,7 +513,6 @@
 #endif
 
 //   <o> UART3_RX Pin  <0=>P0_0 <1=>P3_14 <2=>P3_15 <3=>P4_2
-#define RTE_UART3_RX_ID                0
 #if    (RTE_UART3_RX_ID == 0)
 #define RTE_UART3_RX_PORT              P0_0
 #define RTE_UART3_RX_INPUT             USIC1_C1_DX0_P0_0
@@ -575,7 +530,6 @@
 #endif
 
 //   <o> UART3_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART3_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART3_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART3_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART3_RX_FIFO_SIZE_NUM     0
@@ -599,7 +553,6 @@
 #endif
 
 //   <o> UART3_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART3_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART3_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART3_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART3_TX_FIFO_SIZE_NUM     0
@@ -625,10 +578,7 @@
 //</e>
 // <e> UART4 (Universal asynchronous receiver transmitter) [Driver_USART4]
 // <i> Configuration settings for Driver_USART4 in component ::Drivers:UART
-#define RTE_UART4                      0
-
 //   <o> UART4_TX Pin <0=>P3_8 <1=>P5_0 <2=>P6_6
-#define RTE_UART4_TX_ID                0
 #if    (RTE_UART4_TX_ID == 0)
 #define RTE_UART4_TX_PORT              P3_8
 #define RTE_UART4_TX_AF                P3_8_AF_U2C0_DOUT0
@@ -643,7 +593,6 @@
 #endif
 
 //   <o> UART4_RX Pin <0=>P3_7 <1=>P5_0 <2=>P5_1 <3=>P6_5
-#define RTE_UART4_RX_ID                0
 #if    (RTE_UART4_RX_ID == 0)
 #define RTE_UART4_RX_PORT              P3_7
 #define RTE_UART4_RX_INPUT             USIC2_C0_DX0_P3_7
@@ -661,7 +610,6 @@
 #endif
 
 //   <o> UART4_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART4_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART4_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART4_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART4_RX_FIFO_SIZE_NUM     0
@@ -685,7 +633,6 @@
 #endif
 
 //   <o> UART4_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART4_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART4_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART4_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART4_TX_FIFO_SIZE_NUM     0
@@ -710,10 +657,7 @@
 //</e>
 // <e> UART5 (Universal asynchronous receiver transmitter) [Driver_USART5]
 // <i> Configuration settings for Driver_USART5 in component ::Drivers:UART
-#define RTE_UART5                      0
-
 //   <o> UART5_TX Pin <0=>P3_5 <1=>P3_11 <2=>P4_7
-#define RTE_UART5_TX_ID                0
 #if    (RTE_UART5_TX_ID == 0)
 #define RTE_UART5_TX_PORT              P3_5
 #define RTE_UART5_TX_AF                P3_5_AF_U2C1_DOUT0
@@ -728,7 +672,6 @@
 #endif
 
 //   <o> UART5_RX Pin <0=>P3_4 <1=>P3_5 <2=>P3_12 <3=>P4_0 <4=>P4_6
-#define RTE_UART5_RX_ID                0
 #if    (RTE_UART5_RX_ID == 0)
 #define RTE_UART5_RX_PORT              P3_4
 #define RTE_UART5_RX_INPUT             USIC2_C1_DX0_P3_4
@@ -749,7 +692,6 @@
 #endif
 
 //   <o> UART5_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART5_RX_FIFO_SIZE_ID                4
 #if    (RTE_UART5_RX_FIFO_SIZE_ID == 0)
 #define RTE_UART5_RX_FIFO_SIZE         NO_FIFO
 #define RTE_UART5_RX_FIFO_SIZE_NUM     0
@@ -773,7 +715,6 @@
 #endif
 
 //   <o> UART5_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_UART5_TX_FIFO_SIZE_ID                4
 #if    (RTE_UART5_TX_FIFO_SIZE_ID == 0)
 #define RTE_UART5_TX_FIFO_SIZE         NO_FIFO
 #define RTE_UART5_TX_FIFO_SIZE_NUM     0
@@ -799,10 +740,7 @@
 
 // <e> SPI0 (Serial peripheral interface) [Driver_SPI0]
 // <i> Configuration settings for Driver_SPI0 in component ::Drivers:SPI
-#define RTE_SPI0                      0
-
 //   <o> SPI0 TX: MOSI(master) MISO(slave) Pin <0=>P1_5 <1=>P1_7 <2=>P5_1
-#define RTE_SPI0_TX_ID                0
 #if    (RTE_SPI0_TX_ID == 0)
 #define RTE_SPI0_TX_PORT              P1_5
 #define RTE_SPI0_TX_AF                P1_5_AF_U0C0_DOUT0
@@ -817,7 +755,6 @@
 #endif
 
 //   <o> SPI0 RX MISO(master) MOSI(slave) Pin <0=>P1_4 <1=>P1_5 <2=>P4_7 <3=>P5_0
-#define RTE_SPI0_RX_ID                0
 #if    (RTE_SPI0_RX_ID == 0)
 #define RTE_SPI0_RX_PORT              P1_4
 #define RTE_SPI0_RX_INPUT             USIC0_C0_DX0_P1_4
@@ -835,7 +772,6 @@
 #endif
 
 //   <o> SPI0_CLK OUTPUT Pin <0=>P0_8 <1=>P1_1 <2=>P1_6 <3=>P1_9 <4=>P1_10
-#define RTE_SPI0_CLK_OUTPUT_ID                0
 #if    (RTE_SPI0_CLK_OUTPUT_ID == 0)
 #define RTE_SPI0_CLK_OUTPUT_PORT              P0_8
 #define RTE_SPI0_CLK_AF                       P0_8_AF_U0C0_SCLKOUT 
@@ -858,9 +794,7 @@
 // <h> SPI0_SLAVE SELECT Pins 
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI0_SLAVE_SELECT_LINE0 0
 //   <o> SPI0_SLAVE SELECT LINE 0 Pin <0=>P0_7 <1=>P1_0 <2=>P1_11
-#define RTE_SPI0_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_0_PORT              P0_7
 #define RTE_SPI0_SLAVE_SELECT_LINE_0_AF                P0_7_AF_U0C0_SELO0
@@ -877,9 +811,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI0_SLAVE_SELECT_LINE1 0 
 //   <o> SPI0_SLAVE SELECT LINE 1 Pin <0=>P1_8
-#define RTE_SPI0_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_1_PORT              P1_8
 #define RTE_SPI0_SLAVE_SELECT_LINE_1_AF                P1_8_AF_U0C0_SELO1
@@ -890,9 +822,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI0_SLAVE_SELECT_LINE2 0
 //   <o> SPI0_SLAVE SELECT LINE 2 Pin <0=>P4_6
-#define RTE_SPI0_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_2_PORT              P4_6
 #define RTE_SPI0_SLAVE_SELECT_LINE_2_AF                P4_6_AF_U0C0_SELO2
@@ -903,9 +833,7 @@
 
 // <e> SLAVE SELECT LINE 3
 // <i> Enable slave select line 3
-#define RTE_SPI0_SLAVE_SELECT_LINE3 0
 //   <o> SPI0_SLAVE SELECT LINE 3 Pin <0=>P4_5
-#define RTE_SPI0_SLAVE_SELECT_LINE_3_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_3_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_3_PORT              P4_5
 #define RTE_SPI0_SLAVE_SELECT_LINE_3_AF                P4_5_AF_U0C0_SELO3
@@ -916,9 +844,7 @@
 
 // <e> SLAVE SELECT LINE 4
 // <i> Enable slave select line 4
-#define RTE_SPI0_SLAVE_SELECT_LINE4 0
 //   <o> SPI0_SLAVE SELECT LINE 4 Pin <0=>P4_4
-#define RTE_SPI0_SLAVE_SELECT_LINE_4_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_4_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_4_PORT              P4_4
 #define RTE_SPI0_SLAVE_SELECT_LINE_4_AF                P4_4_AF_U0C0_SELO4
@@ -929,9 +855,7 @@
 
 // <e> SLAVE SELECT LINE 5
 // <i> Enable slave select line 5
-#define RTE_SPI0_SLAVE_SELECT_LINE5 0
 // <o> SPI0_SLAVE SELECT LINE 5 Pin <0=>P4_3
-#define RTE_SPI0_SLAVE_SELECT_LINE_5_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_LINE_5_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_LINE_5_PORT              P4_3
 #define RTE_SPI0_SLAVE_SELECT_LINE_5_AF                P4_3_AF_U0C0_SELO5
@@ -942,7 +866,6 @@
 // </h>
 
 //   <o> SPI0_CLK INPUT Pin <0=>P0_8 <1=>P1_1
-#define RTE_SPI0_CLK_INPUT_ID                0
 #if    (RTE_SPI0_CLK_INPUT_ID == 0)
 #define RTE_SPI0_CLK_INPUT_PORT              P0_8
 #define RTE_SPI0_CLK_INPUT                   USIC0_C0_DX1_P0_8
@@ -954,7 +877,6 @@
 #endif
 
 //   <o> RTE_SPI0_SLAVE_SELECT INPUT Pin <0=>P0_7 <1=>P1_0
-#define RTE_SPI0_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI0_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI0_SLAVE_SELECT_INPUT_PORT              P0_7
 #define RTE_SPI0_SLAVE_SELECT_INPUT                   USIC0_C0_DX2_P0_7
@@ -966,7 +888,6 @@
 #endif
 
 //   <o> SPI0_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI0_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI0_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI0_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI0_RX_FIFO_SIZE_NUM     0
@@ -990,7 +911,6 @@
 #endif
 
 //   <o> SPI0_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI0_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI0_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI0_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI0_TX_FIFO_SIZE_NUM     0
@@ -1016,10 +936,7 @@
 
 // <e> SPI1 (Serial peripheral interface) [Driver_SPI1]
 // <i> Configuration settings for Driver_SPI1 in component ::Drivers:SPI
-#define RTE_SPI1                      0
-
 //   <o> SPI1 TX MOSI(master) MISO(slave) Pin <0=>P2_5 <1=>P3_5 <2=>P3_13 <3=>P6_4
-#define RTE_SPI1_TX_ID                0
 #if    (RTE_SPI1_TX_ID == 0)
 #define RTE_SPI1_TX_PORT              P2_5
 #define RTE_SPI1_TX_AF                P2_5_AF_U0C1_DOUT0
@@ -1037,7 +954,6 @@
 #endif
 
 //   <o> SPI1 RX MISO(master) MOSI(slave) Pin <0=>P2_2 <1=>P2_5 <2=>P3_13 <3=>P4_0 <4=>P6_3
-#define RTE_SPI1_RX_ID                0
 #if    (RTE_SPI1_RX_ID == 0)
 #define RTE_SPI1_RX_PORT              P2_2
 #define RTE_SPI1_RX_INPUT             USIC0_C1_DX0_P2_2
@@ -1059,7 +975,6 @@
 
 
 //   <o> SPI1_CLK OUTPUT Pin <0=>P2_4 <1=>P3_0 <2=>P3_6 <3=>P6_2
-#define RTE_SPI1_CLK_OUTPUT_ID                0
 #if    (RTE_SPI1_CLK_OUTPUT_ID == 0)
 #define RTE_SPI1_CLK_OUTPUT_PORT              P2_4
 #define RTE_SPI1_CLK_AF                       P2_4_AF_U0C1_SCLKOUT
@@ -1079,9 +994,7 @@
 // <h> SPI1_SLAVE SELECT Pins
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI1_SLAVE_SELECT_LINE0 0
 //   <o> SPI1_SLAVE SELECT LINE 0 Pin <0=>P2_3 <1=>P3_1 <2=>P4_1 <3=>P6_1
-#define RTE_SPI1_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI1_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI1_SLAVE_SELECT_LINE_0_PORT              P2_3
 #define RTE_SPI1_SLAVE_SELECT_LINE_0_AF                P2_3_AF_U0C1_SELO0
@@ -1101,9 +1014,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI1_SLAVE_SELECT_LINE1 0
 //   <o> SPI1_SLAVE SELECT LINE 1 Pin <0=>P3_12 <1=>P6_0
-#define RTE_SPI1_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI1_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI1_SLAVE_SELECT_LINE_1_PORT              P3_12
 #define RTE_SPI1_SLAVE_SELECT_LINE_1_AF                P3_12_AF_U0C1_SELO1
@@ -1117,9 +1028,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI1_SLAVE_SELECT_LINE2 0
 //   <o> SPI1_SLAVE SELECT LINE 2 Pin <0=>P1_14  <1=>P3_11
-#define RTE_SPI1_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI1_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI1_SLAVE_SELECT_LINE_2_PORT              P1_14
 #define RTE_SPI1_SLAVE_SELECT_LINE_2_AF                P1_14_AF_U0C1_SELO2
@@ -1133,9 +1042,7 @@
 
 // <e> SLAVE SELECT LINE 3
 // <i> Enable slave select line 3
-#define RTE_SPI1_SLAVE_SELECT_LINE3 0
 //   <o> SPI1_SLAVE SELECT LINE 3 Pin <0=>P1_13 <1=>P3_8
-#define RTE_SPI1_SLAVE_SELECT_LINE_3_ID                0
 #if    (RTE_SPI1_SLAVE_SELECT_LINE_3_ID == 0)
 #define RTE_SPI1_SLAVE_SELECT_LINE_3_PORT              P1_13
 #define RTE_SPI1_SLAVE_SELECT_LINE_3_AF                P1_13_AF_U0C1_SELO3
@@ -1149,7 +1056,6 @@
 // </h>
 
 //   <o> SPI1_CLK INPUT Pin <0=>P2_4 <1=>P3_0 <2=>P6_2 
-#define RTE_SPI1_CLK_INPUT_ID                0
 #if    (RTE_SPI1_CLK_INPUT_ID == 0)
 #define RTE_SPI1_CLK_INPUT_PORT              P2_4
 #define RTE_SPI1_CLK_INPUT                   USIC0_C1_DX1_P2_4
@@ -1164,7 +1070,6 @@
 #endif
 
 //   <o> RTE_SPI1_SLAVE_SELECT INPUT Pin <0=>P2_3 <1=>P3_1 <2=>P6_1
-#define RTE_SPI1_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI1_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI1_SLAVE_SELECT_INPUT_PORT              P2_3
 #define RTE_SPI1_SLAVE_SELECT_INPUT                   USIC0_C1_DX2_P2_3
@@ -1179,7 +1084,6 @@
 #endif
 
 //   <o> SPI1_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI1_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI1_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI1_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI1_RX_FIFO_SIZE_NUM     0
@@ -1203,7 +1107,6 @@
 #endif
 
 //   <o> SPI1_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI1_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI1_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI1_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI1_TX_FIFO_SIZE_NUM     0
@@ -1229,10 +1132,7 @@
 
 // <e> SPI2 (Serial peripheral interface) [Driver_SPI2]
 // <i> Configuration settings for Driver_SPI2 in component ::Drivers:SPI
-#define RTE_SPI2                      0
-
 //   <o> SPI2 TX MOSI(master) MISO(slave) Pin <0=>P0_5 <1=>P1_15 <2=>P2_14
-#define RTE_SPI2_TX_ID                0
 #if    (RTE_SPI2_TX_ID == 0)
 #define RTE_SPI2_TX_PORT              P0_5
 #define RTE_SPI2_TX_AF                P0_5_AF_U1C0_DOUT0
@@ -1247,7 +1147,6 @@
 #endif
 
 //   <o> SPI2 RX MISO(master) MOSI(slave) Pin <0=>P0_4 <1=>P0_5 <2=>P1_14 <3=>P2_14 <4=>P2_15
-#define RTE_SPI2_RX_ID                0
 #if    (RTE_SPI2_RX_ID == 0)
 #define RTE_SPI2_RX_PORT              P0_4
 #define RTE_SPI2_RX_INPUT             USIC1_C0_DX0_P0_4
@@ -1268,7 +1167,6 @@
 #endif
 
 //   <o> SPI2_CLK OUTPUT Pin <0=>P0_11 <1=>P4_0 <2=>P5_8
-#define RTE_SPI2_CLK_OUTPUT_ID                0
 #if    (RTE_SPI2_CLK_OUTPUT_ID == 0)
 #define RTE_SPI2_CLK_OUTPUT_PORT              P0_11
 #define RTE_SPI2_CLK_AF                       P0_11_AF_U1C0_SCLKOUT
@@ -1285,9 +1183,7 @@
 //   <h> SPI2_SLAVE SELECT Pins 
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI2_SLAVE_SELECT_LINE0 0
 //   <o> SPI2_SLAVE SELECT LINE 0 Pin <0=>P0_6 <1=>P5_9
-#define RTE_SPI2_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI2_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI2_SLAVE_SELECT_LINE_0_PORT              P0_6
 #define RTE_SPI2_SLAVE_SELECT_LINE_0_AF                P0_6_AF_U1C0_SELO0
@@ -1301,9 +1197,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI2_SLAVE_SELECT_LINE1 0
 //   <o> SPI2_SLAVE SELECT LINE 1 Pin <0=>P0_14 <1=>P5_11
-#define RTE_SPI2_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI2_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI2_SLAVE_SELECT_LINE_1_PORT              P0_14
 #define RTE_SPI2_SLAVE_SELECT_LINE_1_AF                P0_14_AF_U1C0_SELO1
@@ -1317,9 +1211,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI2_SLAVE_SELECT_LINE2 0
 //   <o> SPI2_SLAVE SELECT LINE 2 Pin <0=>P0_15
-#define RTE_SPI2_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI2_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI2_SLAVE_SELECT_LINE_2_PORT              P0_15
 #define RTE_SPI2_SLAVE_SELECT_LINE_2_AF                P0_15_AF_U1C0_SELO2
@@ -1329,9 +1221,7 @@
 // </e>
 // <e> SLAVE SELECT LINE 3
 // <i> Enable slave select line 3
-#define RTE_SPI2_SLAVE_SELECT_LINE3 0
 //   <o> SPI2_SLAVE SELECT LINE 3 Pin <0=>P3_14
-#define RTE_SPI2_SLAVE_SELECT_LINE_3_ID                0
 #if    (RTE_SPI2_SLAVE_SELECT_LINE_3_ID == 0)
 #define RTE_SPI2_SLAVE_SELECT_LINE_3_PORT              P3_14
 #define RTE_SPI2_SLAVE_SELECT_LINE_3_AF                P3_14_AF_U1C0_SELO3
@@ -1342,7 +1232,6 @@
 // </h>
 
 //   <o> SPI2_CLK INPUT Pin <0=>P0_11 <1=>P5_8
-#define RTE_SPI2_CLK_INPUT_ID                0
 #if    (RTE_SPI2_CLK_INPUT_ID == 0)
 #define RTE_SPI2_CLK_INPUT_PORT              P0_11
 #define RTE_SPI2_CLK_INPUT                   USIC1_C0_DX1_P0_11
@@ -1354,7 +1243,6 @@
 #endif
 
 //   <o> RTE_SPI2_SLAVE_SELECT INPUT Pin <0=>P0_6 <1=>P5_9
-#define RTE_SPI2_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI2_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI2_SLAVE_SELECT_INPUT_PORT              P0_6
 #define RTE_SPI2_SLAVE_SELECT_INPUT                   USIC1_C0_DX2_P0_6
@@ -1366,7 +1254,6 @@
 #endif
 
 //   <o> SPI2_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI2_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI2_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI2_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI2_RX_FIFO_SIZE_NUM     0
@@ -1390,7 +1277,6 @@
 #endif
 
 //   <o> SPI2_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI2_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI2_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI2_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI2_TX_FIFO_SIZE_NUM     0
@@ -1415,10 +1301,7 @@
 //</e>
 // <e> SPI3 (Serial peripheral interface) [Driver_SPI3]
 // <i> Configuration settings for Driver_SPI3 in component ::Drivers:SPI
-#define RTE_SPI3                      0
-
 //   <o> SPI3 TX MOSI(master) MISO(slave) Pin <0=>P0_1 <1=>P1_9 <2=>P3_15 <3=>P4_2
-#define RTE_SPI3_TX_ID                0
 #if    (RTE_SPI3_TX_ID == 0)
 #define RTE_SPI3_TX_PORT              P0_1
 #define RTE_SPI3_TX_AF                P0_1_AF_U1C1_DOUT0
@@ -1436,7 +1319,6 @@
 #endif
 
 //   <o> SPI3 RX MISO(master) MOSI(slave)Pin <0=>P0_0 <1=>P3_14 <2=>P3_15 <3=>P4_2 
-#define RTE_SPI3_RX_ID                0
 #if    (RTE_SPI3_RX_ID == 0)
 #define RTE_SPI3_RX_PORT              P0_0
 #define RTE_SPI3_RX_INPUT             USIC1_C1_DX0_P0_0
@@ -1454,7 +1336,6 @@
 #endif
 
 //   <o> SPI3_CLK OUTPUT Pin <0=>P0_10 <1=>P0_13 <2=>P1_8
-#define RTE_SPI3_CLK_OUTPUT_ID                0
 #if    (RTE_SPI3_CLK_OUTPUT_ID == 0)
 #define RTE_SPI3_CLK_OUTPUT_PORT              P0_10
 #define RTE_SPI3_CLK_AF                       P0_10_AF_U1C1_SCLKOUT
@@ -1471,9 +1352,7 @@
 //   <h> SPI3_SLAVE SELECT Pins 
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI3_SLAVE_SELECT_LINE0 0
 //   <o> SPI3_SLAVE SELECT LINE 0 Pin <0=>P0_9 <1=>P0_12
-#define RTE_SPI3_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_LINE_0_PORT              P0_9
 #define RTE_SPI3_SLAVE_SELECT_LINE_0_AF                P0_9_AF_U1C1_SELO0
@@ -1487,9 +1366,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI3_SLAVE_SELECT_LINE1 0
 //   <o> SPI3_SLAVE SELECT LINE 1 Pin <0=>P0_2 <1=>P3_3
-#define RTE_SPI3_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_LINE_1_PORT              P0_2
 #define RTE_SPI3_SLAVE_SELECT_LINE_1_AF                P0_2_AF_U1C1_SELO1
@@ -1503,9 +1380,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI3_SLAVE_SELECT_LINE2 0
 //   <o> SPI3_SLAVE SELECT LINE 2 Pin <0=>P3_4
-#define RTE_SPI3_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_LINE_2_PORT              P3_4
 #define RTE_SPI3_SLAVE_SELECT_LINE_2_AF                P3_4_AF_U1C1_SELO2
@@ -1516,9 +1391,7 @@
 
 // <e> SLAVE SELECT LINE 3
 // <i> Enable slave select line 3
-#define RTE_SPI3_SLAVE_SELECT_LINE3 0
 //   <o> SPI3_SLAVE SELECT LINE 3 Pin <0=>P3_5
-#define RTE_SPI3_SLAVE_SELECT_LINE_3_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_LINE_3_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_LINE_3_PORT              P3_5
 #define RTE_SPI3_SLAVE_SELECT_LINE_3_AF                P3_5_AF_U1C1_SELO3
@@ -1529,9 +1402,7 @@
 
 // <e> SLAVE SELECT LINE 4
 // <i> Enable slave select line 4
-#define RTE_SPI3_SLAVE_SELECT_LINE4 0
 //   <o> SPI3_SLAVE SELECT LINE 4 Pin <0=>P3_6
-#define RTE_SPI3_SLAVE_SELECT_LINE_4_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_LINE_4_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_LINE_4_PORT              P3_6
 #define RTE_SPI3_SLAVE_SELECT_LINE_4_AF                P3_6_AF_U1C1_SELO4
@@ -1542,7 +1413,6 @@
 // </h>
 
 //   <o> SPI3_CLK INPUT Pin <0=>P0_10 <1=>P0_13 <2=>P4_0
-#define RTE_SPI3_CLK_INPUT_ID                0
 #if    (RTE_SPI3_CLK_INPUT_ID == 0)
 #define RTE_SPI3_CLK_INPUT_PORT              P0_10
 #define RTE_SPI3_CLK_INPUT                   USIC1_C1_DX1_P0_10
@@ -1557,7 +1427,6 @@
 #endif
 
 //   <o> RTE_SPI3_SLAVE_SELECT INPUT Pin <0=>P0_9 <1=>P0_12
-#define RTE_SPI3_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI3_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI3_SLAVE_SELECT_INPUT_PORT              P0_9
 #define RTE_SPI3_SLAVE_SELECT_INPUT                   USIC1_C1_DX2_P0_9
@@ -1569,7 +1438,6 @@
 #endif
 
 //   <o> SPI3_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI3_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI3_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI3_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI3_RX_FIFO_SIZE_NUM     0
@@ -1593,7 +1461,6 @@
 #endif
 
 //   <o> SPI3_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI3_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI3_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI3_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI3_TX_FIFO_SIZE_NUM     0
@@ -1619,10 +1486,7 @@
 //</e>
 // <e> SPI4 (Serial peripheral interface) [Driver_SPI4]
 // <i> Configuration settings for Driver_SPI4 in component ::Drivers:SPI
-#define RTE_SPI4                      1
-
 //   <o> SPI4 TX MOSI(master) MISO(slave) Pin <0=>P3_8 <1=>P5_0 <2=>P6_6
-#define RTE_SPI4_TX_ID                0
 #if    (RTE_SPI4_TX_ID == 0)
 #define RTE_SPI4_TX_PORT              P3_8
 #define RTE_SPI4_TX_AF                P3_8_AF_U2C0_DOUT0
@@ -1637,7 +1501,6 @@
 #endif
 
 //   <o> SPI4 RX MISO(master) MOSI(slave) Pin <0=>P3_7 <1=>P5_0 <2=>P5_1 <3=>P6_5
-#define RTE_SPI4_RX_ID                0
 #if    (RTE_SPI4_RX_ID == 0)
 #define RTE_SPI4_RX_PORT              P3_7
 #define RTE_SPI4_RX_INPUT             USIC2_C0_DX0_P3_7
@@ -1655,7 +1518,6 @@
 #endif
 
 //   <o> SPI4_CLK OUTPUT Pin <0=>P3_9 <1=>P5_2
-#define RTE_SPI4_CLK_OUTPUT_ID                0
 #if    (RTE_SPI4_CLK_OUTPUT_ID == 0)
 #define RTE_SPI4_CLK_OUTPUT_PORT              P3_9
 #define RTE_SPI4_CLK_AF                       P3_9_AF_U2C0_SCLKOUT
@@ -1669,9 +1531,7 @@
 //   <h> SPI4_SLAVE SELECT Pins 
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI4_SLAVE_SELECT_LINE0 0
 //   <o> SPI4_SLAVE SELECT LINE 0 Pin <0=>P3_10 <1=>P5_3
-#define RTE_SPI4_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_LINE_0_PORT              P3_10
 #define RTE_SPI4_SLAVE_SELECT_LINE_0_AF                P3_10_AF_U2C0_SELO0
@@ -1685,9 +1545,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI4_SLAVE_SELECT_LINE1 0
 //   <o> SPI4_SLAVE SELECT LINE 1 Pin <0=>P5_4
-#define RTE_SPI4_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_LINE_1_PORT              P5_4
 #define RTE_SPI4_SLAVE_SELECT_LINE_1_AF                P5_4_AF_U2C0_SELO1
@@ -1698,9 +1556,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI4_SLAVE_SELECT_LINE2 0
 //   <o> SPI4_SLAVE SELECT LINE 2 Pin <0=>P5_5
-#define RTE_SPI4_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_LINE_2_PORT              P5_5
 #define RTE_SPI4_SLAVE_SELECT_LINE_2_AF                P5_5_AF_U2C0_SELO2
@@ -1711,9 +1567,7 @@
 
 // <e> SLAVE SELECT LINE 3
 // <i> Enable slave select line 3
-#define RTE_SPI4_SLAVE_SELECT_LINE3 0
 //   <o> SPI4_SLAVE SELECT LINE 3 Pin <0=>P5_6
-#define RTE_SPI4_SLAVE_SELECT_LINE_3_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_LINE_3_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_LINE_3_PORT              P5_6
 #define RTE_SPI4_SLAVE_SELECT_LINE_3_AF                P5_6_AF_U2C0_SELO3
@@ -1724,9 +1578,7 @@
 
 // <e> SLAVE SELECT LINE 4
 // <i> Enable slave select line 4
-#define RTE_SPI4_SLAVE_SELECT_LINE4 0
 //   <o> SPI4_SLAVE SELECT LINE 4 Pin <0=>P2_6
-#define RTE_SPI4_SLAVE_SELECT_LINE_4_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_LINE_4_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_LINE_4_PORT              P2_6
 #define RTE_SPI4_SLAVE_SELECT_LINE_4_AF                P2_6_AF_U2C0_SELO4
@@ -1737,7 +1589,6 @@
 // </h>
 
 //   <o> SPI4_CLK INPUT Pin <0=>P5_2
-#define RTE_SPI4_CLK_INPUT_ID                0
 #if    (RTE_SPI4_CLK_INPUT_ID == 0)
 #define RTE_SPI4_CLK_INPUT_PORT              P5_2
 #define RTE_SPI4_CLK_INPUT                   USIC2_C0_DX1_P5_2
@@ -1746,7 +1597,6 @@
 #endif
 
 //   <o> RTE_SPI4_SLAVE_SELECT INPUT Pin <0=>P5_3
-#define RTE_SPI4_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI4_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI4_SLAVE_SELECT_INPUT_PORT              P5_3
 #define RTE_SPI4_SLAVE_SELECT_INPUT                   USIC2_C0_DX2_P5_3
@@ -1755,7 +1605,6 @@
 #endif
 
 //   <o> SPI4_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI4_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI4_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI4_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI4_RX_FIFO_SIZE_NUM     0
@@ -1779,7 +1628,6 @@
 #endif
 
 //   <o> SPI4_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI4_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI4_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI4_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI4_TX_FIFO_SIZE_NUM     0
@@ -1806,10 +1654,7 @@
 
 // <e> SPI5 (Serial peripheral interface) [Driver_SPI5]
 // <i> Configuration settings for Driver_SPI5 in component ::Drivers:SPI
-#define RTE_SPI5                      0
-
 //   <o> SPI5 TX MOSI(master) MISO(slave)Pin <0=>P3_5 <1=>P3_11 <2=>P4_7
-#define RTE_SPI5_TX_ID                0
 #if    (RTE_SPI5_TX_ID == 0)
 #define RTE_SPI5_TX_PORT              P3_5
 #define RTE_SPI5_TX_AF                P3_5_AF_U2C1_DOUT0
@@ -1824,7 +1669,6 @@
 #endif
 
 //   <o> SPI5 RX MISO(master) MOSI(slave) <0=>P3_4 <1=>P3_5 <2=>P3_12 <3=>P4_0 <4=>P4_6
-#define RTE_SPI5_RX_ID                0
 #if    (RTE_SPI5_RX_ID == 0)
 #define RTE_SPI5_RX_PORT              P3_4
 #define RTE_SPI5_RX_INPUT             USIC2_C1_DX0_P3_4
@@ -1845,7 +1689,6 @@
 #endif
 
 //   <o> SPI5_CLK OUTPUT Pin <0=>P3_6 <1=>P3_13 <2=>P4_2
-#define RTE_SPI5_CLK_OUTPUT_ID                0
 #if    (RTE_SPI5_CLK_OUTPUT_ID == 0)
 #define RTE_SPI5_CLK_OUTPUT_PORT              P3_6
 #define RTE_SPI5_CLK_AF                       P3_6_AF_U2C1_SCLKOUT
@@ -1862,9 +1705,7 @@
 //   <h> SPI5_SLAVE SELECT Pins 
 // <e> SLAVE SELECT LINE 0
 // <i> Enable slave select line 0
-#define RTE_SPI5_SLAVE_SELECT_LINE0 0
 //   <o> SPI5_SLAVE SELECT LINE 0 Pin <0=>P3_0 <1=>P4_1
-#define RTE_SPI5_SLAVE_SELECT_LINE_0_ID                0
 #if    (RTE_SPI5_SLAVE_SELECT_LINE_0_ID == 0)
 #define RTE_SPI5_SLAVE_SELECT_LINE_0_PORT              P3_0
 #define RTE_SPI5_SLAVE_SELECT_LINE_0_AF                P3_0_AF_U2C1_SELO0
@@ -1878,9 +1719,7 @@
 
 // <e> SLAVE SELECT LINE 1
 // <i> Enable slave select line 1
-#define RTE_SPI5_SLAVE_SELECT_LINE1 0
 //   <o> SPI5_SLAVE SELECT LINE 1 Pin <0=>P4_2
-#define RTE_SPI5_SLAVE_SELECT_LINE_1_ID                0
 #if    (RTE_SPI5_SLAVE_SELECT_LINE_1_ID == 0)
 #define RTE_SPI5_SLAVE_SELECT_LINE_1_PORT              P4_2
 #define RTE_SPI5_SLAVE_SELECT_LINE_1_AF                P4_2_AF_U2C1_SELO1
@@ -1891,9 +1730,7 @@
 
 // <e> SLAVE SELECT LINE 2
 // <i> Enable slave select line 2
-#define RTE_SPI5_SLAVE_SELECT_LINE2 0
 //   <o> SPI5_SLAVE SELECT LINE 2 Pin <0=>P4_3
-#define RTE_SPI5_SLAVE_SELECT_LINE_2_ID                0
 #if    (RTE_SPI5_SLAVE_SELECT_LINE_2_ID == 0)
 #define RTE_SPI5_SLAVE_SELECT_LINE_2_PORT              P4_3
 #define RTE_SPI5_SLAVE_SELECT_LINE_2_AF                P4_3_AF_U2C1_SELO2
@@ -1901,13 +1738,9 @@
 #error "Invalid SPI5 SLAVE SELECT LINE 2 Pin Configuration!"
 #endif
 //</e>
-
-#define RTE_SPI5_SLAVE_SELECT_LINE3 0
-
 // </h>
 
 //   <o> SPI5_CLK INPUT Pin <0=>P3_6 <1=>P4_2
-#define RTE_SPI5_CLK_INPUT_ID                0
 #if    (RTE_SPI5_CLK_INPUT_ID == 0)
 #define RTE_SPI5_CLK_INPUT_PORT              P3_6
 #define RTE_SPI5_CLK_INPUT                   USIC2_C1_DX1_P3_6
@@ -1919,7 +1752,6 @@
 #endif
 
 //   <o> RTE_SPI5_SLAVE_SELECT INPUT Pin <0=>P4_1
-#define RTE_SPI5_SLAVE_SELECT_INPUT_ID                0
 #if    (RTE_SPI5_SLAVE_SELECT_INPUT_ID == 0)
 #define RTE_SPI5_SLAVE_SELECT_INPUT_PORT              P4_1
 #define RTE_SPI5_SLAVE_SELECT_INPUT                   USIC2_C1_DX2_P4_1
@@ -1928,7 +1760,6 @@
 #endif
 
 //   <o> SPI5_RX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI5_RX_FIFO_SIZE_ID                4
 #if    (RTE_SPI5_RX_FIFO_SIZE_ID == 0)
 #define RTE_SPI5_RX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI5_RX_FIFO_SIZE_NUM     0
@@ -1952,7 +1783,6 @@
 #endif
 
 //   <o> SPI5_TX FIFO ENTRIES <0=>0 <1=>2 <2=>4 <3=>8 <4=>16 <5=>32
-#define RTE_SPI5_TX_FIFO_SIZE_ID                4
 #if    (RTE_SPI5_TX_FIFO_SIZE_ID == 0)
 #define RTE_SPI5_TX_FIFO_SIZE         NO_FIFO
 #define RTE_SPI5_TX_FIFO_SIZE_NUM     0
@@ -3576,18 +3406,14 @@
 
 // <e> ENET (Ethernet Interface) [Driver_ETH_MAC0]
 // <i> Configuration settings for Driver_ETH_MAC0 in component ::Drivers:Ethernet MAC
-#define   RTE_ENET                      0
 
 //   <e> MII (Media Independent Interface)
-#define   RTE_ENET_MII                  0
 
 //     <o> TXD0 (Transmit data bit 0) pin 
 //       <0=>P0_5
 //       <1=>P1_13
 //       <2=>P2_8
 //       <3=>P2_12
-#define   RTE_ENET_MII_TXD0_PIN_ID     0
-
 #if (RTE_ENET_MII_TXD0_PIN_ID == 0)
  #define RTE_ENET_MII_TXD0_PIN  P0_5
  #define RTE_ENET_MII_TXD0_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3609,8 +3435,6 @@
 //       <1=>P1_14
 //       <2=>P2_9
 //       <3=>P2_13
-#define   RTE_ENET_MII_TXD1_PIN_ID     0
-
 #if (RTE_ENET_MII_TXD1_PIN_ID == 0)
  #define RTE_ENET_MII_TXD1_PIN  P0_6
  #define RTE_ENET_MII_TXD1_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3630,8 +3454,6 @@
 //     <o> TXD2 (Transmit data bit 2) pin 
 //       <0=>P2_12
 //       <1=>P6_0
-#define   RTE_ENET_MII_TXD2_PIN_ID     0
-
 #if (RTE_ENET_MII_TXD2_PIN_ID == 0)
  #define RTE_ENET_MII_TXD2_PIN  P2_12
  #define RTE_ENET_MII_TXD2_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3645,8 +3467,6 @@
 //     <o> TXD3 (Transmit data bit 3) pin 
 //       <0=>P2_13
 //       <1=>P6_1
-#define   RTE_ENET_MII_TXD3_PIN_ID     0
-
 #if (RTE_ENET_MII_TXD3_PIN_ID == 0)
  #define RTE_ENET_MII_TXD3_PIN  P2_13
  #define RTE_ENET_MII_TXD3_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3662,8 +3482,6 @@
 //       <1=>P1_12
 //       <2=>P2_5
 //       <3=>P5_9
-#define   RTE_ENET_MII_TXEN_PIN_ID     0
-
 #if (RTE_ENET_MII_TXEN_PIN_ID == 0)
  #define RTE_ENET_MII_TXEN_PIN  P0_4
  #define RTE_ENET_MII_TXEN_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3683,8 +3501,6 @@
 //     <o> TXER (Transmit Error) pin 
 //       <0=>P2_11
 //       <1=>P6_2
-#define   RTE_ENET_MII_TXER_PIN_ID     0
-
 #if (RTE_ENET_MII_TXER_PIN_ID == 0)
  #define RTE_ENET_MII_TXER_PIN  P2_11
  #define RTE_ENET_MII_TXER_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3698,8 +3514,6 @@
 //     <o> TXCLK (PHY Transmit clock) pin 
 //       <0=>P5_10
 //       <1=>P6_6
-#define   RTE_ENET_MII_TXCLK_PIN_ID     0
-
 #if (RTE_ENET_MII_TXCLK_PIN_ID == 0)
  #define RTE_ENET_MII_TXCLK_PIN  P5_10
 #elif (RTE_ENET_MII_TXCLK_PIN_ID == 1)
@@ -3713,8 +3527,6 @@
 //       <1=>P0_2
 //       <2=>P14_8
 //       <3=>P5_0
-#define   RTE_ENET_MII_RXD0_PIN_ID     0
-
 #if (RTE_ENET_MII_RXD0_PIN_ID == 0)
  #define RTE_ENET_MII_RXD0_PIN  P2_2
 #elif (RTE_ENET_MII_RXD0_PIN_ID == 1)
@@ -3732,8 +3544,6 @@
 //       <1=>P0_3
 //       <2=>P14_9
 //       <3=>P5_1
-#define   RTE_ENET_MII_RXD1_PIN_ID     0
-
 #if (RTE_ENET_MII_RXD1_PIN_ID == 0)
  #define RTE_ENET_MII_RXD1_PIN  P2_3
 #elif (RTE_ENET_MII_RXD1_PIN_ID == 1)
@@ -3749,8 +3559,6 @@
 //     <o> RXD2 (Receive data bit 2) pin 
 //       <0=>P5_8
 //       <1=>P6_4
-#define   RTE_ENET_MII_RXD2_PIN_ID     0
-
 #if (RTE_ENET_MII_RXD2_PIN_ID == 0)
  #define RTE_ENET_MII_RXD2_PIN  P5_8
 #elif (RTE_ENET_MII_RXD2_PIN_ID == 1)
@@ -3762,8 +3570,6 @@
 //     <o> RXD3 (Receive data bit 3) pin 
 //       <0=>P5_9
 //       <1=>P6_3
-#define   RTE_ENET_MII_RXD3_PIN_ID     0
-
 #if (RTE_ENET_MII_RXD3_PIN_ID == 0)
  #define RTE_ENET_MII_RXD3_PIN  P5_9
 #elif (RTE_ENET_MII_RXD3_PIN_ID == 1)
@@ -3777,8 +3583,6 @@
 //       <1=>P0_1
 //       <2=>P15_9
 //       <3=>P5_2
-#define   RTE_ENET_MII_RXDV_PIN_ID     0
-
 #if (RTE_ENET_MII_RXDV_PIN_ID == 0)
  #define RTE_ENET_MII_RXDV_PIN  P2_5
 #elif (RTE_ENET_MII_RXDV_PIN_ID == 1)
@@ -3794,8 +3598,6 @@
 //     <o> COL (Collision Detect) pin 
 //       <0=>P2_15
 //       <3=>P5_5
-#define   RTE_ENET_MII_COL_PIN_ID     0
-
 #if (RTE_ENET_MII_COL_PIN_ID == 0)
  #define RTE_ENET_MII_COL_PIN  P2_15
 #elif (RTE_ENET_MII_COL_PIN_ID == 3)
@@ -3807,8 +3609,6 @@
 //     <o> CRS (Carrier Sense) pin 
 //       <0=>P5_11
 //       <3=>P5_4
-#define   RTE_ENET_MII_CRS_PIN_ID     0
-
 #if (RTE_ENET_MII_CRS_PIN_ID == 0)
  #define RTE_ENET_MII_CRS_PIN  P5_11
 #elif (RTE_ENET_MII_CRS_PIN_ID == 3)
@@ -3821,8 +3621,6 @@
 //       <0=>P2_4
 //       <1=>P0_11
 //       <3=>P5_3
-#define   RTE_ENET_MII_RXER_PIN_ID     0
-
 #if (RTE_ENET_MII_RXER_PIN_ID == 0)
  #define RTE_ENET_MII_RXER_PIN  P2_4
 #elif (RTE_ENET_MII_RXER_PIN_ID == 1)
@@ -3838,8 +3636,6 @@
 //       <1=>P0_0
 //       <2=>P15_8
 //       <3=>P6_5
-#define   RTE_ENET_MII_RXCLK_PIN_ID     0
-
 #if (RTE_ENET_MII_RXCLK_PIN_ID == 0)
  #define RTE_ENET_MII_RXCLK_PIN  P2_1
 #elif (RTE_ENET_MII_RXCLK_PIN_ID == 1)
@@ -3855,15 +3651,12 @@
 //   </e> MII (Media Independent Interface)
 
 //   <e> RMII (Reduced Media Independent Interface)
-#define   RTE_ENET_RMII                 1
 
 //     <o> TXD0 (Transmit data bit 0) pin 
 //       <0=>P0_5
 //       <1=>P1_13
 //       <2=>P2_8
 //       <3=>P2_12
-#define   RTE_ENET_RMII_TXD0_PIN_ID     2
-
 #if (RTE_ENET_RMII_TXD0_PIN_ID == 0)
  #define RTE_ENET_RMII_TXD0_PIN  P0_5
  #define RTE_ENET_RMII_TXD0_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3885,8 +3678,6 @@
 //       <1=>P1_14
 //       <2=>P2_9
 //       <3=>P2_13
-#define   RTE_ENET_RMII_TXD1_PIN_ID     2
-
 #if (RTE_ENET_RMII_TXD1_PIN_ID == 0)
  #define RTE_ENET_RMII_TXD1_PIN  P0_6
  #define RTE_ENET_RMII_TXD1_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3908,8 +3699,6 @@
 //       <1=>P1_12
 //       <2=>P2_5
 //       <3=>P5_9
-#define   RTE_ENET_RMII_TXEN_PIN_ID     2
-
 #if (RTE_ENET_RMII_TXEN_PIN_ID == 0)
  #define RTE_ENET_RMII_TXEN_PIN  P0_4
  #define RTE_ENET_RMII_TXEN_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -3931,8 +3720,6 @@
 //       <1=>P0_2
 //       <2=>P14_8
 //       <3=>P5_0
-#define   RTE_ENET_RMII_RXD0_PIN_ID     0
-
 #if (RTE_ENET_RMII_RXD0_PIN_ID == 0)
  #define RTE_ENET_RMII_RXD0_PIN  P2_2
 #elif (RTE_ENET_RMII_RXD0_PIN_ID == 1)
@@ -3950,8 +3737,6 @@
 //       <1=>P0_3
 //       <2=>P14_9
 //       <3=>P5_1
-#define   RTE_ENET_RMII_RXD1_PIN_ID     0
-
 #if (RTE_ENET_RMII_RXD1_PIN_ID == 0)
  #define RTE_ENET_RMII_RXD1_PIN  P2_3
 #elif (RTE_ENET_RMII_RXD1_PIN_ID == 1)
@@ -3969,8 +3754,6 @@
 //       <1=>P0_1
 //       <2=>P15_9
 //       <3=>P5_2
-#define   RTE_ENET_RMII_CRS_DV_PIN_ID     2
-
 #if (RTE_ENET_RMII_CRS_DV_PIN_ID == 0)
  #define RTE_ENET_RMII_CRS_DV_PIN  P2_5
 #elif (RTE_ENET_RMII_CRS_DV_PIN_ID == 1)
@@ -3987,8 +3770,6 @@
 //       <0=>P2_4
 //       <2=>P0_11
 //       <3=>P5_3
-#define   RTE_ENET_RMII_RXER_PIN_ID     0
-
 #if (RTE_ENET_RMII_RXER_PIN_ID == 0)
  #define RTE_ENET_RMII_RXER_PIN  P2_4
 #elif (RTE_ENET_RMII_RXER_PIN_ID == 2)
@@ -4004,8 +3785,6 @@
 //       <1=>P0_0
 //       <2=>P15_8
 //       <3=>P6_5
-#define   RTE_ENET_RMII_REFCLK_PIN_ID     2
-
 #if (RTE_ENET_RMII_REFCLK_PIN_ID == 0)
  #define RTE_ENET_RMII_REFCLK_PIN  P2_1
 #elif (RTE_ENET_RMII_REFCLK_PIN_ID == 1)
@@ -4025,8 +3804,6 @@
 //       <0=>P0_9
 //       <1=>P2_0
 //       <2=>P1_11
-#define   RTE_ENET_MIIM_MDIO_PIN_ID     1
-
 #if (RTE_ENET_MIIM_MDIO_PIN_ID == 0)
  #define RTE_ENET_MIIM_MDIO_PIN   P0_9
  #define RTE_ENET_MIIM_MDIO_HWSEL XMC_GPIO_HWCTRL_PERIPHERAL1
@@ -4044,8 +3821,6 @@
 //       <0=>P0_10
 //       <1=>P1_10
 //       <2=>P2_7
-#define   RTE_ENET_MIIM_MDC_PIN_ID     2
-
 #if (RTE_ENET_MIIM_MDC_PIN_ID == 0)
  #define RTE_ENET_MIIM_MDC_PIN  P0_10
  #define RTE_ENET_MIIM_MDC_MODE XMC_GPIO_MODE_OUTPUT_PUSH_PULL_ALT1
@@ -4064,8 +3839,6 @@
 
 // <e> USB (Universal Serial Bus) [Driver_USBH]
 //     <o> VBUS drive pin setting <0=>P0_1 <1=>P3_2
-
-#define   RTE_USB_HOST_ID         0
 #if (RTE_USB_HOST_ID == 0)
  #define XMC_USB_DRIVE_PORT    P0_1
 #elif  (RTE_USB_HOST_ID == 1)
