@@ -60,7 +60,10 @@ add_executable(${EXECUTABLE}
 target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC4000_DFP/Device/XMClib/inc
   lib/XMC4000_DFP/Device/XMC4700_series/Include
+  lib/XMC4000_DFP/RTE_Driver
+  lib/XMC4000_DFP/CMSIS/RTOS/RTX/INC
   lib/CMSIS-6.1.0/Core/Include
+  lib/CMSIS-6.1.0/Driver/Include
   ${NANOPB}
   ../../firmware
   .
