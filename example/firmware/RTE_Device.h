@@ -1619,7 +1619,7 @@
 //</e>
 // <e> SPI4 (Serial peripheral interface) [Driver_SPI4]
 // <i> Configuration settings for Driver_SPI4 in component ::Drivers:SPI
-#define RTE_SPI4                      0
+#define RTE_SPI4                      1
 
 //   <o> SPI4 TX MOSI(master) MISO(slave) Pin <0=>P3_8 <1=>P5_0 <2=>P6_6
 #define RTE_SPI4_TX_ID                0
