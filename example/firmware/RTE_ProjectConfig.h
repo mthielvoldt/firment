@@ -15,12 +15,12 @@
 #define RTE_UART4 0
 #define RTE_UART5 0
 
-#define RTE_SPI0 0
-#define RTE_SPI1 0
-#define RTE_SPI2 0
-#define RTE_SPI3 0
-#define RTE_SPI4 0
-#define RTE_SPI5 0
+#define RTE_SPI0 0 // XMC_SPI0_CH0
+#define RTE_SPI1 0 // XMC_SPI0_CH1
+#define RTE_SPI2 0 // XMC_SPI1_CH0
+#define RTE_SPI3 0 // XMC_SPI1_CH1
+#define RTE_SPI4 1 // XMC_SPI2_CH0
+#define RTE_SPI5 0 // XMC_SPI2_CH1
 
 #define RTE_ENET 0
 
