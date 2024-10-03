@@ -1,5 +1,9 @@
 #include "xmc_gpio.h"
 
+#define ERR_DATA_LOST 0
+#define ERR_SPI_FAULT 1
+#define ERR_PB_ENCODE 2
+
 typedef struct
 {
   XMC_GPIO_PORT_t *port;
