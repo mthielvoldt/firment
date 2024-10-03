@@ -31,10 +31,10 @@ int main(void)
   10: CS: USIC2_CH0.SELO0 (ALT1 output)
   */
   spiCfg_t spiConfig = getDefaultSpiCfg();
-
-  spiConfig.priority = spiTxBuf_priority;
-
+  spiConfig.spiIrqPriority = spiTxBuf_priority;
   initFirment_spi(spiConfig);
+
+  comm_init((portPin_t){.port = XMC_GPIO_PORT0, .pin = 13U});
 
   // Set periodicA to 1kHz frequency.
   initPeriodicISR(
@@ -60,6 +60,6 @@ int main(void)
 // 1kHz
 void periodicA()
 {
-  genTelem_periodic();
+  comm_handleTelemetry();
   ctl_updateVoltageISR();
 }

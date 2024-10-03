@@ -1,4 +1,4 @@
-#include "fmt_types.h"
+#include "gpio_common.h"
 
 const XMC_GPIO_CONFIG_t gpOutPinConfig = {
       .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL,

@@ -1,5 +1,5 @@
 #include "fmt_spi.h"
-#include <ctype.h>
+#include <cmsis_gcc.h> // __BKPT()
 
 #include "queue.h"
 #include <pb_encode.h>
@@ -10,9 +10,6 @@
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
-
-// optimization: stop storing the config.
-static portPin_t led = {};
 
 extern ARM_DRIVER_SPI Driver_SPI4;
 static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
@@ -44,9 +41,6 @@ void SPI1_callback(uint32_t event)
 
 bool initFirment_spi(spiCfg_t cfg)
 {
-  led = cfg.led;
-  XMC_GPIO_Init(cfg.led.port, cfg.led.pin, &gpOutPinConfig);
-
   spi1->Initialize(SPI1_callback);
   spi1->PowerControl(ARM_POWER_FULL);
 
@@ -112,7 +106,6 @@ void SendNextPacket(void)
   if (spiReady && dequeueFront(&sendQueue, txPacket))
   {
     currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
-    XMC_GPIO_ToggleOutput(led.port, led.pin);
 
     /** Note: If application has multiple subs, this driver will need the
      * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.

@@ -20,7 +20,16 @@
 // This must be a power of 2.
 #define CALLS_PER_FULL_ROTATION 1024U
 
-void genTelem_periodic(void)
+// optimization: stop storing the config.
+static portPin_t led = {0};
+
+void comm_init(portPin_t ledPin)
+{
+  led = ledPin;
+  XMC_GPIO_Init(led.port, led.pin, &gpOutPinConfig);
+}
+
+void comm_handleTelemetry(void)
 {
   static uint32_t count = 0;
 
@@ -36,6 +45,15 @@ void genTelem_periodic(void)
             .WaveformTlm = {
                 .currentMa = telem.currentMa,
                 .voltageV = telem.voltage}}});
+
+    sendMsg((const Top){
+        .which_sub = Top_WaveformTlm_tag,
+        .sub = {
+            .WaveformTlm = {
+                .currentMa = telem.currentMa,
+                .voltageV = telem.voltage}}});
+
+    XMC_GPIO_ToggleOutput(led.port, led.pin);
     break;
   }
   case 20:

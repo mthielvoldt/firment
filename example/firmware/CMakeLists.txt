@@ -39,8 +39,8 @@ add_executable(${EXECUTABLE}
   example_comms.c
   control.c
   generated/mcu_1.pb.c
+  gpio_common.c
   ../../firmware/fmt_spi.c
-  ../../firmware/fmt_types.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
   ../../firmware/fmt_hardfault.c

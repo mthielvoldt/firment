@@ -11,5 +11,10 @@
  *  - ACKs.  These are managed by handleTx().
  *  - Command responses.  These are driven by the handleRx().
  */
-void genTelem_periodic(void);
+
+#include "gpio_common.h"
+
+void comm_init(portPin_t ledPin);
+
+void comm_handleTelemetry(void);
 
