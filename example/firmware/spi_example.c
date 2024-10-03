@@ -63,8 +63,3 @@ void periodicA()
   genTelem_periodic();
   ctl_updateVoltageISR();
 }
-
-void USIC2_0_IRQHandler(void)
-{
-  ISR_handleTx_spi();
-}

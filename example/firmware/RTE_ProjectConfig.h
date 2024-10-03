@@ -1,5 +1,9 @@
-
-#define RTE_Drivers_SPI // turn on the SPI driver
+/** Provides project-specific peripheral configuration.
+ * These macros have been extracted from RTE_Device.h. 
+ * Normally, parts of RTE_Device.h are edited by a GUI assistant (uVision etc.)
+ * Rather than rely on such an assistant, I chose to extract the configurable
+ * parts of RTE_Device.h, leaving the written-in-silicon relationships in place.
+ */
 
 #define RTE_CAN0 0
 #define RTE_CAN1 0
@@ -164,7 +168,7 @@
 #define RTE_SPI4_TX_ID 0                  // valid range: 0-2
 #define RTE_SPI4_RX_ID 0                  // valid range: 0-3
 #define RTE_SPI4_CLK_OUTPUT_ID 0          // valid range: 0-1
-#define RTE_SPI4_SLAVE_SELECT_LINE0 0     // valid range: 0-1 (enable)
+#define RTE_SPI4_SLAVE_SELECT_LINE0 1     // valid range: 0-1 (enable)
 #define RTE_SPI4_SLAVE_SELECT_LINE1 0     // valid range: 0-1 (enable)
 #define RTE_SPI4_SLAVE_SELECT_LINE2 0     // valid range: 0-1 (enable)
 #define RTE_SPI4_SLAVE_SELECT_LINE3 0     // valid range: 0-1 (enable)

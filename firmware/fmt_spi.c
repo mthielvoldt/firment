@@ -5,55 +5,64 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
+#define BAUD_1MHZ 1000000u
+
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
 
 // optimization: stop storing the config.
 static portPin_t led = {};
-static XMC_USIC_CH_t *channel = NULL;
 
-// Private Declarations
-static void initSpiGpio(spiCfg_t cfg);
+extern ARM_DRIVER_SPI Driver_SPI4;
+static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
+
+ARM_SPI_SignalEvent_t callback;
+
+void SPI1_callback(uint32_t event)
+{
+  switch (event)
+  {
+  case ARM_SPI_EVENT_TRANSFER_COMPLETE:
+    SendNextPacket();
+    break;
+  case ARM_SPI_EVENT_DATA_LOST:
+    /*  Occurs in slave mode when data is requested/sent by master
+        but send/receive/transfer operation has not been started
+        and indicates that data is lost. Occurs also in master mode
+        when driver cannot transfer data fast enough. */
+    __BKPT(0); /* Error: Call debugger or replace with custom error handling */
+    break;
+  case ARM_SPI_EVENT_MODE_FAULT:
+    /*  Occurs in master mode when Slave Select is deactivated and
+        indicates Master Mode Fault. */
+    __BKPT(0); /* Error: Call debugger or replace with custom error handling */
+    break;
+  }
+}
 
 bool initFirment_spi(spiCfg_t cfg)
 {
   led = cfg.led;
-  channel = cfg.channel;
+  XMC_GPIO_Init(cfg.led.port, cfg.led.pin, &gpOutPinConfig);
 
-  // InitEx() must come first among XMC_SPI calls as subsequent "Set" functions
-  // replace the defaults set by InitEx.
-  XMC_SPI_CH_Init(cfg.channel, &cfg.channel_config);
-  XMC_SPI_CH_SetWordLength(cfg.channel, cfg.word_length);
-  XMC_SPI_CH_SetFrameLength(cfg.channel, cfg.frame_length);
-  XMC_SPI_CH_SetInputSource(
-      cfg.channel, XMC_SPI_CH_INPUT_DIN0, (uint8_t)cfg.input_source);
-  XMC_SPI_CH_SetBitOrderLsbFirst(cfg.channel);
+  spi1->Initialize(SPI1_callback);
+  spi1->PowerControl(ARM_POWER_FULL);
 
-  /** MSLS master slave select.
-   * SELCFG block: supports SELOx output signals.
-   * - Direct select mode = connect each SELOx line to sub device.
-   *   - a SELOx output pin driven by MSLS signal if PCR.SELOx is 1.
-   * PCR.SELCTR: choose direct or coded select mode
-   */
-  XMC_SPI_CH_EnableSlaveSelect(cfg.channel, cfg.sub);
+  /** Warning:
+   * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
+   * controls).  However the XMC4000 library *Requires* the mode parameters are
+   * all OR'd.  It gates setting some parameters based on other parameters,
+   * which only works if they're all OR'd together and sent in a single call. */
+  uint32_t modeParams =
+      ARM_SPI_MODE_MASTER |
+      ARM_SPI_CPOL0_CPHA1 |
+      ARM_SPI_LSB_MSB |
+      ARM_SPI_SS_MASTER_HW_OUTPUT |
+      ARM_SPI_DATA_BITS(8);
+  spi1->Control(modeParams, BAUD_1MHZ); // second arg sets baud.
 
-  // Rig up interrupt
-  XMC_SPI_CH_SelectInterruptNodePointer(
-      cfg.channel,
-      XMC_SPI_CH_INTERRUPT_NODE_POINTER_TRANSMIT_BUFFER,
-      cfg.serviceRequest);
-  XMC_SPI_CH_EnableEvent(cfg.channel, XMC_SPI_CH_EVENT_TRANSMIT_BUFFER);
-  NVIC_SetPriority(cfg.IRQn, cfg.priority);
-  NVIC_EnableIRQ(cfg.IRQn);
-
-  // The second parameter passed in seems to have no effect. 
-  // The result of this call is that frames come in every 98us (with 64us gap).
-  // The ESP dropps full messages if this isn't enabled (with DMA on).
-  XMC_SPI_CH_SetInterwordDelay(cfg.channel, 2);
-  XMC_SPI_CH_Start(cfg.channel);
-
-  initSpiGpio(cfg);
+  spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
 
   initQueue(
       MAX_PACKET_SIZE_BYTES,
@@ -62,30 +71,6 @@ bool initFirment_spi(spiCfg_t cfg)
       sendQueueStore,
       MAX_SENDER_PRIORITY);
   return true;
-}
-
-static void initSpiGpio(spiCfg_t cfg)
-{
-
-  XMC_GPIO_Init(cfg.led.port, cfg.led.pin, &gpOutPinConfig);
-  /* Initialize SPI SCLK out pin */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)cfg.sclk.port,
-      (uint8_t)cfg.sclk.pin,
-      &cfg.sclk.config);
-  /* Configure the input pin properties */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)cfg.miso.port,
-      (uint8_t)cfg.miso.pin,
-      &(cfg.miso.config));
-  /* Configure the output pin properties */
-  XMC_GPIO_Init(
-      (XMC_GPIO_PORT_t *)cfg.mosi.port,
-      (uint8_t)cfg.mosi.pin,
-      &cfg.mosi.config);
-
-  /* Pin under USIC control as ALT1 output */
-  XMC_GPIO_Init(cfg.ss0.port, cfg.ss0.pin, &cfg.ss0.config);
 }
 
 bool sendMsg(Top message)
@@ -101,7 +86,7 @@ bool sendMsg(Top message)
     enqueueBack(&sendQueue, txPacket);
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
-    ISR_handleTx_spi();
+    SendNextPacket();
   }
   else // message possibly bigger than PAYLOAD_SIZE_BYTES?
   {
@@ -113,45 +98,27 @@ bool sendMsg(Top message)
   return success;
 }
 
-void ISR_handleTx_spi(void)
+void SendNextPacket(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
   static uint_fast16_t currentPacketSize = 0;
-  static uint_fast16_t bytesSent = 0;
+
+  // sendMsg calls this fn, which is async with spi status, so check spi ready.
+  bool spiReady = !spi1->GetStatus().busy;
 
   /*
   If we've finished transmitting the previous message, but there are still
   messages in the queue, pull a new packet out of the queue and keep Txing. */
-  if (bytesSent >= currentPacketSize)
+
+  if (spiReady && dequeueFront(&sendQueue, txPacket))
   {
-    if (dequeueFront(&sendQueue, txPacket))
-    {
-      // dequeue successful.  Starting tx of new packet.
+    // dequeue successful.  Starting tx of new packet.
 
-      // relying on integer division to truncate remainder.
-      uint32_t num4ByteFrames = (txPacket[0] + HEADER_SIZE_BYTES + 3) / 4;
-      currentPacketSize = num4ByteFrames * 4;
-      bytesSent = 0;
-      XMC_GPIO_ToggleOutput(led.port, led.pin);
-    }
-  }
-
-  /*
-  We send 2 bytes at a time, so we Tx 1 extra byte for odd-size packets.
-  MAX_PACKET_SIZE_BYTES is even, so we'll never read past the buffer.
-  This Fn, being interrupt-driven, rapidly gets re-called until _Transmit() is
-  skipped, which only happens when sendQueue is empty. */
-  if (bytesSent < currentPacketSize)
-  {
-    /* The next line clears the Tx Buff Interrupt Flag (TBIF) so a new IRQ fires
-    as soon as Tx Buff is ready again for a new word.
-    It also blocks (spinlock) to wait for TBUF to become available in case it is
-    called before the Tx Buff is ready.  Note: this assumes one-shot mode*/
-    XMC_SPI_CH_Transmit(
-        channel, *(int16_t *)(txPacket + bytesSent), XMC_SPI_CH_MODE_STANDARD);
-
-    // Because the previous blocks until TBUF ready, we assume Tx happened.
-    bytesSent += 2;
+    // relying on integer division to truncate remainder.
+    uint32_t num4ByteFrames = (txPacket[0] + HEADER_SIZE_BYTES + 3) / 4;
+    currentPacketSize = num4ByteFrames * 4;
+    XMC_GPIO_ToggleOutput(led.port, led.pin);
+    spi1->Send(txPacket, currentPacketSize);
   }
 }
 

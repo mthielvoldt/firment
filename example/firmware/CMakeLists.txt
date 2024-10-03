@@ -47,6 +47,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/fmt_waveform.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
+  lib/XMC4000_DFP/RTE_Driver/SPI.c
   ${XMC_LIB}/xmc4_gpio.c
   ${XMC_LIB}/xmc_spi.c
   ${XMC_LIB}/xmc_usic.c
