@@ -75,7 +75,7 @@ bool initFirment_spi(spiCfg_t cfg)
 
 bool sendMsg(Top message)
 {
-  uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0x00, 0xEF, 0xCD, 0xAB};
+  uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
   uint8_t *txMsg = txPacket + HEADER_SIZE_BYTES;
   pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
 
@@ -112,11 +112,7 @@ void SendNextPacket(void)
 
   if (spiReady && dequeueFront(&sendQueue, txPacket))
   {
-    // dequeue successful.  Starting tx of new packet.
-
-    // relying on integer division to truncate remainder.
-    uint32_t num4ByteFrames = (txPacket[0] + HEADER_SIZE_BYTES + 3) / 4;
-    currentPacketSize = num4ByteFrames * 4;
+    currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
     XMC_GPIO_ToggleOutput(led.port, led.pin);
     spi1->Send(txPacket, currentPacketSize);
   }
