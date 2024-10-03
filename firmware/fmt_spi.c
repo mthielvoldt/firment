@@ -31,12 +31,12 @@ void SPI1_callback(uint32_t event)
         but send/receive/transfer operation has not been started
         and indicates that data is lost. Occurs also in master mode
         when driver cannot transfer data fast enough. */
-    __BKPT(ERR_DATA_LOST); /* Error: Call debugger or replace with custom error handling */
+    __BKPT(0); /* TODO: Handle this error */
     break;
   case ARM_SPI_EVENT_MODE_FAULT:
     /*  Occurs in master mode when Slave Select is deactivated and
         indicates Master Mode Fault. */
-    __BKPT(ERR_SPI_FAULT); /* Error: Call debugger or replace with custom error handling */
+    __BKPT(1); /* TODO: Handle this error */
     break;
   }
 }
@@ -90,7 +90,7 @@ bool sendMsg(Top message)
   }
   else // message possibly bigger than PAYLOAD_SIZE_BYTES?
   {
-    __BKPT(ERR_PB_ENCODE);  // TODO: Increment err counter, Send error message.
+    __BKPT(2); // TODO: Increment err counter, Send error message.
   }
 
   return success;
