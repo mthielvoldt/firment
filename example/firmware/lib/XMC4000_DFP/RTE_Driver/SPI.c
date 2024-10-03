@@ -2047,9 +2047,10 @@ static void SPI_IRQHandler(SPI_RESOURCES *const spi)
     if (spi->info->cb_event) spi->info->cb_event(ARM_SPI_EVENT_DATA_LOST);
   }
 
+  // There is still data to receive.
   if(spi->info->xfer.rx_cnt < spi->info->xfer.num)
   {
-    // Not using FIFO  
+    // Not using FIFO. Transfer one byte to rx_buf.
     if(spi->rx_fifo_size_reg == NO_FIFO)
     {
       spi->info->xfer.rx_cnt++;
@@ -2068,6 +2069,7 @@ static void SPI_IRQHandler(SPI_RESOURCES *const spi)
         }
       }
     }
+    // Using FIFO.  Transfer as many bytes as are in FIFO to rx_buf. 
     else
     {
       while(XMC_USIC_CH_RXFIFO_IsEmpty(spi->spi) == false)
@@ -2095,7 +2097,7 @@ static void SPI_IRQHandler(SPI_RESOURCES *const spi)
         } 
       } 
     }
-  
+    // After flushing the Rx FIFO to rx_buf, We're at the end.
     if (spi->info->xfer.num == spi->info->xfer.rx_cnt)
     {
       if(spi->rx_fifo_size_reg == NO_FIFO)
@@ -2114,8 +2116,12 @@ static void SPI_IRQHandler(SPI_RESOURCES *const spi)
       spi->info->status.busy = 0;      
       if (spi->info->cb_event) spi->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);    
     }
+    // After draining the RX FIFO to rx_buf above, We're still not at xfer.num.
+    // This means xfer.num was bigger than the Rx FIFO?
     else
     {
+      // What's left to transfer will fit in half the fifo size.
+      // So set the FIFO to trigger when there's enough space to fit everything?
       if((spi->info->xfer.num - spi->info->xfer.rx_cnt) <= (spi->rx_fifo_size_num >> 1))
       {
         XMC_USIC_CH_RXFIFO_SetSizeTriggerLimit(spi->spi, (XMC_USIC_CH_FIFO_SIZE_t)spi->rx_fifo_size_reg, spi->info->xfer.num - spi->info->xfer.rx_cnt - 1U);
