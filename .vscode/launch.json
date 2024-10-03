@@ -50,7 +50,7 @@
       "cwd": "/project",
       "environment": [],
       "externalConsole": true,
-      "preLaunchTask": "",
+      "preLaunchTask": "esp flash-ocd",
       "targetArchitecture": "arm",
       "sourceFileMap": { "/project": "${workspaceFolder}/esp/mqtt5" },
       "pipeTransport": {
