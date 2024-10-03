@@ -24,6 +24,7 @@ void SPI1_callback(uint32_t event)
   switch (event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
+    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
     SendNextPacket();
     break;
   case ARM_SPI_EVENT_DATA_LOST:
@@ -58,7 +59,7 @@ bool initFirment_spi(spiCfg_t cfg)
       ARM_SPI_MODE_MASTER |
       ARM_SPI_CPOL0_CPHA1 |
       ARM_SPI_LSB_MSB |
-      ARM_SPI_SS_MASTER_HW_OUTPUT |
+      ARM_SPI_SS_MASTER_SW |
       ARM_SPI_DATA_BITS(8);
   spi1->Control(modeParams, BAUD_1MHZ); // second arg sets baud.
 
@@ -112,6 +113,11 @@ void SendNextPacket(void)
   {
     currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
     XMC_GPIO_ToggleOutput(led.port, led.pin);
+
+    /** Note: If application has multiple subs, this driver will need the
+     * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.
+     * see https://arm-software.github.io/CMSIS-Driver/latest/driver_SPI.html */
+    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
     spi1->Send(txPacket, currentPacketSize);
   }
 }
