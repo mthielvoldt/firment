@@ -172,7 +172,13 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
   if (ret == ESP_OK)
   {
     bool crcGood = true; // placeholder.
-    if (crcGood)
+    /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/
+    bool lenGood = rxdTransaction->trans_len == EXPECTED_TRANS_LEN_BITS;
+    if (!lenGood) 
+      ret = ESP_ERR_INVALID_SIZE;
+    else if (!crcGood)
+      ret = ESP_ERR_INVALID_CRC;
+    else // All good.
     {
       spiTxCount++;
       // subtract the num bytes we received (we transmitted at least this many)
@@ -181,10 +187,6 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
       if (transmissionsInQueue < 0)
         transmissionsInQueue = 0;
       memcpy(rxMsg, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
-    }
-    else
-    {
-      ret = ESP_ERR_INVALID_CRC;
     }
   }
   return ret;
@@ -203,7 +205,7 @@ void checkForSPIErrors(spi_slave_transaction_t *rxdTransaction)
   static bool firstSet = true;
   uint32_t *rxbuf = (rxdTransaction->rx_buffer);
 
-  if (rxdTransaction->trans_len != EXPECTED_LEN)
+  if (rxdTransaction->trans_len != EXPECTED_TRANS_LEN_BITS)
   {
     lenErrCount++;
   }

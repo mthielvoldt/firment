@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "esp_event.h"
@@ -348,27 +349,44 @@ void app_main(void)
     size_t msgLength;
     // drain the RX queue.
     esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
-    if (ret == ESP_OK)
+    switch (ret)
+    {
+    case ESP_OK:
     {
       msgLength = pbMsg[0];
       msgNum++;
       // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
       // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
 
-      ESP_LOGI(TAG, "msg: %u len: %d, %lx %lx %lx", msgNum, msgLength,
-               *(uint32_t *)&pbMsg[0], *(uint32_t *)&pbMsg[4], *(uint32_t *)&pbMsg[8]);
+      char msgAsStr[256] = "";
+      int strIndex = 0;
+      for (int i = 0; i < SPI_MAX_FRAME_SZ; i++)
+      {
+        strIndex += snprintf(msgAsStr + strIndex, 4, "%d ", pbMsg[i]);
+      }
+
+      ESP_LOGI(TAG, "msg: %u len: %d, %s", msgNum, msgLength, msgAsStr);
+      break;
     }
-    else if (ret == ESP_ERR_TIMEOUT)
+    case ESP_ERR_TIMEOUT:
     {
       ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
+      break;
     }
-    else if (ret == ESP_ERR_INVALID_SIZE)
+    case ESP_ERR_INVALID_SIZE:
     {
-      ESP_LOGE(TAG, "invalid size error");
+      ESP_LOGE(TAG, "invalid size");
+      break;
     }
-    else
+    case ESP_ERR_INVALID_CRC:
+    {
+      ESP_LOGE(TAG, "invalid CRC");
+      break;
+    }
+    default:
     {
       ESP_LOGE(TAG, "unknown error: %d", ret);
+    }
     }
 
     // vTaskDelay(pdMS_TO_TICKS(2000));

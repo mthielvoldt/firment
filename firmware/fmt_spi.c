@@ -94,7 +94,6 @@ bool sendMsg(Top message)
 void SendNextPacket(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
-  static uint_fast16_t currentPacketSize = 0;
 
   // sendMsg calls this fn, which is async with spi status, so check spi ready.
   bool spiReady = !spi1->GetStatus().busy;
@@ -105,13 +104,25 @@ void SendNextPacket(void)
 
   if (spiReady && dequeueFront(&sendQueue, txPacket))
   {
-    currentPacketSize = txPacket[0] + HEADER_SIZE_BYTES;
-
     /** Note: If application has multiple subs, this driver will need the
      * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.
      * see https://arm-software.github.io/CMSIS-Driver/latest/driver_SPI.html */
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
-    spi1->Send(txPacket, currentPacketSize);
+
+    /** Note: in SPI we're using fixed-width data frames to simplify staying
+     * synchronized in the presence of data corruption. */
+    spi1->Send(txPacket, MAX_PACKET_SIZE_BYTES);
+
+    /* Some test code for counting bytes that get through.*/
+    // static uint8_t substitutePacket[] = {
+    //     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    //     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    //     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+    //     30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+    //     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+    //     50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
+    // spi1->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
   }
 }
 
