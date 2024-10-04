@@ -134,9 +134,9 @@ esp_err_t initSpi(void)
   return ret;
 }
 
-esp_err_t waitForSpiRx(uint32_t *rxWord, uint32_t msTimeout)
+esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
 {
-  static uint32_t transmissionsInQueue = 0;
+  static int32_t transmissionsInQueue = 0;
   static uint32_t nextTransIndex = 0;
 
   spi_slave_transaction_t *rxdTransaction = NULL;
@@ -171,15 +171,20 @@ esp_err_t waitForSpiRx(uint32_t *rxWord, uint32_t msTimeout)
   esp_err_t ret = spi_slave_get_trans_result(RCV_HOST, &rxdTransaction, pdMS_TO_TICKS(msTimeout));
   if (ret == ESP_OK)
   {
-    if (rxdTransaction->trans_len == EXPECTED_LEN)
+    bool crcGood = true; // placeholder.
+    if (crcGood)
     {
       spiTxCount++;
-      transmissionsInQueue--;
-      *rxWord = *(uint32_t *)(rxdTransaction->rx_buffer);
+      // subtract the num bytes we received (we transmitted at least this many)
+      // TODO: this should be the num of bytes to transmit, not "transmissions"
+      transmissionsInQueue -= rxdTransaction->trans_len;
+      if (transmissionsInQueue < 0)
+        transmissionsInQueue = 0;
+      memcpy(rxMsg, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
     }
     else
     {
-      ret = ESP_ERR_INVALID_SIZE;
+      ret = ESP_ERR_INVALID_CRC;
     }
   }
   return ret;

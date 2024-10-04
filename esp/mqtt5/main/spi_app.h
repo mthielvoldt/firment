@@ -5,9 +5,9 @@
 #define GPIO_MOSI 11
 #define GPIO_MISO 12
 #define GPIO_SCLK 13
-#define SPI_BUFFER_SZ_BYTES 8 // Double the size we expect (32 bits).
+#define SPI_BUFFER_SZ_BYTES 64 // Double the size we expect (32 bits).
 #define MAX_TRANSACTION_LENGTH (SPI_BUFFER_SZ_BYTES * 8)
-#define SPI_QUEUE_LEN 12
+#define SPI_QUEUE_LEN 4
 #define TARGET_TX_QUEUE_DEPTH 8
 
 // #define EXPECTED_VALUE 0x01248EDB 7FAA5566
@@ -20,4 +20,4 @@
 #define MAX_BAD_DAT_TO_STORE 10U
 
 esp_err_t initSpi(void);
-esp_err_t waitForSpiRx(uint32_t *rxWord, uint32_t msTimeout);
+esp_err_t waitForSpiRx(uint8_t *rxWord, uint32_t msTimeout);

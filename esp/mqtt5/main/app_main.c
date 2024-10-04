@@ -19,8 +19,8 @@
 
 #include "spi_app.h"
 
-#define MAX_PAYLOAD_BYTES 60
-#define START_KEY 0xABCDEF00
+#define MAX_PAYLOAD_BYTES 64
+// #define START_KEY 0xABCDEF00
 #define MSG_TIMEOUT_MS 2000
 
 static const char *TAG = "mqtt5_example";
@@ -76,8 +76,6 @@ static esp_mqtt5_disconnect_property_config_t disconnect_property = {
     .session_expiry_interval = 60,
     .disconnect_reason = 0,
 };
-
-bool collateMessage(char *msgBuffer, size_t *msgLength, uint32_t newWord);
 
 static void print_user_property(mqtt5_user_property_handle_t user_property)
 {
@@ -346,15 +344,19 @@ void app_main(void)
   unsigned int msgNum = 0;
   for (;;)
   {
-    uint32_t wordFromSpi;
-    bool msgReady = false;
-    char pbMsg[MAX_PAYLOAD_BYTES];
+    uint8_t pbMsg[MAX_PAYLOAD_BYTES];
     size_t msgLength;
     // drain the RX queue.
-    esp_err_t ret = waitForSpiRx(&wordFromSpi, MSG_TIMEOUT_MS);
+    esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
     if (ret == ESP_OK)
     {
-      msgReady = collateMessage(pbMsg, &msgLength, wordFromSpi);
+      msgLength = pbMsg[0];
+      msgNum++;
+      // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
+      // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
+
+      ESP_LOGI(TAG, "msg: %u len: %d, %lx %lx %lx", msgNum, msgLength,
+               *(uint32_t *)&pbMsg[0], *(uint32_t *)&pbMsg[4], *(uint32_t *)&pbMsg[8]);
     }
     else if (ret == ESP_ERR_TIMEOUT)
     {
@@ -369,52 +371,6 @@ void app_main(void)
       ESP_LOGE(TAG, "unknown error: %d", ret);
     }
 
-    if (msgReady)
-    {
-      msgReady = false;
-      msgNum++;
-      // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
-      // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
-
-      ESP_LOGI(TAG, "msg: %u len: %d, %lx %lx %lx", msgNum, msgLength,
-               *(uint32_t *)&pbMsg[0], *(uint32_t *)&pbMsg[4], *(uint32_t *)&pbMsg[8]);
-    }
     // vTaskDelay(pdMS_TO_TICKS(2000));
   }
-}
-
-bool collateMessage(char *msgBuffer, size_t *msgLength, uint32_t newWord)
-{
-  bool msgReady = false;
-  static enum collationState {
-    WAITING_FOR_START_WORD,
-    COLLECTING_PAYLOAD_WORDS,
-  } state = WAITING_FOR_START_WORD;
-  static uint32_t bytesReceived = 0;
-
-  if (state == WAITING_FOR_START_WORD)
-  {
-    if ((newWord & 0xFFFFFF00) == START_KEY)
-    {
-      *msgLength = newWord & 0xFF;
-      if (*msgLength <= MAX_PAYLOAD_BYTES)
-      {
-        bytesReceived = 0;
-        state = COLLECTING_PAYLOAD_WORDS;
-      }
-    }
-  }
-  else if (state == COLLECTING_PAYLOAD_WORDS)
-  {
-    // store this word into the msgBuffer buffer.
-    // We don't worry about
-    *(uint32_t *)(msgBuffer + bytesReceived) = newWord;
-    bytesReceived += 4;
-    if (bytesReceived >= *msgLength)
-    {
-      state = WAITING_FOR_START_WORD;
-      msgReady = true;
-    }
-  }
-  return msgReady;
 }
