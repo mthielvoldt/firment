@@ -309,6 +309,8 @@ static void mqtt5_app_start(void)
 // {
 // }
 
+// void handleSpi()
+
 void app_main(void)
 {
   // The following block doesn't work.  Core Panics.  No clue why.
@@ -346,14 +348,14 @@ void app_main(void)
   for (;;)
   {
     uint8_t pbMsg[MAX_PAYLOAD_BYTES];
-    size_t msgLength;
     // drain the RX queue.
     esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
+    // handleSpi(ret, pbMsg);
     switch (ret)
     {
     case ESP_OK:
     {
-      msgLength = pbMsg[0];
+      size_t msgLength = pbMsg[0];
       msgNum++;
       // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
       // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);

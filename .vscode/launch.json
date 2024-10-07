@@ -46,7 +46,7 @@
       "request": "launch",
       "MIMode": "gdb",
       "program": "build/mqtt5.elf",
-      "stopAtEntry": true,
+      "stopAtEntry": false,
       "cwd": "/project",
       "environment": [],
       "externalConsole": true,

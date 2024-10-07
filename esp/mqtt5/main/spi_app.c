@@ -87,8 +87,9 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static WORD_ALIGNED_ATTR char txBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {};
-static WORD_ALIGNED_ATTR char rxBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {};
+static WORD_ALIGNED_ATTR char txBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {0};
+static WORD_ALIGNED_ATTR char txNada[SPI_BUFFER_SZ_BYTES] = {0};
+static WORD_ALIGNED_ATTR char rxBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {0};
 static spi_slave_transaction_t spiTransactions[SPI_QUEUE_LEN] = {};
 
 // Main application
@@ -100,10 +101,11 @@ esp_err_t initSpi(void)
   {
     spiTransactions[i] = (spi_slave_transaction_t){
         .length = MAX_TRANSACTION_LENGTH,
-        .rx_buffer = &rxBufs + (i * SPI_BUFFER_SZ_BYTES),
-        .tx_buffer = &txBufs + (i * SPI_BUFFER_SZ_BYTES),
+        .rx_buffer = &(rxBufs[i * SPI_BUFFER_SZ_BYTES]),
+        .tx_buffer = &(txBufs[i * SPI_BUFFER_SZ_BYTES]),
     };
   }
+  spiTransactions[2].tx_buffer = txNada;
 
   // Configure handshake line as output
   gpio_config(&io_conf);
@@ -136,7 +138,7 @@ esp_err_t initSpi(void)
 
 esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
 {
-  static int32_t transmissionsInQueue = 0;
+  static int32_t numMessagesInSendQueue = 0;
   static uint32_t nextTransIndex = 0;
 
   spi_slave_transaction_t *rxdTransaction = NULL;
@@ -153,11 +155,11 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
   */
 
   // (re)fill txQueue
-  while (transmissionsInQueue < TARGET_TX_QUEUE_DEPTH)
+  while (numMessagesInSendQueue < TARGET_TX_QUEUE_DEPTH)
   {
     if (spi_slave_queue_trans(RCV_HOST, &spiTransactions[nextTransIndex], 0) == ESP_OK)
     {
-      transmissionsInQueue++;
+      numMessagesInSendQueue++;
       if (++nextTransIndex == SPI_QUEUE_LEN)
         nextTransIndex = 0;
     }
@@ -174,78 +176,17 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
     bool crcGood = true; // placeholder.
     /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/
     bool lenGood = rxdTransaction->trans_len == EXPECTED_TRANS_LEN_BITS;
-    if (!lenGood) 
+    if (!lenGood)
       ret = ESP_ERR_INVALID_SIZE;
     else if (!crcGood)
       ret = ESP_ERR_INVALID_CRC;
     else // All good.
     {
       spiTxCount++;
-      // subtract the num bytes we received (we transmitted at least this many)
-      // TODO: this should be the num of bytes to transmit, not "transmissions"
-      transmissionsInQueue -= rxdTransaction->trans_len;
-      if (transmissionsInQueue < 0)
-        transmissionsInQueue = 0;
+      if (--numMessagesInSendQueue < 0)
+        numMessagesInSendQueue = 0;
       memcpy(rxMsg, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
     }
   }
   return ret;
-}
-
-void checkForSPIErrors(spi_slave_transaction_t *rxdTransaction)
-{
-  static int datErrTotal = 0;
-  static uint16_t badDat[MAX_BAD_DAT_TO_STORE] = {};
-  static uint32_t badDati = 0;
-  static int lenErrCount = 0;
-  static int lenTotal = 0;
-  static int lenMin = SAMPLES_PER_REPORT;
-  static int lenMax = 0;
-  static int setCount = 0;
-  static bool firstSet = true;
-  uint32_t *rxbuf = (rxdTransaction->rx_buffer);
-
-  if (rxdTransaction->trans_len != EXPECTED_TRANS_LEN_BITS)
-  {
-    lenErrCount++;
-  }
-  else
-  {
-    if (*rxbuf != EXPECTED_VALUE)
-    {
-      datErrTotal++;
-      if (badDati < MAX_BAD_DAT_TO_STORE)
-      {
-        badDat[badDati] = *rxbuf;
-        badDati++;
-      }
-    }
-  }
-
-  if (spiTxCount >= SAMPLES_PER_REPORT) // If this passes, we Rx'd something, so rxbuf not NULL.
-  {
-    lenTotal += lenErrCount;
-    setCount++;
-    lenMax = (!firstSet && lenErrCount > lenMax) ? lenErrCount : lenMax;
-    lenMin = (lenErrCount < lenMin) ? lenErrCount : lenMin;
-    float avgLenErrPerSet = (float)lenTotal / setCount;
-    printf("Set %d with %d\n", setCount, spiTxCount);
-    printf("Current value: %04lX\tLen: %d\n", rxbuf[0], rxdTransaction->trans_len);
-    printf(" Len errors-> max: %d\tmin: %d\tAvg: %f\tDat errors total: %d\n",
-           lenMax, lenMin, avgLenErrPerSet, datErrTotal);
-
-    if (badDati)
-    {
-      printf("Bad Data: ");
-      for (uint32_t i = 0; i < badDati; i++)
-      {
-        printf("%02X ", badDat[i]);
-      }
-      printf("\n");
-      badDati = 0;
-    }
-
-    spiTxCount = lenErrCount = 0;
-    firstSet = false;
-  }
 }
