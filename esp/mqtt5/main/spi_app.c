@@ -99,6 +99,8 @@ typedef struct buff_s
 static WORD_ALIGNED_ATTR buff_t txBufs[NUM_TX_BUFFERS];
 static WORD_ALIGNED_ATTR buff_t txNada = {0};
 static WORD_ALIGNED_ATTR buff_t rxBufs[TRANSACTION_QUEUE_LEN] = {0};
+
+// The transactions must be static - spi driver only keeps a pointer to them
 static spi_slave_transaction_t transactions[TRANSACTION_QUEUE_LEN] = {0};
 
 /** When we don't have a message to send (no message pending from web), we leave
@@ -209,7 +211,7 @@ esp_err_t addToTransactionQueue(void)
 /** Enables the SPI slave interface to send the txBufs and receive into rxBufs.
  * However, it will not actually happen until the main device starts a hardware
  * transaction by pulling CS low and pulsing the clock. */
-esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
+esp_err_t waitForSpiRx(char *rxMsg, uint32_t msTimeout)
 {
   spi_slave_transaction_t *rxdTransaction;
   static uint32_t numTransactionsQueued = 0;

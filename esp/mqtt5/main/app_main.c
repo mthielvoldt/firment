@@ -309,7 +309,59 @@ static void mqtt5_app_start(void)
 // {
 // }
 
-// void handleSpi()
+void logMsgContents(char msg[], size_t msgLength)
+{
+  static unsigned int msgNum = 0;
+  msgNum++;
+
+  if (msgLength <= SPI_MAX_FRAME_SZ)
+  {
+    char msgAsStr[256] = "";
+    int strIndex = 0;
+    for (int i = 0; i < msgLength; i++)
+    {
+      strIndex += snprintf(msgAsStr + strIndex, 4, "%d ", (uint8_t)msg[i]);
+    }
+    ESP_LOGI(TAG, "msg: %u len: %d, %s", msgNum, msgLength, msgAsStr);
+  }
+  else
+  {
+    ESP_LOGE(TAG, "msg %d too long! len: %d", msgNum, msgLength);
+  }
+}
+
+void handleSpiMsg(esp_err_t spiResult, char pbMsg[])
+{
+  switch (spiResult)
+  {
+  case ESP_OK:
+  {
+    size_t msgLength = pbMsg[0];
+    int msg_id = esp_mqtt_client_publish(client, "Top", &pbMsg[1], msgLength, 1, 1);
+    logMsgContents(pbMsg, msgLength);
+    break;
+  }
+  case ESP_ERR_TIMEOUT:
+  {
+    ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
+    break;
+  }
+  case ESP_ERR_INVALID_SIZE:
+  {
+    ESP_LOGE(TAG, "invalid size");
+    break;
+  }
+  case ESP_ERR_INVALID_CRC:
+  {
+    ESP_LOGE(TAG, "invalid CRC");
+    break;
+  }
+  default:
+  {
+    ESP_LOGE(TAG, "unknown error: %d", spiResult);
+  }
+  }
+}
 
 void app_main(void)
 {
@@ -342,59 +394,13 @@ void app_main(void)
    */
   ESP_ERROR_CHECK(example_connect());
 
-  sendMessage((char[]){4, 3, 2, 1, 0}, 5);
-
-  sendMessage((char[]){4, 9, 8, 7, 6}, 5);
-
   mqtt5_app_start();
 
-  unsigned int msgNum = 0;
   for (;;)
   {
-    sendMessage((char[]){4, msgNum, msgNum, msgNum, msgNum}, 5);
-    uint8_t pbMsg[MAX_PAYLOAD_BYTES];
-    // drain the RX queue.
+    char pbMsg[MAX_PAYLOAD_BYTES];
     esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
-    // handleSpi(ret, pbMsg);
-    switch (ret)
-    {
-    case ESP_OK:
-    {
-      size_t msgLength = pbMsg[0];
-      msgNum++;
-      // int msg_id = esp_mqtt_client_publish(client, "Top", pbMsg, msgLength, 1, 1);
-      // ESP_LOGI(TAG, "PUB msg_id=%d", msg_id);
-
-      char msgAsStr[256] = "";
-      int strIndex = 0;
-      for (int i = 0; i < SPI_MAX_FRAME_SZ; i++)
-      {
-        strIndex += snprintf(msgAsStr + strIndex, 4, "%d ", pbMsg[i]);
-      }
-
-      ESP_LOGI(TAG, "msg: %u len: %d, %s", msgNum, msgLength, msgAsStr);
-      break;
-    }
-    case ESP_ERR_TIMEOUT:
-    {
-      ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
-      break;
-    }
-    case ESP_ERR_INVALID_SIZE:
-    {
-      ESP_LOGE(TAG, "invalid size");
-      break;
-    }
-    case ESP_ERR_INVALID_CRC:
-    {
-      ESP_LOGE(TAG, "invalid CRC");
-      break;
-    }
-    default:
-    {
-      ESP_LOGE(TAG, "unknown error: %d", ret);
-    }
-    }
+    handleSpiMsg(ret, pbMsg);
 
     // vTaskDelay(pdMS_TO_TICKS(2000));
   }

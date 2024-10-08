@@ -23,4 +23,4 @@
 
 esp_err_t initSpi(void);
 bool sendMessage(char *toSend, size_t size);
-esp_err_t waitForSpiRx(uint8_t *rxWord, uint32_t msTimeout);
+esp_err_t waitForSpiRx(char *rxWord, uint32_t msTimeout);
