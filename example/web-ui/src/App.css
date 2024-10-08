@@ -29,9 +29,9 @@
   border-color: #0070f3;
 }
 
-.widget h4 {
+.widget-head span {
   margin: 0 0 1rem 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .field p {

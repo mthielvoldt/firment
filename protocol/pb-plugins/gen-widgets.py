@@ -28,6 +28,66 @@ integer_fields = (
 )
 
 def get_message_widget(message: DescriptorProto):
+  if message.name.endswith("Ctl"):
+    return get_ctl_widget(message)
+  elif message.name.endswith("Tlm"):
+    return get_tlm_widget(message)
+  else:
+    return "" # Perhaps an error?
+
+
+def get_ctl_widget(message: DescriptorProto):
+  state = f"{message.name}State"
+  field_strings = ""
+  initial_state = {}
+  setState = f"set{state}"
+
+  for field in message.field:
+    if field.type in integer_fields:
+      initial_state[field.name] = 0
+      field_strings += f'''
+      <label>
+        {field.name}: 
+        <input className="field" type="number" step="1" 
+          value={{{state}.{field.name}}} name="{field.name}"
+          onChange={{e => set{state}({{...{state}, {field.name}:e.target.value}})}}/>
+      </label>
+      <br/>'''
+    if field.type in float_fields:
+      initial_state[field.name] = 0
+      field_strings += f'''
+      <label>
+        {field.name}: 
+        <input className="field" type="number" step="0.01" 
+          value={{{state}.{field.name}}} name="{field.name}"
+          onChange={{e => set{state}({{...{state}, {field.name}:e.target.value}})}}/>
+      </label>
+      <br/>'''
+
+  return f'''
+export function {message.name}({{}}) {{
+  const [{state}, {setState}] = useState({initial_state});
+  addTopicCallback("{message.name}", {setState});
+
+  function handleSubmit(e) {{
+    e.preventDefault();
+    console.log({state});
+  }}
+
+  return (
+    <form className="widget" onSubmit={{handleSubmit}}>
+      <p className="widget-head">
+        <span >WaveformCtl </span>
+        <button type="submit">Send</button>
+      </p>
+      {field_strings}
+    </form>
+  );
+}}
+'''
+
+
+def get_tlm_widget(message: DescriptorProto):
   # spec a div with a name
   message_name = message.name
   field_strings = ""
@@ -71,7 +131,8 @@ export function {message_name}({{}}) {{
 def digest_proto(proto: FileDescriptorProto):
   ret = ""
   for message in proto.message_type:
-    ret += get_message_widget(message)
+    widget_str = get_message_widget(message)
+    ret += widget_str
   return ret
 
 def generate_widgets(request: CodeGeneratorRequest) -> str:
