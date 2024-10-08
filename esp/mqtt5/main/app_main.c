@@ -342,11 +342,16 @@ void app_main(void)
    */
   ESP_ERROR_CHECK(example_connect());
 
+  sendMessage((char[]){4, 3, 2, 1, 0}, 5);
+
+  sendMessage((char[]){4, 9, 8, 7, 6}, 5);
+
   mqtt5_app_start();
 
   unsigned int msgNum = 0;
   for (;;)
   {
+    sendMessage((char[]){4, msgNum, msgNum, msgNum, msgNum}, 5);
     uint8_t pbMsg[MAX_PAYLOAD_BYTES];
     // drain the RX queue.
     esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);

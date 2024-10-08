@@ -11,6 +11,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "esp_log.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -74,7 +76,7 @@ static spi_bus_config_t buscfg = {
 static spi_slave_interface_config_t slvcfg = {
     .mode = 1, // (CPOL, CPHA) = (0,1) Clock is low when Sub enabled, data valid on second edge (falling).
     .spics_io_num = GPIO_CS,
-    .queue_size = SPI_QUEUE_LEN,
+    .queue_size = TRANSACTION_QUEUE_LEN,
     .flags = SPI_SLAVE_BIT_LSBFIRST,
     .post_setup_cb = my_post_setup_cb,
     .post_trans_cb = my_post_trans_cb,
@@ -87,25 +89,42 @@ static gpio_config_t io_conf = {
     .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
 };
 static int spiTxCount = 0;
-static WORD_ALIGNED_ATTR char txBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {0};
-static WORD_ALIGNED_ATTR char txNada[SPI_BUFFER_SZ_BYTES] = {0};
-static WORD_ALIGNED_ATTR char rxBufs[SPI_BUFFER_SZ_BYTES * SPI_QUEUE_LEN] = {0};
-static spi_slave_transaction_t spiTransactions[SPI_QUEUE_LEN] = {};
+
+typedef struct buff_s
+{
+  char data[SPI_BUFFER_SZ_BYTES];
+} buff_t;
+
+// Memory blocks; all buffers point to various locations in these.
+static WORD_ALIGNED_ATTR buff_t txBufs[NUM_TX_BUFFERS];
+static WORD_ALIGNED_ATTR buff_t txNada = {0};
+static WORD_ALIGNED_ATTR buff_t rxBufs[TRANSACTION_QUEUE_LEN] = {0};
+static spi_slave_transaction_t transactions[TRANSACTION_QUEUE_LEN] = {0};
+
+/** When we don't have a message to send (no message pending from web), we leave
+ * the tx_buffer ptr pointing to txNada, and don't advance nextTxIndex.  We can
+ * transmit from txNada over and over until we have something to send. In
+ * contrast, rx_buffer must advance on every transaction so so we don't clobber
+ * data rx data hasn't been processed.
+ * Accordingly, rx_buffer is in lock-step with rxBufs, and tx_buffer has
+ * an extra layer of indirection through txBufPtrs.*/
+
+static struct txPreQueue_s
+{
+  uint32_t numWaiting;
+  uint32_t readIdx;
+} txPreQ = {0};
 
 // Main application
 esp_err_t initSpi(void)
 {
   esp_err_t ret;
 
-  for (int i = 0; i < SPI_QUEUE_LEN; i++)
+  for (int i = 0; i < TRANSACTION_QUEUE_LEN; i++)
   {
-    spiTransactions[i] = (spi_slave_transaction_t){
-        .length = MAX_TRANSACTION_LENGTH,
-        .rx_buffer = &(rxBufs[i * SPI_BUFFER_SZ_BYTES]),
-        .tx_buffer = &(txBufs[i * SPI_BUFFER_SZ_BYTES]),
-    };
-  }
-  spiTransactions[2].tx_buffer = txNada;
+    transactions[i].length = MAX_TRANSACTION_LENGTH_BITS;
+    transactions[i].rx_buffer = &rxBufs[i];
+  };
 
   // Configure handshake line as output
   gpio_config(&io_conf);
@@ -136,43 +155,82 @@ esp_err_t initSpi(void)
   return ret;
 }
 
-esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
+bool sendMessage(char *toSend, size_t size)
 {
-  static int32_t numMessagesInSendQueue = 0;
+  bool success = false;
+  if (txPreQ.numWaiting < TX_PREQUEUE_LEN)
+  {
+    uint32_t writeIdx = txPreQ.readIdx + txPreQ.numWaiting;
+    if (writeIdx >= NUM_TX_BUFFERS)
+      writeIdx -= NUM_TX_BUFFERS;
+    memcpy(&txBufs[writeIdx], toSend, size);
+    txPreQ.numWaiting++;
+    success = true;
+  }
+  return success;
+}
+
+const void *getNextTxBuffer(void)
+{
+  const void *nextTxBuffer;
+
+  if (txPreQ.numWaiting > 0)
+  {
+    nextTxBuffer = &txBufs[txPreQ.readIdx];
+    txPreQ.numWaiting--;
+    if (++txPreQ.readIdx >= NUM_TX_BUFFERS)
+      txPreQ.readIdx = 0;
+  }
+  else
+  {
+    nextTxBuffer = &txNada;
+  }
+  return nextTxBuffer;
+}
+
+esp_err_t addToTransactionQueue(void)
+{
   static uint32_t nextTransIndex = 0;
 
-  spi_slave_transaction_t *rxdTransaction = NULL;
+  // prep the next transaction.
+  spi_slave_transaction_t *nextTransaction = &transactions[nextTransIndex];
+  nextTransaction->tx_buffer = getNextTxBuffer();
 
-  // Clear receive buffer, set send buffer to something sane
-  // memset(rxBufs, 0x0, SPI_BUFFER_SZ_BYTES);
-  // sprintf(txBufs, "This is the receiver, sending data for transmission number %04d.", spiTxCount++);
-
-  /* This call enables the SPI slave interface to send/receive to the txBufs and rxBufs. The transaction is
-  initialized by the SPI master, however, so it will not actually happen until the master starts a hardware transaction
-  by pulling CS low and pulsing the clock etc. In this specific example, we use the handshake line, pulled up by the
-  .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
-  data.
-  */
-
-  // (re)fill txQueue
-  while (numMessagesInSendQueue < TARGET_TX_QUEUE_DEPTH)
+  // try to enqueue it.  If this fails, stop trying.
+  esp_err_t ret = spi_slave_queue_trans(RCV_HOST, nextTransaction, 0);
+  if (ret == ESP_OK)
   {
-    if (spi_slave_queue_trans(RCV_HOST, &spiTransactions[nextTransIndex], 0) == ESP_OK)
-    {
-      numMessagesInSendQueue++;
-      if (++nextTransIndex == SPI_QUEUE_LEN)
-        nextTransIndex = 0;
-    }
+    if (++nextTransIndex == TRANSACTION_QUEUE_LEN)
+      nextTransIndex = 0;
+  }
+  return ret;
+}
+
+/** Enables the SPI slave interface to send the txBufs and receive into rxBufs.
+ * However, it will not actually happen until the main device starts a hardware
+ * transaction by pulling CS low and pulsing the clock. */
+esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
+{
+  spi_slave_transaction_t *rxdTransaction;
+  static uint32_t numTransactionsQueued = 0;
+
+  while (numTransactionsQueued < TRANSACTION_QUEUE_LEN)
+  {
+    if (addToTransactionQueue() == ESP_OK)
+      numTransactionsQueued++;
     else
-    {
-      break; // Getting here means the queue is full, so move on to processing Rx.
-    }
+      break; // If here, we tried to add to a full transaction queue: (an error)
   }
 
   // The timeout is important so lower priority tasks can breathe when there isn't data.
-  esp_err_t ret = spi_slave_get_trans_result(RCV_HOST, &rxdTransaction, pdMS_TO_TICKS(msTimeout));
+  volatile esp_err_t ret =
+      spi_slave_get_trans_result(RCV_HOST, &rxdTransaction, pdMS_TO_TICKS(msTimeout));
+
   if (ret == ESP_OK)
   {
+    // Regardless of CRC/Length, we lost an item from the transaction queue.
+    numTransactionsQueued--;
+
     bool crcGood = true; // placeholder.
     /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/
     bool lenGood = rxdTransaction->trans_len == EXPECTED_TRANS_LEN_BITS;
@@ -180,11 +238,11 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
       ret = ESP_ERR_INVALID_SIZE;
     else if (!crcGood)
       ret = ESP_ERR_INVALID_CRC;
+    else if (rxdTransaction->rx_buffer < &rxBufs || rxdTransaction->rx_buffer > &rxBufs[TRANSACTION_QUEUE_LEN - 1])
+      ret = ESP_ERR_INVALID_RESPONSE;
     else // All good.
     {
       spiTxCount++;
-      if (--numMessagesInSendQueue < 0)
-        numMessagesInSendQueue = 0;
       memcpy(rxMsg, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
     }
   }
