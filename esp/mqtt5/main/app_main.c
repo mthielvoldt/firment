@@ -103,14 +103,16 @@ static void print_user_property(mqtt5_user_property_handle_t user_property)
 
 static void print_data(esp_mqtt_event_t *event)
 {
-  print_user_property(event->property->user_property);
+  // print_user_property(event->property->user_property);
   // ESP_LOGI(TAG, "payload_format_indicator is %d", event->property->payload_format_indicator);
   // ESP_LOGI(TAG, "response_topic is %.*s", event->property->response_topic_len, event->property->response_topic);
   // ESP_LOGI(TAG, "correlation_data is %.*s", event->property->correlation_data_len, event->property->correlation_data);
   // ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
-  ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
+  // ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
   // ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
-  ESP_LOGI(TAG, "len=%d Dat=%02x %02x %02x %02x", event->data_len, event->data[0], event->data[1], event->data[2], event->data[3]);
+  ESP_LOGI(TAG, "DATA, len=%d Dat=%02x %02x %02x %02x",
+           event->data_len,
+           event->data[0], event->data[1], event->data[2], event->data[3]);
 }
 
 static void setup_users(esp_mqtt_client_handle_t client)
@@ -165,7 +167,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
   ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32, base, event_id);
   esp_mqtt_event_handle_t event = event_data;
   esp_mqtt_client_handle_t client = event->client;
-  int msg_id;
+  int msg_id; // unused, could be.
 
   ESP_LOGD(TAG, "free heap size is %" PRIu32 ", minimum %" PRIu32, esp_get_free_heap_size(), esp_get_minimum_free_heap_size());
   switch ((esp_mqtt_event_id_t)event_id)
@@ -173,43 +175,29 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
   case MQTT_EVENT_CONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
     setup_users(client);
-
-    print_user_property(event->property->user_property);
-
+    // print_user_property(event->property->user_property);
     subscribe_all(client);
-
-    // msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos0");
-    // ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
-
     break;
   case MQTT_EVENT_DISCONNECTED:
-    ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-    print_user_property(event->property->user_property);
+    ESP_LOGI(TAG, "DISCONNECTED");
     delete_users();
     break;
   case MQTT_EVENT_SUBSCRIBED:
-    ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
-    print_user_property(event->property->user_property);
-    msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
-    ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+    ESP_LOGI(TAG, "SUBSCRIBED, msg_id=%d", event->msg_id);
     break;
   case MQTT_EVENT_UNSUBSCRIBED:
-    ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
-    print_user_property(event->property->user_property);
-
+    ESP_LOGI(TAG, "UNSUBSCRIBED, msg_id=%d", event->msg_id);
     // esp_mqtt_client_disconnect(client);
     break;
   case MQTT_EVENT_PUBLISHED:
-    ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
-    print_user_property(event->property->user_property);
+    ESP_LOGI(TAG, "PUBLISHED, msg_id=%d", event->msg_id);
     break;
   case MQTT_EVENT_DATA:
     print_data(event);
+    sendMessage(event->data, event->data_len);
     break;
   case MQTT_EVENT_ERROR:
-    ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
-    print_user_property(event->property->user_property);
-    ESP_LOGI(TAG, "MQTT5 return code %d", event->error_handle->connect_return_code);
+    ESP_LOGI(TAG, "MQTT_EVENT_ERROR, return code %d", event->error_handle->connect_return_code);
     if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
     {
       log_error_if_nonzero("reported from esp-tls", event->error_handle->esp_tls_last_esp_err);
@@ -337,7 +325,7 @@ void handleSpiMsg(esp_err_t spiResult, char pbMsg[])
   case ESP_OK:
   {
     size_t msgLength = pbMsg[0];
-    int msg_id = esp_mqtt_client_publish(client, "Top", &pbMsg[1], msgLength, 1, 1);
+    esp_mqtt_client_publish(client, "Top", &pbMsg[1], msgLength, 1, 1);
     logMsgContents(pbMsg, msgLength);
     break;
   }
