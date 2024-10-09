@@ -2,6 +2,11 @@ import mqtt, { MqttClient } from "mqtt"; // import namespace "mqtt"
 import * as pb from "./generated/mcu_1.es6.js";
 
 let client: MqttClient;
+/** callbacks is an object containing:
+ * keys: widget/message names, values: the setState functions of those widgets.
+ * When an MQTT message comes in, after decoding, the message name is looked up,
+ * which will be the same as the name of a widget.  That lets us call the 
+ * right widget's setState function, passing it that message's data.*/
 let callbacks = {}
 let ranOnce = false;
 
@@ -41,3 +46,9 @@ export function addTopicCallback(topic: string, callback) {
   callbacks[topic] = callback;
 }
 
+export function sendMessage( message_name: string, state_obj: object) {
+  let message = {[message_name]: state_obj}
+  let packet = pb.Top.encode(message).finish();
+  client.publish("Top", packet);
+  console.log(JSON.stringify(message), "packet: ", packet);
+}

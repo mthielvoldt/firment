@@ -10,7 +10,7 @@ header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
 import { useState } from "react";
-import { addTopicCallback } from "../mqclient";"""
+import { addTopicCallback, sendMessage } from "../mqclient";"""
 
 float_fields = (
   FieldDescriptor.TYPE_FLOAT,
@@ -72,6 +72,7 @@ export function {message.name}({{}}) {{
   function handleSubmit(e) {{
     e.preventDefault();
     console.log({state});
+    sendMessage("{message.name}", {state});
   }}
 
   return (
