@@ -36,7 +36,7 @@ link_libraries("-lm")
 
 add_executable(${EXECUTABLE}
   spi_example.c
-  example_comms.c
+  project_comms.c
   control.c
   generated/mcu_1.pb.c
   gpio_common.c
@@ -45,6 +45,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/port/fmt_periodic_xmc.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
+  ../../firmware/fmt_rx.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   lib/XMC4000_DFP/RTE_Driver/SPI.c

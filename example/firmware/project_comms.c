@@ -13,9 +13,8 @@
  * - periodic telemetry (unrequested)
  * - conditional-triggered alerts
  */
-#include "example_comms.h"
+#include "project_comms.h"
 #include "control.h"
-#include "fmt_spi.h"
 
 // This must be a power of 2.
 #define CALLS_PER_FULL_ROTATION 1024U
@@ -69,9 +68,11 @@ void comm_handleTelemetry(void)
     break;
   }
 
-  Top incomingMessage;
-  if(getMsg(&incomingMessage))
-  {
-    XMC_GPIO_ToggleOutput(led.port, led.pin);
-  }
 }
+
+#ifdef USE_WAVEFORM_CTL
+void handleWaveformCtl(WaveformCtl msg)
+{
+  XMC_GPIO_ToggleOutput(led.port, led.pin);
+}
+#endif

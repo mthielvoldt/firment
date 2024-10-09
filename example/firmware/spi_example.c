@@ -8,9 +8,10 @@
 #endif
 
 #include <fmt_spi.h>
+#include <fmt_rx.h>
 #include <port/fmt_periodic_xmc.h>
 #include "control.h"
-#include "example_comms.h"
+#include "project_comms.h"
 #include "frequency.h"
 
 #define periodicA CCU40_0_IRQHandler
@@ -61,5 +62,6 @@ int main(void)
 void periodicA()
 {
   comm_handleTelemetry();
+  fmt_handleRx();
   ctl_updateVoltageISR();
 }

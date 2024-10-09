@@ -1,4 +1,5 @@
-#include "generated/mcu_1.pb.h"
+#pragma once
+#include <project_comms.h>
 #include <Driver_SPI.h>
 
 #define HEADER_SIZE_BYTES 1U
@@ -7,19 +8,6 @@
 #define MAX_SENDER_PRIORITY 16U
 
 #define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - HEADER_SIZE_BYTES)
-
-// TODO: Abstract this away from XMC.
-typedef enum
-{
-  USIC_INPUT_A = 0U, /*< Input-A */
-  USIC_INPUT_B,      /*< Input-B */
-  USIC_INPUT_C,      /*< Input-C */
-  USIC_INPUT_D,      /*< Input-D */
-  USIC_INPUT_E,      /*< Input-E */
-  USIC_INPUT_F,      /*< Input-F */
-  USIC_INPUT_G,      /*< Input-G */
-  USIC_INPUT_INVALID /*< This is to check during mode switch */
-} usicInput_t;
 
 typedef enum {
   BUS_MODE_MAIN,
