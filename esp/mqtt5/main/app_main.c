@@ -146,13 +146,6 @@ static void subscribe(esp_mqtt_client_handle_t client, char *topic, int qos)
   ESP_LOGI(TAG, "requested subscribe to '%s'", topic);
 }
 
-static void subscribe_all(esp_mqtt_client_handle_t client)
-{
-  subscribe(client, "/topic/qos0", 0);
-  subscribe(client, "/topic/qos1", 2);
-  subscribe(client, "Top", 0);
-}
-
 /*
  * @brief Event handler registered to receive MQTT events
  *
@@ -177,7 +170,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
     setup_users(client);
     // print_user_property(event->property->user_property);
-    subscribe_all(client);
+    subscribe(client, "edge-bound", 0);
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "DISCONNECTED");
@@ -326,7 +319,7 @@ void handleSpiMsg(esp_err_t spiResult, char pbMsg[])
   case ESP_OK:
   {
     size_t msgLength = pbMsg[0];
-    esp_mqtt_client_publish(client, "Top", &pbMsg[1], msgLength, 1, 1);
+    esp_mqtt_client_publish(client, "hq-bound", &pbMsg[1], msgLength, 1, 1);
     logMsgContents(pbMsg, msgLength);
     break;
   }

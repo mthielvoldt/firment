@@ -41,7 +41,9 @@ message TouchParam {
 
 message Top {
   oneof sub {
-    WaveformCtl WaveformCtl = 1;
-    WaveformTlm WaveformTlm = 2;
+    Ack Ack = 1;
+    TouchParam TouchParam = 2;
+    WaveformCtl WaveformCtl = 8;
+    WaveformTlm WaveformTlm = 9;
   }
 }

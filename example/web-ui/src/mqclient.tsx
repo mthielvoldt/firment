@@ -18,9 +18,9 @@ export default function setupMq() {
   ranOnce = true;
   client = mqtt.connect("mqtt://localhost:8080");
   client.on("connect", () => {
-    console.log(`Subscribing to Top`);
-    client.subscribe("Top", (err) => {
-      if (!err) { console.log("Subscribed to Top"); }
+    client.subscribe("hq-bound", (err) => {
+      if (!err) { console.log("Subscribed to 'hq-bound'"); }
+      else { console.error("Failed to subscribe to hq-bound."); }
     })
   });
 
@@ -49,6 +49,6 @@ export function addTopicCallback(topic: string, callback) {
 export function sendMessage( message_name: string, state_obj: object) {
   let message = {[message_name]: state_obj}
   let packet = pb.Top.encodeDelimited(message).finish();
-  client.publish("Top", packet);
+  client.publish("edge-bound", packet);
   console.log(JSON.stringify(message), "packet: ", packet);
 }
