@@ -48,7 +48,7 @@ export function addTopicCallback(topic: string, callback) {
 
 export function sendMessage( message_name: string, state_obj: object) {
   let message = {[message_name]: state_obj}
-  let packet = pb.Top.encode(message).finish();
+  let packet = pb.Top.encodeDelimited(message).finish();
   client.publish("Top", packet);
   console.log(JSON.stringify(message), "packet: ", packet);
 }

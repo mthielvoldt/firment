@@ -58,13 +58,4 @@ static inline spiCfg_t getDefaultSpiCfg(void)
  */
 bool sendMsg(Top message);
 
-/** Pulls the next packed from the sendQueue and sends it.
- * Triggered on SPI_EVENT_TRANSFER_COMPLETE, which can be in ISR context, or as 
- * a result of a sendMsg() call.
- */
-void SendNextPacket(void);
-
-/** Receive handler
- * An ISR that runs when a new word has been received and is ready to process.
- */
-void ISR_handleRx_spi(void);
+bool getMsg(Top *message);

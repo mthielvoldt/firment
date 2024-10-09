@@ -11,10 +11,16 @@
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
 
+static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
+static queue_t rxQueue;
+static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES];
+
 extern ARM_DRIVER_SPI Driver_SPI4;
 static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
 
 ARM_SPI_SignalEvent_t callback;
+
+void SendNextPacket(void);
 
 void SPI1_callback(uint32_t event)
 {
@@ -22,6 +28,8 @@ void SPI1_callback(uint32_t event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
+    if (rxPacket[0])
+      enqueueBack(&rxQueue, rxPacket);
     SendNextPacket();
     break;
   case ARM_SPI_EVENT_DATA_LOST:
@@ -64,6 +72,12 @@ bool initFirment_spi(spiCfg_t cfg)
       SEND_QUEUE_LENGTH,
       &sendQueue,
       sendQueueStore,
+      MAX_SENDER_PRIORITY);
+  initQueue(
+      MAX_PACKET_SIZE_BYTES,
+      SEND_QUEUE_LENGTH,
+      &rxQueue,
+      rxQueueStore,
       MAX_SENDER_PRIORITY);
   return true;
 }
@@ -110,8 +124,9 @@ void SendNextPacket(void)
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
 
     /** Note: in SPI we're using fixed-width data frames to simplify staying
-     * synchronized in the presence of data corruption. */
-    spi1->Send(txPacket, MAX_PACKET_SIZE_BYTES);
+     * synchronized in the presence of data corruption. 
+     * Note: this call only starts the transfer, it doesn't block.*/
+    spi1->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
 
     /* Some test code for counting bytes that get through.*/
     // static uint8_t substitutePacket[] = {
@@ -126,23 +141,21 @@ void SendNextPacket(void)
   }
 }
 
-Top decode(uint8_t *buffer, size_t msg_len)
+bool getMsg(Top *message)
 {
-  Top msg = Top_init_zero;
-  /* Create a stream that reads from the buffer. */
-  pb_istream_t stream = pb_istream_from_buffer(
-      buffer + HEADER_SIZE_BYTES, msg_len);
-
-  /* Now we are ready to decode the message. */
-  if (pb_decode(&stream, Top_fields, &msg))
+  bool success = false;
+  if (numItemsInQueue(&rxQueue) > 0) 
   {
-    // handle an error
-  }
-  return msg;
-}
+    uint8_t packet[MAX_PACKET_SIZE_BYTES];
+    dequeueFront(&rxQueue, packet);
+    uint8_t messageLen = packet[0];
 
-void ISR_handleRx_spi(void)
-{
+    /* Create a stream that reads from the buffer. */
+    pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
+    /* Now we are ready to decode the message. */
+    success = pb_decode(&stream, Top_fields, message);
+  }
+  return success;
 }
 
 /** OPTIMIZATION POSSIBILITIES

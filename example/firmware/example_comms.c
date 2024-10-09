@@ -53,7 +53,7 @@ void comm_handleTelemetry(void)
     //             .currentMa = telem.currentMa,
     //             .voltageV = telem.voltage}}});
 
-    XMC_GPIO_ToggleOutput(led.port, led.pin);
+    // XMC_GPIO_ToggleOutput(led.port, led.pin);
     break;
   }
   case 20:
@@ -67,5 +67,11 @@ void comm_handleTelemetry(void)
     break;
   case 60:
     break;
+  }
+
+  Top incomingMessage;
+  if(getMsg(&incomingMessage))
+  {
+    XMC_GPIO_ToggleOutput(led.port, led.pin);
   }
 }

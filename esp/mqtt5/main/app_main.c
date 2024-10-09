@@ -143,13 +143,14 @@ static void delete_users(void)
 static void subscribe(esp_mqtt_client_handle_t client, char *topic, int qos)
 {
   int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
-  ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+  ESP_LOGI(TAG, "requested subscribe to '%s'", topic);
 }
 
 static void subscribe_all(esp_mqtt_client_handle_t client)
 {
   subscribe(client, "/topic/qos0", 0);
   subscribe(client, "/topic/qos1", 2);
+  subscribe(client, "Top", 0);
 }
 
 /*
