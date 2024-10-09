@@ -70,9 +70,7 @@ void comm_handleTelemetry(void)
 
 }
 
-#ifdef USE_WAVEFORM_CTL
 void handleWaveformCtl(WaveformCtl msg)
 {
   XMC_GPIO_ToggleOutput(led.port, led.pin);
 }
-#endif

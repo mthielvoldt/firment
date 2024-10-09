@@ -39,13 +39,13 @@ add_executable(${EXECUTABLE}
   project_comms.c
   control.c
   generated/mcu_1.pb.c
+  generated/fmt_rx.pb.c
   gpio_common.c
   ../../firmware/fmt_spi.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
-  ../../firmware/fmt_rx.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   lib/XMC4000_DFP/RTE_Driver/SPI.c

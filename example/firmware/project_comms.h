@@ -8,7 +8,7 @@
 
 void comm_init(portPin_t ledPin); // kinda hate xmc gpio being here - for main, not fmt.
 
-#define USE_WAVEFORM_CTL
+#define USE_WaveformCtl
 void handleWaveformCtl(WaveformCtl msg);
 
 /** Comms Periodic
