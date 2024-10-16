@@ -18,6 +18,7 @@ function App() {
         <div>
           <h2>Telemetry</h2>
           <widgets.WaveformTlm />
+          <widgets.Log />
         </div>
       </div>
     </>

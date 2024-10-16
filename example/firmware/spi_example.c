@@ -52,7 +52,8 @@ int main(void)
   {
     /** Do some intelligent housekeeping. For example:
      *  - record how much time I spend here as a cpu-idle metric.
-     *  -
+     *  - handle logging.
+     *  - free memory accounting.
      */
 
   }

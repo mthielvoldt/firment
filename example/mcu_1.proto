@@ -1,6 +1,7 @@
 // A message structure to control a signal generator's output waveform.
 
 syntax = "proto3";
+import "nanopb.proto";
 
 enum WaveShape {
   WAVE_SHAPE_UNSPECIFIED = 0;
@@ -25,6 +26,11 @@ message Ack {
   fixed32 refCRC = 1;
 }
 
+message Log {
+  string text = 1 [(nanopb).max_size = 50]; // 64 - 4(Top) - 4(value) = 56
+  float value = 2;
+}
+
 enum ParamOperation {
   CURRENT_VAL = 0;
   GET = 1;
@@ -42,7 +48,8 @@ message TouchParam {
 message Top {
   oneof sub {
     Ack Ack = 1;
-    TouchParam TouchParam = 2;
+    Log Log = 2;
+    TouchParam TouchParam = 3;
     WaveformCtl WaveformCtl = 8;
     WaveformTlm WaveformTlm = 9;
   }

@@ -128,9 +128,30 @@ export function {message_name}({{}}) {{
 }}
 
 '''
+def get_log_widget() :
+  return '''
+interface LogMessage {
+  text: string;
+  value: number;
+}
+export function Log({}) {
+  const [LogState, setLogState] = useState("");
+  addTopicCallback("Log", appendToLog);
+  function appendToLog(newLogMessage: LogMessage) {
+    setLogState(LogState + newLogMessage.text + newLogMessage.value + "\\n");
+  }
+
+  return (
+    <div className="widget">
+      <h4>Log</h4>
+      <pre>{LogState}</pre>
+    </div>
+  )
+}
+'''
   
 def digest_proto(proto: FileDescriptorProto):
-  ret = ""
+  ret = get_log_widget()
   for message in proto.message_type:
     widget_str = get_message_widget(message)
     ret += widget_str

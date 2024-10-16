@@ -31,12 +31,14 @@ void comm_init(portPin_t ledPin)
 void comm_handleTelemetry(void)
 {
   static uint32_t count = 0;
+  static uint32_t rotations = 0;
 
   // execute 8 different operations, one each call in round-robin
   switch (++count & (CALLS_PER_FULL_ROTATION - 1))
   {
   case 0:
   {
+    rotations++;
     telem_t telem = ctl_getTelem();
     sendMsg((const Top){
         .which_sub = Top_WaveformTlm_tag,
@@ -57,9 +59,12 @@ void comm_handleTelemetry(void)
   }
   case 20:
   {
-    // sendMsg((const Top){
-    //     .which_sub = ,
-    //     .sub = {}});
+    sendMsg((const Top){
+        .which_sub = Top_Log_tag,
+        .sub = {
+            .Log = {
+                .text = "This message is a test.",
+                .value = rotations}}});
     break;
   }
   case 40:
@@ -67,7 +72,6 @@ void comm_handleTelemetry(void)
   case 60:
     break;
   }
-
 }
 
 void handleWaveformCtl(WaveformCtl msg)
