@@ -40,14 +40,14 @@ void comm_handleTelemetry(void)
   {
     rotations++;
     telem_t telem = ctl_getTelem();
-    sendMsg((const Top){
+    fmt_sendMsg((const Top){
         .which_sub = Top_WaveformTlm_tag,
         .sub = {
             .WaveformTlm = {
                 .currentMa = telem.currentMa,
                 .voltageV = telem.voltage}}});
 
-    // sendMsg((const Top){
+    // fmt_sendMsg((const Top){
     //     .which_sub = Top_WaveformTlm_tag,
     //     .sub = {
     //         .WaveformTlm = {
@@ -59,7 +59,7 @@ void comm_handleTelemetry(void)
   }
   case 20:
   {
-    sendMsg((const Top){
+    fmt_sendMsg((const Top){
         .which_sub = Top_Log_tag,
         .sub = {
             .Log = {

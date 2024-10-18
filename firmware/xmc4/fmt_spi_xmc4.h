@@ -49,7 +49,7 @@ typedef struct
 /** Initializes firment spi driver
  * passes project-specific pin and peripheral selections.
  */
-bool initFirment_spi(spiCfg_t config);
+bool fmt_initSpi(spiCfg_t config);
 
 static inline spiCfg_t getDefaultSpiCfg(void)
 {
@@ -89,7 +89,7 @@ static inline spiCfg_t getDefaultSpiCfg(void)
  * Queues a message for transmit.
  * Should only be called from a single context - not thread-safe.
  */
-bool sendMsg(Top message);
+bool fmt_sendMsg(Top message);
 
 /** Transmit handler
  * An ISR that runs when the Tx buffer is done transferring out the last word

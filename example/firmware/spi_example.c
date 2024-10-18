@@ -33,7 +33,7 @@ int main(void)
   */
   spiCfg_t spiConfig = getDefaultSpiCfg();
   spiConfig.spiIrqPriority = spiTxBuf_priority;
-  initFirment_spi(spiConfig);
+  fmt_initSpi(spiConfig);
 
   comm_init((portPin_t){.port = XMC_GPIO_PORT0, .pin = 13U});
 

@@ -16,7 +16,7 @@ static XMC_USIC_CH_t *channel = NULL;
 // Private Declarations
 static void initSpiGpio(spiCfg_t cfg);
 
-bool initFirment_spi(spiCfg_t cfg)
+bool fmt_initSpi(spiCfg_t cfg)
 {
   led = cfg.led;
   channel = cfg.channel;
@@ -88,7 +88,7 @@ static void initSpiGpio(spiCfg_t cfg)
   XMC_GPIO_Init(cfg.ss0.port, cfg.ss0.pin, &cfg.ss0.config);
 }
 
-bool sendMsg(Top message)
+bool fmt_sendMsg(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0x00, 0xEF, 0xCD, 0xAB};
   uint8_t *txMsg = txPacket + HEADER_SIZE_BYTES;

@@ -20,34 +20,12 @@ static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
 
 ARM_SPI_SignalEvent_t callback;
 
-void SendNextPacket(void);
+/* Declarations of private functions */
+static void SendNextPacket(void);
+static void SPI1_callback(uint32_t event);
 
-void SPI1_callback(uint32_t event)
-{
-  switch (event)
-  {
-  case ARM_SPI_EVENT_TRANSFER_COMPLETE:
-    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
-    if (rxPacket[0])
-      enqueueBack(&rxQueue, rxPacket);
-    SendNextPacket();
-    break;
-  case ARM_SPI_EVENT_DATA_LOST:
-    /*  Occurs in slave mode when data is requested/sent by master
-        but send/receive/transfer operation has not been started
-        and indicates that data is lost. Occurs also in master mode
-        when driver cannot transfer data fast enough. */
-    __BKPT(0); /* TODO: Handle this error */
-    break;
-  case ARM_SPI_EVENT_MODE_FAULT:
-    /*  Occurs in master mode when Slave Select is deactivated and
-        indicates Master Mode Fault. */
-    __BKPT(1); /* TODO: Handle this error */
-    break;
-  }
-}
-
-bool initFirment_spi(spiCfg_t cfg)
+/* Public function definitions */
+bool fmt_initSpi(spiCfg_t cfg)
 {
   spi1->Initialize(SPI1_callback);
   spi1->PowerControl(ARM_POWER_FULL);
@@ -82,7 +60,7 @@ bool initFirment_spi(spiCfg_t cfg)
   return true;
 }
 
-bool sendMsg(Top message)
+bool fmt_sendMsg(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
   uint8_t *txMsg = txPacket + HEADER_SIZE_BYTES;
@@ -105,11 +83,28 @@ bool sendMsg(Top message)
   return success;
 }
 
-void SendNextPacket(void)
+bool fmt_getMsg(Top *message)
+{
+  bool success = false;
+  if (numItemsInQueue(&rxQueue) > 0) 
+  {
+    uint8_t packet[MAX_PACKET_SIZE_BYTES];
+    dequeueFront(&rxQueue, packet);
+    uint8_t messageLen = packet[0];
+
+    /* Create a stream that reads from the buffer. */
+    pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
+    /* Now we are ready to decode the message. */
+    success = pb_decode(&stream, Top_fields, message);
+  }
+  return success;
+}
+
+static void SendNextPacket(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
 
-  // sendMsg calls this fn, which is async with spi status, so check spi ready.
+  // fmt_sendMsg calls this fn, which is async with spi status, so check spi ready.
   bool spiReady = !spi1->GetStatus().busy;
 
   /*
@@ -141,21 +136,32 @@ void SendNextPacket(void)
   }
 }
 
-bool getMsg(Top *message)
-{
-  bool success = false;
-  if (numItemsInQueue(&rxQueue) > 0) 
-  {
-    uint8_t packet[MAX_PACKET_SIZE_BYTES];
-    dequeueFront(&rxQueue, packet);
-    uint8_t messageLen = packet[0];
+/* PRIVATE (static) functions */
+static void SendNextPacket(void);
 
-    /* Create a stream that reads from the buffer. */
-    pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
-    /* Now we are ready to decode the message. */
-    success = pb_decode(&stream, Top_fields, message);
+static void SPI1_callback(uint32_t event)
+{
+  switch (event)
+  {
+  case ARM_SPI_EVENT_TRANSFER_COMPLETE:
+    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
+    if (rxPacket[0])
+      enqueueBack(&rxQueue, rxPacket);
+    SendNextPacket();
+    break;
+  case ARM_SPI_EVENT_DATA_LOST:
+    /*  Occurs in slave mode when data is requested/sent by master
+        but send/receive/transfer operation has not been started
+        and indicates that data is lost. Occurs also in master mode
+        when driver cannot transfer data fast enough. */
+    __BKPT(0); /* TODO: Handle this error */
+    break;
+  case ARM_SPI_EVENT_MODE_FAULT:
+    /*  Occurs in master mode when Slave Select is deactivated and
+        indicates Master Mode Fault. */
+    __BKPT(1); /* TODO: Handle this error */
+    break;
   }
-  return success;
 }
 
 /** OPTIMIZATION POSSIBILITIES
