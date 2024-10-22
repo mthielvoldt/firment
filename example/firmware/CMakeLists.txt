@@ -44,6 +44,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/fmt_spi.c
   ../../firmware/queue.c
   ../../firmware/port/fmt_periodic_xmc.c
+  ../../firmware/port/fmt_crc_xmc4.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
   ${XMC_SYSTEM_FILE}
@@ -54,6 +55,7 @@ add_executable(${EXECUTABLE}
   ${XMC_LIB}/xmc_usic.c
   ${XMC_LIB}/xmc_ccu4.c
   ${XMC_LIB}/xmc4_scu.c
+  ${XMC_LIB}/xmc_fce.c
   ${NANOPB}/pb_encode.c
   ${NANOPB}/pb_decode.c
   ${NANOPB}/pb_common.c

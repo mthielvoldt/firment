@@ -1,5 +1,6 @@
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
+#include "crc.h"
 
 #include "queue.h"
 #include <pb_encode.h>
@@ -15,8 +16,11 @@ static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES];
 
-extern ARM_DRIVER_SPI Driver_SPI4;
+extern ARM_DRIVER_SPI Driver_SPI4;  // Need to not hard-code SPI4. 
 static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
+
+extern FMT_DRIVER_CRC Driver_CRC0;
+static FMT_DRIVER_CRC *crc = &Driver_CRC0;
 
 ARM_SPI_SignalEvent_t callback;
 
@@ -29,6 +33,8 @@ bool fmt_initSpi(spiCfg_t cfg)
 {
   spi1->Initialize(SPI1_callback);
   spi1->PowerControl(ARM_POWER_FULL);
+
+  crc->Initialize();
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -145,8 +151,15 @@ static void SPI1_callback(uint32_t event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
-    if (rxPacket[0])
+    if (rxPacket[0]) {
+      // check CRC here so we don't consume Rx queue with errors.
+      // Todo: pad messages so all lengths are even. 
+      uint16_t result;
+      int32_t status = ARM_DRIVER_OK;
+      status = crc->ComputeCRC(rxPacket, (rxPacket[0]/2)*2, &result);
+      
       enqueueBack(&rxQueue, rxPacket);
+    }
     SendNextPacket();
     break;
   case ARM_SPI_EVENT_DATA_LOST:
