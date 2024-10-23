@@ -12,6 +12,7 @@
             "esp/mqtt5/build/config",
             "../esp-idf/components/esp_driver_gpio/include",
             "../esp-idf/components/esp_driver_spi/include/**",
+            "../esp-idf/components/esp_rom/include",
             "../esp-idf/components/esp_system/include/*",
             "../esp-idf/components/esp_timer/include",
             "../esp-idf/components/esp_common/include",

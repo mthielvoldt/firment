@@ -1,6 +1,6 @@
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
-#include "crc.h"
+#include "fmt_crc.h"
 
 #include "queue.h"
 #include <pb_encode.h>
@@ -16,7 +16,7 @@ static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES];
 
-extern ARM_DRIVER_SPI Driver_SPI4;  // Need to not hard-code SPI4. 
+extern ARM_DRIVER_SPI Driver_SPI4; // Need to not hard-code SPI4.
 static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
 
 extern FMT_DRIVER_CRC Driver_CRC0;
@@ -27,6 +27,7 @@ ARM_SPI_SignalEvent_t callback;
 /* Declarations of private functions */
 static void SendNextPacket(void);
 static void SPI1_callback(uint32_t event);
+static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES], uint8_t dataLength);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
@@ -35,6 +36,7 @@ bool fmt_initSpi(spiCfg_t cfg)
   spi1->PowerControl(ARM_POWER_FULL);
 
   crc->Initialize();
+  crc->PowerControl(ARM_POWER_FULL);
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -76,6 +78,7 @@ bool fmt_sendMsg(Top message)
   if (success)
   {
     txPacket[0] = ostream.bytes_written;
+    addCRC(txPacket, ostream.bytes_written + HEADER_SIZE_BYTES);
     enqueueBack(&sendQueue, txPacket);
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
@@ -92,7 +95,7 @@ bool fmt_sendMsg(Top message)
 bool fmt_getMsg(Top *message)
 {
   bool success = false;
-  if (numItemsInQueue(&rxQueue) > 0) 
+  if (numItemsInQueue(&rxQueue) > 0)
   {
     uint8_t packet[MAX_PACKET_SIZE_BYTES];
     dequeueFront(&rxQueue, packet);
@@ -125,7 +128,7 @@ static void SendNextPacket(void)
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
 
     /** Note: in SPI we're using fixed-width data frames to simplify staying
-     * synchronized in the presence of data corruption. 
+     * synchronized in the presence of data corruption.
      * Note: this call only starts the transfer, it doesn't block.*/
     spi1->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
 
@@ -143,7 +146,20 @@ static void SendNextPacket(void)
 }
 
 /* PRIVATE (static) functions */
-static void SendNextPacket(void);
+static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES], uint8_t dataLength)
+{
+  // dataLength must be a multiple of 2.  Add 1 if it's odd.
+  dataLength = ((dataLength + 1) >> 1) << 1;
+
+  uint16_t computedCRC;
+  int32_t result =
+      crc->ComputeCRC(packet, dataLength, &computedCRC);
+  *(uint16_t *)(&packet[dataLength]) = computedCRC;
+  if (result != ARM_DRIVER_OK)
+  {
+    __BKPT(0);
+  }
+}
 
 static void SPI1_callback(uint32_t event)
 {
@@ -151,14 +167,23 @@ static void SPI1_callback(uint32_t event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
     spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
-    if (rxPacket[0]) {
+    if (rxPacket[0])
+    {
       // check CRC here so we don't consume Rx queue with errors.
-      // Todo: pad messages so all lengths are even. 
+      // Todo: pad messages so all lengths are even.
       uint16_t result;
       int32_t status = ARM_DRIVER_OK;
-      status = crc->ComputeCRC(rxPacket, (rxPacket[0]/2)*2, &result);
-      
-      enqueueBack(&rxQueue, rxPacket);
+
+      /* CRC position must be 16-bit aligned for hardware CRC engines, so if the 
+      length of the pb buffer (including length prefix) is odd, there will be a 
+      byte of padding, between the buffer and the CRC. */
+      uint32_t dataLength = ((rxPacket[0] + 1) >> 1) << 1;
+
+      status = crc->ComputeCRC(rxPacket, dataLength, &result);
+      if (result == *(uint16_t *)(&rxPacket[dataLength]) ) //
+      {
+        enqueueBack(&rxQueue, rxPacket);
+      }
     }
     SendNextPacket();
     break;

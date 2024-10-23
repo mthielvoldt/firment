@@ -1,4 +1,4 @@
-#include "crc.h"
+#include "fmt_crc.h"
 #include <xmc_fce.h>
 
 #define FMT_CRC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(0, 0)
@@ -20,14 +20,23 @@ static const FMT_CRC_CAPABILITIES_t DriverCapabilities = {
 };
 
 // Default init config
+// static XMC_FCE_t engine = {
+//     .kernel_ptr = FCE_KE2, // Supports CRC16
+//     .fce_cfg_update = {
+//         .config_refin = 0,  // don't mirror (reflect) input words.
+//         .config_refout = 0, // don't mirror (reflect) CRC result.
+//         .config_xsel = 0,   // don't invert CRC result.
+//     },
+//     .seedvalue = 0,
+// };
 static XMC_FCE_t engine = {
     .kernel_ptr = FCE_KE2, // Supports CRC16
     .fce_cfg_update = {
-        .config_refin = 0,  // don't mirror (reflect) input words.
-        .config_refout = 0, // don't mirror (reflect) CRC result.
-        .config_xsel = 0,   // don't invert CRC result.
+        .config_refin = 1,  // don't mirror (reflect) input words.
+        .config_refout = 1, // don't mirror (reflect) CRC result.
+        .config_xsel = 1,   // don't invert CRC result.
     },
-    .seedvalue = 0,
+    .seedvalue = 0xFFFFFFFF,
 };
 
 static bool isInitialized = false;
@@ -56,46 +65,47 @@ static int32_t Uninitialize(void)
 static int32_t PowerControl(ARM_POWER_STATE state)
 {
   int32_t ret = ARM_DRIVER_ERROR;
-  switch (state) {
-    case ARM_POWER_FULL:
-    {
-      XMC_FCE_Enable();
-      ret = ARM_DRIVER_OK;
-      break;
-    }
-    case ARM_POWER_OFF:
-    {
-      XMC_FCE_Disable();
-      ret = ARM_DRIVER_OK;
-      break;
-    }
-    default:
-    {
-      ret = ARM_DRIVER_ERROR_UNSUPPORTED;
-    }
+  switch (state)
+  {
+  case ARM_POWER_FULL:
+  {
+    XMC_FCE_Enable();
+    ret = ARM_DRIVER_OK;
+    break;
+  }
+  case ARM_POWER_OFF:
+  {
+    XMC_FCE_Disable();
+    ret = ARM_DRIVER_OK;
+    break;
+  }
+  default:
+  {
+    ret = ARM_DRIVER_ERROR_UNSUPPORTED;
+  }
   }
   return ret;
 }
 
-static int32_t ComputeCRC(const void *data, uint32_t num, uint16_t *result)
+static int32_t ComputeCRC(const uint8_t *data, uint32_t length, uint16_t *result)
 {
-  XMC_FCE_STATUS_t status;
-  int32_t ret = ARM_DRIVER_ERROR; // Default to unspecified error.
-  if (isInitialized)
+  int32_t ret = ARM_DRIVER_OK; // Default to unspecified error.
+
+  XMC_FCE_Init(&engine);  // Restores the seed (initial) CRC value.
+
+  if ((length & 0x01U) == 0U)
   {
-    status = XMC_FCE_CalculateCRC16(&engine, data, num, result);
-    if (status == XMC_FCE_STATUS_OK)
+    while (length > 0UL)
     {
-      ret = ARM_DRIVER_OK;
+      engine.kernel_ptr->IR = ((uint16_t)(*data) << 8) + *(data + 1);
+      data += 2;
+      length -= 2U;
     }
-    else if (status == XMC_FCE_STATUS_ERROR)
-    {
-      ret = ARM_DRIVER_ERROR_PARAMETER; // Is data size-aligned to CRC order?
-    }
-    else if (status == XMC_FCE_STATUS_BUSY)
-    {
-      ret = ARM_DRIVER_ERROR_BUSY;
-    }
+    *result = (uint16_t)engine.kernel_ptr->RES;
+  }
+  else
+  {
+    ret = ARM_DRIVER_ERROR_PARAMETER;
   }
   return ret;
 }
@@ -104,38 +114,39 @@ static int32_t Control(uint32_t control, uint32_t arg)
 {
   int32_t ret = ARM_DRIVER_ERROR;
 
-  switch (control) {
-    case FMT_CRC_SET_RESULT_INVERSION:
+  switch (control)
+  {
+  case FMT_CRC_SET_RESULT_INVERSION:
+  {
+    break;
+  }
+  case FMT_CRC_SET_RESULT_REFLECTION:
+  {
+    break;
+  }
+  case FMT_CRC_SET_INPUT_REFLECTION:
+  {
+    break;
+  }
+  case FMT_CRC_SET_CRC_ORDER:
+  {
+    break;
+  }
+  case FMT_CRC_CLEAR_ERROR:
+  {
+    if (arg == FMT_CRC_BUS_ERR)
     {
-      break;
+      XMC_FCE_ClearEvent(&engine, XMC_FCE_STS_BUS_ERROR);
     }
-    case FMT_CRC_SET_RESULT_REFLECTION:
+    else if (arg == FMT_CRC_CONFIG_ERR)
     {
-      break;
+      XMC_FCE_ClearEvent(&engine, XMC_FCE_STS_CONFIG_ERROR);
     }
-    case FMT_CRC_SET_INPUT_REFLECTION:
-    {
-      break;
-    }
-    case FMT_CRC_SET_CRC_ORDER:
-    {
-      break;
-    }
-    case FMT_CRC_CLEAR_ERROR:
-    {
-      if (arg == FMT_CRC_BUS_ERR)
-      {
-        XMC_FCE_ClearEvent(&engine, XMC_FCE_STS_BUS_ERROR);
-      }
-      else if (arg == FMT_CRC_CONFIG_ERR)
-      {
-        XMC_FCE_ClearEvent(&engine, XMC_FCE_STS_CONFIG_ERROR);
-      }
-    }
-    default:
-    {
-      ret = ARM_DRIVER_ERROR_UNSUPPORTED;
-    }
+  }
+  default:
+  {
+    ret = ARM_DRIVER_ERROR_UNSUPPORTED;
+  }
   }
   return ret;
 }

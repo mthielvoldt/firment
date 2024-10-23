@@ -19,6 +19,7 @@
 #include "driver/spi_slave.h"
 #include "driver/gpio.h"
 #include "driver/gpio_filter.h"
+#include "esp32s3/rom/crc.h"
 
 #include "spi_app.h"
 
@@ -162,10 +163,16 @@ bool sendMessage(char *toSend, size_t size)
   bool success = false;
   if (txPreQ.numWaiting < TX_PREQUEUE_LEN)
   {
+    // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
+    uint32_t crcPosition = ((size + 1) >> 1) << 1;
+    uint16_t crc = crc16_le(0x00, (uint8_t*)toSend, crcPosition);
+
     uint32_t writeIdx = txPreQ.readIdx + txPreQ.numWaiting;
     if (writeIdx >= NUM_TX_BUFFERS)
       writeIdx -= NUM_TX_BUFFERS;
-    memcpy(&txBufs[writeIdx], toSend, size);
+    
+    *(uint16_t*)(&txBufs[writeIdx].data[crcPosition]) = crc;
+    memcpy(&txBufs[writeIdx], toSend, crcPosition);
     txPreQ.numWaiting++;
     success = true;
   }

@@ -5,8 +5,11 @@
 #define GPIO_MOSI 11
 #define GPIO_MISO 12
 #define GPIO_SCLK 13
+
 #define SPI_MAX_FRAME_SZ 64
 #define SPI_BUFFER_SZ_BYTES (SPI_MAX_FRAME_SZ + 4) // extra 4 to detect errors
+#define CRC_LENGTH_BYTES 2
+
 #define TX_PREQUEUE_LEN 2 // bufs for Tx messages not yet in transaction queue
 #define TRANSACTION_QUEUE_LEN 2 // each transaction claims a tx_buf and rx_buf
 #define NUM_TX_BUFFERS (TRANSACTION_QUEUE_LEN + TX_PREQUEUE_LEN)

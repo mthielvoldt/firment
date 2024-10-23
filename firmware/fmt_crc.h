@@ -58,7 +58,7 @@ typedef enum _CRC_Error {
     int32_t (*Initialize)(void); // Should this take an event handler callback?
     int32_t (*Uninitialize)(void);
     int32_t (*PowerControl)(ARM_POWER_STATE state);
-    int32_t (*ComputeCRC)(const void *data, uint32_t num, uint16_t *crc);
+    int32_t (*ComputeCRC)(const uint8_t *data, uint32_t num, uint16_t *crc);
     int32_t (*Control)(uint32_t control, uint32_t arg);
     FMT_CRC_STATUS_t (*GetStatus)(void);
   } const FMT_DRIVER_CRC;
