@@ -3,6 +3,7 @@ docker run \
   --rm \
   --name idf \
   -v $PWD:/project \
+  -v $PWD/../../firmware:/project/firmware \
   -w /project \
   -u $UID \
   -e HOME=/tmp \

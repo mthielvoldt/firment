@@ -296,7 +296,7 @@ void logMsgContents(char msg[], size_t msgLength)
   static unsigned int msgNum = 0;
   msgNum++;
 
-  if (msgLength <= SPI_MAX_FRAME_SZ)
+  if (msgLength <= MAX_PACKET_SIZE_BYTES)
   {
     char msgAsStr[256] = "";
     int strIndex = 0;

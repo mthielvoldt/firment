@@ -1,5 +1,7 @@
 #include "spi_slave.h"
 
+#define EXPECTED_VALUE 0x01378EDBu //24u
+
 void checkForSPIErrors(spi_slave_transaction_t *rxdTransaction)
 {
   static int datErrTotal = 0;
