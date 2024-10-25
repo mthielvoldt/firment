@@ -91,7 +91,7 @@ static void initSpiGpio(spiCfg_t cfg)
 bool fmt_sendMsg(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0x00, 0xEF, 0xCD, 0xAB};
-  uint8_t *txMsg = txPacket + HEADER_SIZE_BYTES;
+  uint8_t *txMsg = txPacket + PREFIX_SIZE_BYTES;
   pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
 
   bool success = pb_encode(&ostream, Top_fields, &message);
@@ -129,7 +129,7 @@ void ISR_handleTx_spi(void)
       // dequeue successful.  Starting tx of new packet.
 
       // relying on integer division to truncate remainder.
-      uint32_t num4ByteFrames = (txPacket[0] + HEADER_SIZE_BYTES + 3) / 4;
+      uint32_t num4ByteFrames = (txPacket[0] + PREFIX_SIZE_BYTES + 3) / 4;
       currentPacketSize = num4ByteFrames * 4;
       bytesSent = 0;
       XMC_GPIO_ToggleOutput(led.port, led.pin);
@@ -160,7 +160,7 @@ Top decode(uint8_t *buffer, size_t msg_len)
   Top msg = Top_init_zero;
   /* Create a stream that reads from the buffer. */
   pb_istream_t stream = pb_istream_from_buffer(
-      buffer + HEADER_SIZE_BYTES, msg_len);
+      buffer + PREFIX_SIZE_BYTES, msg_len);
 
   /* Now we are ready to decode the message. */
   if (pb_decode(&stream, Top_fields, &msg))

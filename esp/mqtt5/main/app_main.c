@@ -188,7 +188,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     break;
   case MQTT_EVENT_DATA:
     print_data(event);
-    sendMessage(event->data, event->data_len);
+    sendMessage((uint8_t*)event->data);
     break;
   case MQTT_EVENT_ERROR:
     ESP_LOGI(TAG, "MQTT_EVENT_ERROR, return code %d", event->error_handle->connect_return_code);
@@ -291,10 +291,14 @@ static void mqtt5_app_start(void)
 // {
 // }
 
-void logMsgContents(char msg[], size_t msgLength)
+/** Print each byte of a buffer as decimals, space delimited.
+ * @param msg must be a length-prefixed buffer (first byte is the length).
+ */
+void logMsgContents(uint8_t msg[])
 {
   static unsigned int msgNum = 0;
   msgNum++;
+  uint8_t msgLength = msg[0];
 
   if (msgLength <= MAX_PACKET_SIZE_BYTES)
   {
@@ -302,7 +306,7 @@ void logMsgContents(char msg[], size_t msgLength)
     int strIndex = 0;
     for (int i = 0; i < msgLength; i++)
     {
-      strIndex += snprintf(msgAsStr + strIndex, 4, "%d ", (uint8_t)msg[i]);
+      strIndex += snprintf(msgAsStr + strIndex, 4, "%d ", msg[i]);
     }
     ESP_LOGI(TAG, "msg: %u len: %d, %s", msgNum, msgLength, msgAsStr);
   }
@@ -312,15 +316,16 @@ void logMsgContents(char msg[], size_t msgLength)
   }
 }
 
-void handleSpiMsg(esp_err_t spiResult, char pbMsg[])
+void handleSpiMsg(esp_err_t spiResult, uint8_t pbMsg[])
 {
   switch (spiResult)
   {
   case ESP_OK:
   {
-    size_t msgLength = pbMsg[0];
-    esp_mqtt_client_publish(client, "hq-bound", &pbMsg[1], msgLength, 1, 1);
-    logMsgContents(pbMsg, msgLength);
+    int msgLength = pbMsg[0];
+    esp_mqtt_client_publish(
+      client, "hq-bound", (char*)&pbMsg[1], msgLength, 1, 1);
+    logMsgContents(pbMsg);
     break;
   }
   case ESP_ERR_TIMEOUT:
@@ -380,7 +385,7 @@ void app_main(void)
 
   for (;;)
   {
-    char pbMsg[MAX_PAYLOAD_BYTES];
+    uint8_t pbMsg[MAX_PAYLOAD_BYTES];
     esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
     handleSpiMsg(ret, pbMsg);
 

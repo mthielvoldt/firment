@@ -158,13 +158,13 @@ esp_err_t initSpi(void)
   return ret;
 }
 
-bool sendMessage(char *toSend, size_t size)
+bool sendMessage(uint8_t *toSend)
 {
   bool success = false;
   if (txPreQ.numWaiting < TX_PREQUEUE_LEN)
   {
     // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
-    uint32_t crcPosition = ((size + 1) >> 1) << 1;
+    uint32_t crcPosition = getCRCPosition(toSend);
     uint16_t crc = crc16_le(0x00, (uint8_t*)toSend, crcPosition);
 
     uint32_t writeIdx = txPreQ.readIdx + txPreQ.numWaiting;
@@ -218,7 +218,7 @@ esp_err_t addToTransactionQueue(void)
 /** Enables the SPI slave interface to send the txBufs and receive into rxBufs.
  * However, it will not actually happen until the main device starts a hardware
  * transaction by pulling CS low and pulsing the clock. */
-esp_err_t waitForSpiRx(char *rxMsg, uint32_t msTimeout)
+esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
 {
   spi_slave_transaction_t *rxdTransaction;
   static uint32_t numTransactionsQueued = 0;

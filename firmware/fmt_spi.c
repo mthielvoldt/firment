@@ -14,7 +14,7 @@ static queue_t sendQueue;
 
 static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
-static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES];
+static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
 extern ARM_DRIVER_SPI Driver_SPI4; // Need to not hard-code SPI4.
 static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
@@ -27,7 +27,7 @@ ARM_SPI_SignalEvent_t callback;
 /* Declarations of private functions */
 static void SendNextPacket(void);
 static void SPI1_callback(uint32_t event);
-static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES], uint8_t dataLength);
+static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
@@ -71,14 +71,14 @@ bool fmt_initSpi(spiCfg_t cfg)
 bool fmt_sendMsg(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
-  uint8_t *txMsg = txPacket + HEADER_SIZE_BYTES;
+  uint8_t *txMsg = txPacket + PREFIX_SIZE_BYTES;
   pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
 
   bool success = pb_encode(&ostream, Top_fields, &message);
   if (success)
   {
     txPacket[0] = ostream.bytes_written;
-    addCRC(txPacket, ostream.bytes_written + HEADER_SIZE_BYTES);
+    addCRC(txPacket);
     enqueueBack(&sendQueue, txPacket);
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
@@ -146,15 +146,13 @@ static void SendNextPacket(void)
 }
 
 /* PRIVATE (static) functions */
-static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES], uint8_t dataLength)
+static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
 {
-  // dataLength must be a multiple of 2.  Add 1 if it's odd.
-  dataLength = ((dataLength + 1) >> 1) << 1;
-
+  uint32_t crcPosition = getCRCPosition(packet);
   uint16_t computedCRC;
   int32_t result =
-      crc->ComputeCRC(packet, dataLength, &computedCRC);
-  *(uint16_t *)(&packet[dataLength]) = computedCRC;
+      crc->ComputeCRC(packet, crcPosition, &computedCRC);
+  *(uint16_t *)(&packet[crcPosition]) = computedCRC;
   if (result != ARM_DRIVER_OK)
   {
     __BKPT(0);
@@ -174,13 +172,9 @@ static void SPI1_callback(uint32_t event)
       uint16_t result;
       int32_t status = ARM_DRIVER_OK;
 
-      /* CRC position must be 16-bit aligned for hardware CRC engines, so if the 
-      length of the pb buffer (including length prefix) is odd, there will be a 
-      byte of padding, between the buffer and the CRC. */
-      uint32_t dataLength = ((rxPacket[0] + 1) >> 1) << 1;
-
-      status = crc->ComputeCRC(rxPacket, dataLength, &result);
-      if (result == *(uint16_t *)(&rxPacket[dataLength]) ) //
+      uint32_t crcPosition = getCRCPosition(rxPacket);
+      status = crc->ComputeCRC(rxPacket, crcPosition, &result);
+      if (result == *(uint16_t *)(&rxPacket[crcPosition]) ) //
       {
         enqueueBack(&rxQueue, rxPacket);
       }
