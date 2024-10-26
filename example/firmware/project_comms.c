@@ -15,6 +15,7 @@
  */
 #include "project_comms.h"
 #include "control.h"
+#include <fmt_log.h>
 
 // This must be a power of 2.
 #define CALLS_PER_FULL_ROTATION 1024U
@@ -59,12 +60,7 @@ void comm_handleTelemetry(void)
   }
   case 20:
   {
-    fmt_sendMsg((const Top){
-        .which_sub = Top_Log_tag,
-        .sub = {
-            .Log = {
-                .text = "This message is a test.",
-                .value = rotations}}});
+    fmt_sendLog(LOG_INFO, "A test. ", rotations);
     break;
   }
   case 40:
@@ -76,5 +72,9 @@ void comm_handleTelemetry(void)
 
 void handleWaveformCtl(WaveformCtl msg)
 {
+  static float count = 0;
+  count++;
   XMC_GPIO_ToggleOutput(led.port, led.pin);
+  fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
+
 }

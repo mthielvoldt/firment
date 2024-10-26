@@ -38,7 +38,7 @@ def generate_code(request: CodeGeneratorRequest) -> str:
 void fmt_handleRx(void)
 {
   Top incomingMessage;
-  if (getMsg(&incomingMessage))
+  if (fmt_getMsg(&incomingMessage))
   {
     switch (incomingMessage.which_sub)
     {

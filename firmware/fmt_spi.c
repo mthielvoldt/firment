@@ -170,11 +170,11 @@ static void SPI1_callback(uint32_t event)
       // check CRC here so we don't consume Rx queue with errors.
       // Todo: pad messages so all lengths are even.
       uint16_t result;
-      int32_t status = ARM_DRIVER_OK;
 
       uint32_t crcPosition = getCRCPosition(rxPacket);
-      status = crc->ComputeCRC(rxPacket, crcPosition, &result);
-      if (result == *(uint16_t *)(&rxPacket[crcPosition]) ) //
+      int32_t status = crc->ComputeCRC(rxPacket, crcPosition, &result);
+      if (status == ARM_DRIVER_OK &&
+          result == *(uint16_t *)(&rxPacket[crcPosition]))
       {
         enqueueBack(&rxQueue, rxPacket);
       }

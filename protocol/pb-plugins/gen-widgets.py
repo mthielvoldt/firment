@@ -133,18 +133,27 @@ def get_log_widget() :
 interface LogMessage {
   text: string;
   value: number;
+  count: number;
 }
 export function Log({}) {
-  const [LogState, setLogState] = useState("");
+  const [LogState, setLogState] = useState([{id: 0, text: ""}]);
   addTopicCallback("Log", appendToLog);
   function appendToLog(newLogMessage: LogMessage) {
-    setLogState(LogState + newLogMessage.text + newLogMessage.value + "\\n");
+    let newState = LogState.slice(LogState.length > 10 ? 1 : 0);
+    newState.push({
+      id: newLogMessage.count,
+      text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
+    });
+    setLogState(newState);
   }
+
+  const messages = LogState.map((message) => 
+    <p key={message.id}>{message.text}</p>)
 
   return (
     <div className="widget">
       <h4>Log</h4>
-      <pre>{LogState}</pre>
+      {messages}
     </div>
   )
 }

@@ -47,6 +47,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/port/fmt_crc_xmc4.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
+  ../../firmware/fmt_log.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   lib/XMC4000_DFP/RTE_Driver/SPI.c

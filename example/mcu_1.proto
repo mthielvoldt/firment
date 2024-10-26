@@ -27,8 +27,9 @@ message Ack {
 }
 
 message Log {
-  string text = 1 [(nanopb).max_size = 50]; // 64 - 4(Top) - 4(value) = 56
-  float value = 2;
+  uint32 count = 1;
+  string text = 2 [(nanopb).max_size = 50]; // 64 - 17 = 47
+  float value = 3;
 }
 
 enum ParamOperation {
