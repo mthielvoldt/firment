@@ -139,7 +139,7 @@ export function Log({}) {
   const [LogState, setLogState] = useState([{id: 0, text: ""}]);
   addTopicCallback("Log", appendToLog);
   function appendToLog(newLogMessage: LogMessage) {
-    let newState = LogState.slice(LogState.length > 10 ? 1 : 0);
+    let newState = LogState.slice(Math.max(LogState.length - 10, 0));
     newState.push({
       id: newLogMessage.count,
       text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
