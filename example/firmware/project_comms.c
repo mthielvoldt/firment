@@ -58,14 +58,12 @@ void comm_handleTelemetry(void)
     // XMC_GPIO_ToggleOutput(led.port, led.pin);
     break;
   }
-  case 20:
+  case 200:
   {
     fmt_sendLog(LOG_INFO, "A test. ", rotations);
     break;
   }
-  case 40:
-    break;
-  case 60:
+  case 400:
     break;
   }
 }

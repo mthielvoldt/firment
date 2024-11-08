@@ -79,7 +79,7 @@ bool fmt_sendMsg(Top message)
   {
     txPacket[0] = ostream.bytes_written;
     addCRC(txPacket);
-    enqueueBack(&sendQueue, txPacket);
+    bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
     SendNextPacket();

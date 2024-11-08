@@ -184,7 +184,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     // esp_mqtt_client_disconnect(client);
     break;
   case MQTT_EVENT_PUBLISHED:
-    ESP_LOGI(TAG, "PUBLISHED, msg_id=%d", event->msg_id);
+    // ESP_LOGI(TAG, "PUBLISHED, msg_id=%d", event->msg_id);
     break;
   case MQTT_EVENT_DATA:
     print_data(event);

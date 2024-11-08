@@ -1,7 +1,7 @@
 #include "esp_err.h"
 #include <fmt_sizes.h>
 
-#define GPIO_HANDSHAKE 2
+#define GPIO_HANDSHAKE 9
 #define GPIO_CS 10
 #define GPIO_MOSI 11
 #define GPIO_MISO 12

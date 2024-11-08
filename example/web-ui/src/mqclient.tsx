@@ -26,7 +26,14 @@ export default function setupMq() {
 
   client.on("message", (topic, buffer) => {
     // Parse the protobuf buffer
-    let message = pb.Top.decode(buffer, buffer.length);
+    let message
+    try {
+      message = pb.Top.decode(buffer, buffer.length);
+    }
+    catch (error) {
+      console.error(error);
+      // callbacks["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
+    }
     console.log("decoded = ", JSON.stringify(message));
 
     // call the state updater for the widget this message addresses. 
