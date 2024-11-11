@@ -9,7 +9,7 @@ from google.protobuf.descriptor import FieldDescriptor
 header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addTopicCallback, sendMessage } from "../mqclient";"""
 
 float_fields = (
@@ -67,7 +67,6 @@ def get_ctl_widget(message: DescriptorProto):
   return f'''
 export function {message.name}({{}}) {{
   const [{state}, {setState}] = useState({initial_state});
-  addTopicCallback("{message.name}", {setState});
 
   function handleSubmit(e) {{
     e.preventDefault();
@@ -117,7 +116,9 @@ def get_tlm_widget(message: DescriptorProto):
   return f'''
 export function {message_name}({{}}) {{
   const [{message_name}State, {setState}] = useState({initial_state});
-  addTopicCallback("{message_name}", {setState});
+  useEffect( () => {{
+    addTopicCallback("{message_name}", {setState});
+  }}, []);
 
   return (
     <div className="widget">
@@ -137,15 +138,20 @@ interface LogMessage {
 }
 export function Log({}) {
   const [LogState, setLogState] = useState([{id: 0, text: ""}]);
-  addTopicCallback("Log", appendToLog);
+
   function appendToLog(newLogMessage: LogMessage) {
-    let newState = LogState.slice(Math.max(LogState.length - 10, 0));
-    newState.push({
-      id: newLogMessage.count,
-      text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
+    setLogState(prevLogState => {
+      let newState = prevLogState.slice(Math.max(prevLogState.length - 10, 0));
+      newState.push({
+        id: newLogMessage.count,
+        text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
+      });
+      return newState;
     });
-    setLogState(newState);
   }
+  useEffect( () => {
+    addTopicCallback("Log", appendToLog);
+  }, []);
 
   const messages = LogState.map((message) => 
     <p key={message.id}>{message.text}</p>)
