@@ -1,11 +1,4 @@
-/* SPI Slave example, receiver (uses SPI Slave driver to communicate with sender)
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -23,17 +16,6 @@
 
 #include "spi_app.h"
 
-/*
-SPI receiver (slave) example.
-
-This example is supposed to work together with the SPI sender. It uses the standard SPI pins (MISO, MOSI, SCLK, CS) to
-transmit data over in a full-duplex fashion, that is, while the master puts data on the MOSI pin, the slave puts its own
-data on the MISO pin.
-
-This example uses one extra pin: GPIO_HANDSHAKE is used as a handshake pin. After a transmission has been set up and we're
-ready to send/receive data, this code uses a callback to set the handshake pin high. The sender will detect this and start
-sending a transaction. As soon as the transaction is done, the line gets set low again.
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////// Please update the following configuration according to your HardWare spec /////////////////
@@ -47,13 +29,13 @@ sending a transaction. As soon as the transaction is done, the line gets set low
 // Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
 void my_post_setup_cb(spi_slave_transaction_t *trans)
 {
-  gpio_set_level(GPIO_HANDSHAKE, 1);
+  gpio_set_level(GPIO_CLEAR_TO_SEND, 1);
 }
 
 // Called after transaction is sent/received. We use this to set the handshake line low.
 void my_post_trans_cb(spi_slave_transaction_t *trans)
 {
-  gpio_set_level(GPIO_HANDSHAKE, 0);
+  gpio_set_level(GPIO_CLEAR_TO_SEND, 0);
 }
 
 // Configuration for the SPI bus
@@ -83,13 +65,20 @@ static spi_slave_interface_config_t slvcfg = {
     .post_trans_cb = my_post_trans_cb,
 };
 
-// Configuration for the handshake line
-static gpio_config_t io_conf = {
+// Configuration for the comm control lines
+static const gpio_config_t clearToSendPin_conf = {
     .intr_type = GPIO_INTR_DISABLE,
     .mode = GPIO_MODE_OUTPUT,
-    .pin_bit_mask = BIT64(GPIO_HANDSHAKE),
+    .pin_bit_mask = BIT64(GPIO_CLEAR_TO_SEND),
 };
+static const gpio_config_t messagePendingPin_conf = {
+  .intr_type = GPIO_INTR_DISABLE,
+  .mode = GPIO_MODE_OUTPUT,
+  .pin_bit_mask = BIT64(GPIO_MESSAGE_WAITING),
+};
+
 static int spiTxCount = 0;
+static int lastRealMessagePosition = 0;
 
 typedef struct buff_s
 {
@@ -130,7 +119,8 @@ esp_err_t initSpi(void)
   };
 
   // Configure handshake line as output
-  gpio_config(&io_conf);
+  gpio_config(&clearToSendPin_conf);
+  gpio_config(&messagePendingPin_conf);
   // Enable pull-ups on SPI lines so we don't detect rogue pulses when no master is connected.
   gpio_set_pull_mode(GPIO_MOSI, GPIO_PULLUP_ONLY);
   gpio_set_pull_mode(GPIO_SCLK, GPIO_PULLUP_ONLY);
@@ -174,6 +164,10 @@ bool sendMessage(uint8_t *toSend)
     *(uint16_t*)(&txBufs[writeIdx].data[crcPosition]) = crc;
     memcpy(&txBufs[writeIdx], toSend, crcPosition);
     txPreQ.numWaiting++;
+
+    lastRealMessagePosition = txPreQ.numWaiting + TRANSACTION_QUEUE_LEN;
+    gpio_set_level(GPIO_MESSAGE_WAITING, 1);
+
     success = true;
   }
   return success;
@@ -239,6 +233,10 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
   {
     // Regardless of CRC/Length, we lost an item from the transaction queue.
     numTransactionsQueued--;
+
+    if (--lastRealMessagePosition <= 0) {
+      gpio_set_level(GPIO_MESSAGE_WAITING, 0);
+    }
 
     bool crcGood = true; // placeholder.
     /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/

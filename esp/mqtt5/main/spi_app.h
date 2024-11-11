@@ -1,7 +1,27 @@
+/* Firment SPI subordinate (sub) app. 
+
+Part of a bridge between SPI connection to an edge MCU and TCP connection to a 
+network.  This code intended for an MCU with both SPI and TCP peripherals, eg. 
+An ESP32. 
+
+The Edge MCU is main in this configuration, so it drives the clock line and
+initiates transactions.  However, hardware flow-control lines prevent dropped
+packets and reduce latency for edge-bound (sub->main) messages.  
+
+This application uses two hardware flow-control pins: 
+- GPIO_CLEAR_TO_SEND (active high) indicates sub ready for a transaction. 
+  The main MCU should delay beginning a transaction until this is asserted.
+
+- GPIO_MESSAGE_WAITING (active high) indicates edge-bound data is pending.  Main
+  should continue rapidly driving transactions (gated by CLEAR_TO_SEND above) 
+  until this pin is de-asserted.
+*/
+
 #include "esp_err.h"
 #include <fmt_sizes.h>
 
-#define GPIO_HANDSHAKE 9
+#define GPIO_CLEAR_TO_SEND 9
+#define GPIO_MESSAGE_WAITING 46
 #define GPIO_CS 10
 #define GPIO_MOSI 11
 #define GPIO_MISO 12
