@@ -1,11 +1,14 @@
 import { useEffect } from 'react'
-import setupMq from './mqclient';
+import { setupMq, teardownMq} from './mqclient';
 
 import * as widgets from './generated/widgets.pb';
 import './App.css'
 
 function App() {
-  useEffect(setupMq, []);
+  useEffect( () => {
+    setupMq();
+    return teardownMq;
+  }, []);
 
   return (
     <>

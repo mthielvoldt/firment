@@ -10,7 +10,7 @@ let client: MqttClient;
 let callbacks = {}
 let ranOnce = false;
 
-export default function setupMq() {
+export function setupMq() {
   if (ranOnce) {
     return;
   }
@@ -45,6 +45,13 @@ export default function setupMq() {
   });
 }
 
+export function teardownMq() {
+  if (client.connected) {
+    console.log("Disconnecting from broker.");
+    client.end();
+  }
+}
+
 /*
 This is called by generated widget code to register a callback that updates the
 widget when a new message is received.
@@ -53,8 +60,8 @@ export function addTopicCallback(topic: string, callback) {
   callbacks[topic] = callback;
 }
 
-export function sendMessage( message_name: string, state_obj: object) {
-  let message = {[message_name]: state_obj}
+export function sendMessage(message_name: string, state_obj: object) {
+  let message = { [message_name]: state_obj }
   let packet = pb.Top.encodeDelimited(message).finish();
   client.publish("edge-bound", packet);
   console.log(JSON.stringify(message), "packet: ", packet);
