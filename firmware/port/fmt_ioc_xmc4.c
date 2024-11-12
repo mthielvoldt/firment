@@ -1,6 +1,5 @@
 #include "fmt_ioc.h"
 
-#include <XMC4700.h>
 #include <xmc_eru.h>
 #include <xmc_gpio.h>
 
@@ -14,6 +13,13 @@
 
 #define LED_PORT XMC_GPIO_PORT5
 #define LED_PIN 9U
+
+const uint32_t xmc_edge[] = {
+    [EDGE_TYPE_NONE] = XMC_ERU_ETL_EDGE_DETECTION_DISABLED,
+    [EDGE_TYPE_FALLING] = XMC_ERU_ETL_EDGE_DETECTION_FALLING,
+    [EDGE_TYPE_RISING] = XMC_ERU_ETL_EDGE_DETECTION_RISING,
+    [EDGE_TYPE_BOTH] = XMC_ERU_ETL_EDGE_DETECTION_BOTH,
+};
 
 void fmt_initIoc(uint32_t port, uint8_t pin, edgeType_t activeEdges, isr_t isr)
 {
@@ -29,9 +35,9 @@ void fmt_initIoc(uint32_t port, uint8_t pin, edgeType_t activeEdges, isr_t isr)
 
   // Configure ERU for rising edge detection on P1.0
   XMC_ERU_ETL_CONFIG_t eru_etl_config = {
-      .input_b = XMC_ERU_ETL_INPUT_B0,                     // Select P1.0 as input (based on pin mapping)
-      .source = XMC_ERU_ETL_SOURCE_B,                      // Use B input source
-      .edge_detection = XMC_ERU_ETL_EDGE_DETECTION_RISING, // Trigger on rising edge
+      .input_b = XMC_ERU_ETL_INPUT_B0,         // Select P1.0 as input (based on pin mapping)
+      .source = XMC_ERU_ETL_SOURCE_B,          // Use B input source
+      .edge_detection = xmc_edge[activeEdges], // Trigger on rising edge
       .status_flag_mode = XMC_ERU_ETL_STATUS_FLAG_MODE_HWCTRL,
       .enable_output_trigger = XMC_ERU_ETL_OUTPUT_TRIGGER_ENABLED,
       .output_trigger_channel = XMC_ERU_ETL_OUTPUT_TRIGGER_CHANNEL3,

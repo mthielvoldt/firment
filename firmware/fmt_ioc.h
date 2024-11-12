@@ -1,9 +1,11 @@
 /** Firment Interrupt on change module 
- * Provides a standard interface to pin level-change driven interrupts.
+ * Provides a interface to configure gpio edge-driven interrupts.
 */
+#pragma once
 #include <stdint.h>
 
 typedef enum {
+  EDGE_TYPE_NONE,
   EDGE_TYPE_FALLING, 
   EDGE_TYPE_RISING,
   EDGE_TYPE_BOTH,
