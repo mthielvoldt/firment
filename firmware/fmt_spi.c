@@ -17,8 +17,7 @@ static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
-extern ARM_DRIVER_SPI Driver_SPI4; // Need to not hard-code SPI4.
-static ARM_DRIVER_SPI *spi1 = &Driver_SPI4;
+static ARM_DRIVER_SPI *spi1;
 
 extern FMT_DRIVER_CRC Driver_CRC0;
 static FMT_DRIVER_CRC *crc = &Driver_CRC0;
@@ -33,6 +32,8 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
 {
+  spi1 = cfg.spiModule;
+  
   spi1->Initialize(SPI1_callback);
   spi1->PowerControl(ARM_POWER_FULL);
 

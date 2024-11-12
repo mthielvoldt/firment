@@ -19,23 +19,23 @@
 #define periodicA_priority 30
 #define spiTxBuf_priority 25
 
-
 // Todo: specify size of SendQueue, and pass to initSpi().
 // Todo: specify HW resources for spi (channel, etc.)
 
 int main(void)
 {
-  /* Port 3, pins:
-  7:  MISO
-  8:  MOSI
-  9:  SCK
-  10: CS: USIC2_CH0.SELO0 (ALT1 output)
-  */
-  spiCfg_t spiConfig = getDefaultSpiCfg();
-  spiConfig.spiIrqPriority = spiTxBuf_priority;
 
   /* fmt_initSpi selects which SPI module to use for fmt.  The selected module
   must be made available and configured in "RTE_ProjectConfig.h". */
+  extern ARM_DRIVER_SPI Driver_SPI4;
+
+  spiCfg_t spiConfig = {
+      .spiModule = &Driver_SPI4,
+      .baudHz = 1000000,
+      .busMode = BUS_MODE_MAIN,
+      .ssActiveLow = true,
+      .spiIrqPriority = spiTxBuf_priority,
+  };
   fmt_initSpi(spiConfig);
 
   comm_init((portPin_t){.port = XMC_GPIO_PORT0, .pin = 13U});
@@ -58,7 +58,6 @@ int main(void)
      *  - handle logging.
      *  - free memory accounting.
      */
-
   }
 }
 

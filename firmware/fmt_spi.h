@@ -13,6 +13,7 @@ typedef enum {
  */
 typedef struct
 {
+  ARM_DRIVER_SPI *spiModule;
   uint32_t baudHz;
   busMode_t busMode;
   bool ssActiveLow;
@@ -23,16 +24,6 @@ typedef struct
  * passes project-specific pin and peripheral selections.
  */
 bool fmt_initSpi(spiCfg_t config);
-
-static inline spiCfg_t getDefaultSpiCfg(void)
-{
-  return (const spiCfg_t){
-      .baudHz = 1000000,
-      .busMode = BUS_MODE_MAIN,
-      .ssActiveLow = true,
-      .spiIrqPriority = 32,
-  };
-}
 
 /** Send a SPI message
  * Queues a message for transmit.
