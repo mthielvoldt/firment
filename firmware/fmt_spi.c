@@ -1,6 +1,7 @@
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
 #include "fmt_crc.h"
+#include "fmt_ioc.h"
 
 #include "queue.h"
 #include <pb_encode.h>
@@ -37,6 +38,8 @@ bool fmt_initSpi(spiCfg_t cfg)
 
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
+
+  fmt_initIoc(1, 0, EDGE_TYPE_RISING, NULL);
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -80,6 +83,9 @@ bool fmt_sendMsg(Top message)
     txPacket[0] = ostream.bytes_written;
     addCRC(txPacket);
     bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
+    if (!enqueueSuccess) {
+      __BKPT(4);
+    }
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
     SendNextPacket();
