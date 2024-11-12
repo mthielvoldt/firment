@@ -33,6 +33,9 @@ int main(void)
   */
   spiCfg_t spiConfig = getDefaultSpiCfg();
   spiConfig.spiIrqPriority = spiTxBuf_priority;
+
+  /* fmt_initSpi selects which SPI module to use for fmt.  The selected module
+  must be made available and configured in "RTE_ProjectConfig.h". */
   fmt_initSpi(spiConfig);
 
   comm_init((portPin_t){.port = XMC_GPIO_PORT0, .pin = 13U});

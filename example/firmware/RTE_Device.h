@@ -1,5 +1,32 @@
-/*
+/**
+ * @file fmt_RTE_Device.h
+ * @date 12 Nov, 2024
+ * @version 1.0
  *
+ * @brief Run-Time Environment interconnections for Infineon XMC48/47_F144
+ * 
+ * The RTE_Device.h file provided by manufacturers in CMSIS Device Family Packs
+ * (eg. XMC4000_DFP/RTE_Driver/Config/XMC4800_F144/RTE_Device.h ) contains two 
+ * types of information:
+ * 1. Fixed-in-silicon peripheral interconnections that are available for use.
+ *    eg: CAN module 0 may use pins 0.0, 1.4, 2.0, and 3.10 for Tx.
+ * 2. Project-specific configuration which selects the inteconnections to use.
+ *    eg: make CAN module 0 available and use pin 1.4 for Tx with this module. 
+ *    These lines of code are generally edited by BSP software, not by hand.
+ * 
+ * This file contains just the fixed-in-silicon interconnections (1.) and
+ * excludes all project-specific config.  It can therefore be used, unmodified,
+ * by any XMC48/47_F144 project.
+ * 
+ * This file is meant to be used in concert with "RTE_ProjectConfig.h" that 
+ * contains just the project-specific configuration that conventionally appears
+ * in RTE_Device.h files. 
+ * 
+ * This version extracted information from Version 1.1.0 (30 June, 2016) of
+ * XMC4000_DFP/RTE_Driver/Config/XMC4800_F144/RTE_Device.h
+ */
+
+/*
  * Copyright (c) 2015-2016, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
@@ -28,31 +55,7 @@
  *
  */
 
-/**
- * @file RTE_Device.h
- * @date 30 June, 2016
- * @version 1.1.0
- *
- * @brief RTE Device Configuration for Infineon XMC48/47_F144
- *
- * History
- *
- * Version 1.0.0 
- * - Initial version
- *
- * Version 1.0.2
- * - Changed ETH pins defaults to match XMC4800 Relax Kit boards
- *
- * Version 1.1.0
- * - [New] MCI, CAN and SAI drivers 
- * - [Changed] Limit RX and TX FIFO sum of single channel to 32 entries
- * - [Fixed] Several pin configurations fixed.
- */
-
-//-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
-
-#ifndef __RTE_DEVICE_H
-#define __RTE_DEVICE_H
+#pragma once
 
 #include "RTE_ProjectConfig.h"
 #include "xmc_device.h"
@@ -4028,5 +4031,3 @@
         (RTE_I2S5_TX_FIFO_SIZE_NUM*RTE_I2S5))>64)
 #error "Just 64 positions in a FIFO shared by RTE_x4 and RTE_x5 !"
 #endif
-
-#endif  /* __RTE_DEVICE_H */
