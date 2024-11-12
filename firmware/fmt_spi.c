@@ -17,7 +17,7 @@ static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
-static ARM_DRIVER_SPI *spi1;
+static ARM_DRIVER_SPI *spi;
 
 extern FMT_DRIVER_CRC Driver_CRC0;
 static FMT_DRIVER_CRC *crc = &Driver_CRC0;
@@ -26,16 +26,16 @@ ARM_SPI_SignalEvent_t callback;
 
 /* Declarations of private functions */
 static void SendNextPacket(void);
-static void SPI1_callback(uint32_t event);
+static void spiEventHandler(uint32_t event);
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
 {
-  spi1 = cfg.spiModule;
-  
-  spi1->Initialize(SPI1_callback);
-  spi1->PowerControl(ARM_POWER_FULL);
+  spi = cfg.spiModule;
+
+  spi->Initialize(spiEventHandler);
+  spi->PowerControl(ARM_POWER_FULL);
 
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
@@ -53,9 +53,9 @@ bool fmt_initSpi(spiCfg_t cfg)
       ARM_SPI_LSB_MSB |
       ARM_SPI_SS_MASTER_SW |
       ARM_SPI_DATA_BITS(8);
-  spi1->Control(modeParams, BAUD_1MHZ); // second arg sets baud.
+  spi->Control(modeParams, BAUD_1MHZ); // second arg sets baud.
 
-  spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
+  spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
 
   initQueue(
       MAX_PACKET_SIZE_BYTES,
@@ -121,7 +121,7 @@ static void SendNextPacket(void)
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
 
   // fmt_sendMsg calls this fn, which is async with spi status, so check spi ready.
-  bool spiReady = !spi1->GetStatus().busy;
+  bool spiReady = !spi->GetStatus().busy;
 
   /*
   If we've finished transmitting the previous message, but there are still
@@ -132,12 +132,12 @@ static void SendNextPacket(void)
     /** Note: If application has multiple subs, this driver will need the
      * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.
      * see https://arm-software.github.io/CMSIS-Driver/latest/driver_SPI.html */
-    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
+    spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
 
     /** Note: in SPI we're using fixed-width data frames to simplify staying
      * synchronized in the presence of data corruption.
      * Note: this call only starts the transfer, it doesn't block.*/
-    spi1->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
+    spi->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
 
     /* Some test code for counting bytes that get through.*/
     // static uint8_t substitutePacket[] = {
@@ -148,7 +148,7 @@ static void SendNextPacket(void)
     //     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
     //     50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
     //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
-    // spi1->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
+    // spi->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
   }
 }
 
@@ -166,12 +166,12 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
   }
 }
 
-static void SPI1_callback(uint32_t event)
+static void spiEventHandler(uint32_t event)
 {
   switch (event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
-    spi1->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
+    spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
     if (rxPacket[0])
     {
       // check CRC here so we don't consume Rx queue with errors.
