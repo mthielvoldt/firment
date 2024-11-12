@@ -43,9 +43,9 @@ add_executable(${EXECUTABLE}
   gpio_common.c
   ../../firmware/fmt_spi.c
   ../../firmware/queue.c
-  ../../firmware/port/fmt_periodic_xmc.c
-  ../../firmware/port/fmt_crc_xmc4.c
-  ../../firmware/port/fmt_ioc_xmc4.c
+  ../../firmware/port/XMC4/fmt_periodic_xmc.c
+  ../../firmware/port/XMC4/fmt_crc_xmc4.c
+  ../../firmware/port/XMC4/fmt_ioc_xmc4.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
   ../../firmware/fmt_log.c
@@ -74,6 +74,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   lib/CMSIS-6.1.0/Driver/Include
   ${NANOPB}
   ../../firmware
+  ../../firmware/port/XMC4/4800_F144
   .
 )
 

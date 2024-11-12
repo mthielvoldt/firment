@@ -9,6 +9,7 @@
           "includePath": [
             "example/firmware", 
             "firmware",
+            "firmware/port/XMC4/4800_F144",
             "esp/mqtt5/build/config",
             "../esp-idf/components/esp_driver_gpio/include",
             "../esp-idf/components/esp_driver_spi/include/**",
