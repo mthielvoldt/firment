@@ -7,7 +7,9 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
-#define BAUD_1MHZ 1000000u
+// Temporary
+#define LED_PORT XMC_GPIO_PORT5
+#define LED_PIN 9U
 
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
@@ -40,7 +42,19 @@ bool fmt_initSpi(spiCfg_t cfg)
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
 
-  fmt_initIoc(1, 0, EDGE_TYPE_RISING, NULL);
+  // Temporary
+  const XMC_GPIO_CONFIG_t ledCfg = {
+      .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL,
+      .output_level = XMC_GPIO_OUTPUT_LEVEL_LOW,
+      .output_strength = XMC_GPIO_OUTPUT_STRENGTH_MEDIUM,
+  };
+  XMC_GPIO_Init(LED_PORT, LED_PIN, &ledCfg);
+
+  fmt_initIoc(cfg.clearToSendInput, EDGE_TYPE_RISING,
+              cfg.clearToSendOut, cfg.clearToSendIRQn, cfg.spiIrqPriority);
+
+  fmt_initIoc(cfg.msgWaitingInput, EDGE_TYPE_RISING,
+              cfg.msgWaitingOut, cfg.msgWaitingIRQn, cfg.spiIrqPriority);
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -53,7 +67,7 @@ bool fmt_initSpi(spiCfg_t cfg)
       ARM_SPI_LSB_MSB |
       ARM_SPI_SS_MASTER_SW |
       ARM_SPI_DATA_BITS(8);
-  spi->Control(modeParams, BAUD_1MHZ); // second arg sets baud.
+  spi->Control(modeParams, cfg.baudHz);
 
   spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
 
@@ -84,7 +98,8 @@ bool fmt_sendMsg(Top message)
     txPacket[0] = ostream.bytes_written;
     addCRC(txPacket);
     bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
-    if (!enqueueSuccess) {
+    if (!enqueueSuccess)
+    {
       __BKPT(4);
     }
 
@@ -150,6 +165,21 @@ static void SendNextPacket(void)
     //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
     // spi->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
   }
+}
+
+/**Message Waiting ISR
+ * Runs when the ESP drives a rising edge on the Message Waiting GPIO.
+ *
+ * Immediately starts a chain of transactions to flush the ESP's buffer until
+ * the queued message is transferred.
+ */
+void fmt_msgWaitingISR(void)
+{
+  XMC_GPIO_ToggleOutput(LED_PORT, LED_PIN);
+}
+
+void fmt_clearToSendISR(void)
+{
 }
 
 /* PRIVATE (static) functions */

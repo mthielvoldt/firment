@@ -6,15 +6,14 @@
  * @brief Run-Time Environment interconnections for Infineon XMC48/47_F144
  * 
  * The RTE_Device.h file provided by manufacturers in CMSIS Device Family Packs
- * (eg. XMC4000_DFP/RTE_Driver/Config/XMC4800_F144/RTE_Device.h ) contains two 
- * types of information:
+ * contains two types of information:
  * 1. Fixed-in-silicon peripheral interconnections that are available for use.
  *    eg: CAN module 0 may use pins 0.0, 1.4, 2.0, and 3.10 for Tx.
  * 2. Project-specific configuration which selects the inteconnections to use.
  *    eg: make CAN module 0 available and use pin 1.4 for Tx with this module. 
  *    These lines of code are generally edited by BSP software, not by hand.
  * 
- * This file contains just the fixed-in-silicon interconnections (1.) and
+ * This file contains just the fixed-in-silicon interconnection information and
  * excludes all project-specific config.  It can therefore be used, unmodified,
  * by any XMC48/47_F144 project.
  * 
@@ -59,8 +58,10 @@
 
 #include "RTE_ProjectConfig.h"
 #include "xmc_device.h"
+#include "xmc_gpio.h"
 #include "xmc4_gpio_map.h"
 #include "xmc4_usic_map.h"
+#include "xmc_eru.h"
 
 #define NO_FIFO 0
 #define FIFO_SIZE_2 1
@@ -68,6 +69,52 @@
 #define FIFO_SIZE_8 3
 #define FIFO_SIZE_16 4
 #define FIFO_SIZE_32 5
+
+typedef struct _RTE_IOC {
+  XMC_GPIO_PORT_t *const port; 
+  const uint8_t pin;
+  XMC_ERU_t *const eru; 
+  const uint8_t etlNum;
+  const XMC_ERU_ETL_SOURCE_t source;
+  const uint8_t inputChannel; 
+} RTE_IOC_t;
+
+
+#define RTE_IOC_P0_0_ERU0  P0_0,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_B, 0U // ERU0.0B0
+#define RTE_IOC_P0_1_ERU0  P0_1,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_A, 0U // ERU0.0A0
+#define RTE_IOC_P0_2_ERU0  P0_2,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_B, 3U // ERU0.3B3
+#define RTE_IOC_P0_3_ERU1  P0_3,  ERU1_ETL3, XMC_ERU_ETL_SOURCE_B, 0U // ERU1.3B0
+#define RTE_IOC_P0_4_ERU0  P0_4,  ERU0_ETL2, XMC_ERU_ETL_SOURCE_B, 3U // ERU0.2B3
+#define RTE_IOC_P0_5_ERU1  P0_5,  ERU1_ETL3, XMC_ERU_ETL_SOURCE_A, 0U // ERU1.3A0
+#define RTE_IOC_P0_6_ERU0  P0_6,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_B, 2U // ERU0.3B2
+#define RTE_IOC_P0_7_ERU0  P0_7,  ERU0_ETL2, XMC_ERU_ETL_SOURCE_B, 1U // ERU0.2B1
+#define RTE_IOC_P0_8_ERU0  P0_8,  ERU0_ETL2, XMC_ERU_ETL_SOURCE_A, 1U // ERU0.2A1
+#define RTE_IOC_P0_9_ERU0  P0_9,  ERU0_ETL1, XMC_ERU_ETL_SOURCE_B, 0U // ERU0.1B0
+#define RTE_IOC_P0_10_ERU0 P0_10, ERU0_ETL1, XMC_ERU_ETL_SOURCE_A, 0U // ERU0.1A0
+#define RTE_IOC_P0_11_ERU0 P0_11, ERU0_ETL3, XMC_ERU_ETL_SOURCE_A, 2U // ERU0.3A2
+#define RTE_IOC_P0_12_ERU0 P0_12, ERU0_ETL2, XMC_ERU_ETL_SOURCE_B, 2U // ERU0.2B2
+#define RTE_IOC_P0_13_ERU0 P0_13, ERU0_ETL2, XMC_ERU_ETL_SOURCE_A, 2U // ERU0.2A2
+#define RTE_IOC_P1_0_ERU0  P1_0,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_B, 0U // ERU0.3B0
+#define RTE_IOC_P1_1_ERU0  P1_1,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_A, 0U // ERU0.3A0
+#define RTE_IOC_P1_2_ERU1  P1_2,  ERU1_ETL2, XMC_ERU_ETL_SOURCE_B, 0U // ERU1.2B0
+#define RTE_IOC_P1_3_ERU1  P1_3,  ERU1_ETL2, XMC_ERU_ETL_SOURCE_A, 0U // ERU1.2A0
+#define RTE_IOC_P1_4_ERU0  P1_4,  ERU0_ETL2, XMC_ERU_ETL_SOURCE_B, 0U // ERU0.2B0
+#define RTE_IOC_P1_5_ERU0  P1_5,  ERU0_ETL2, XMC_ERU_ETL_SOURCE_A, 0U // ERU0.2A0
+#define RTE_IOC_P1_5_ERU1  P1_5,  ERU1_ETL0, XMC_ERU_ETL_SOURCE_A, 0U // ERU1.0A0
+#define RTE_IOC_P1_15_ERU1 P1_15, ERU1_ETL1, XMC_ERU_ETL_SOURCE_A, 0U // ERU1.1A0
+#define RTE_IOC_P2_0_ERU0  P2_0,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_B, 3U // ERU0.0B3
+#define RTE_IOC_P2_1_ERU1  P2_1,  ERU1_ETL0, XMC_ERU_ETL_SOURCE_B, 0U // ERU1.0B0
+#define RTE_IOC_P2_2_ERU0  P2_2,  ERU0_ETL1, XMC_ERU_ETL_SOURCE_B, 2U // ERU0.1B2
+#define RTE_IOC_P2_3_ERU0  P2_3,  ERU0_ETL1, XMC_ERU_ETL_SOURCE_A, 2U // ERU0.1A2
+#define RTE_IOC_P2_4_ERU0  P2_4,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_B, 2U // ERU0.0B2
+#define RTE_IOC_P2_5_ERU0  P2_5,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_A, 2U // ERU0.0A2
+#define RTE_IOC_P2_6_ERU0  P2_6,  ERU0_ETL1, XMC_ERU_ETL_SOURCE_B, 3U // ERU0.1B3
+#define RTE_IOC_P2_7_ERU1  P2_7,  ERU1_ETL1, XMC_ERU_ETL_SOURCE_B, 0U // ERU1.1B0
+#define RTE_IOC_P3_1_ERU0  P3_1,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_B, 1U // ERU0.0B1
+#define RTE_IOC_P3_2_ERU0  P3_2,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_A, 1U // ERU0.0A1
+#define RTE_IOC_P3_5_ERU0  P3_5,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_B, 1U // ERU0.3B1
+#define RTE_IOC_P3_6_ERU0  P3_6,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_A, 1U // ERU0.3A1
+
 
 // <e> CAN0 (Controller area network) [Driver_CAN0]
 // <i> Configuration settings for Driver_CAN0 in component ::Drivers:CAN

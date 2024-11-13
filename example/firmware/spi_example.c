@@ -18,9 +18,8 @@
 #define periodicA_IRQn CCU40_0_IRQn
 #define periodicA_priority 30
 #define spiTxBuf_priority 25
-
-// Todo: specify size of SendQueue, and pass to initSpi().
-// Todo: specify HW resources for spi (channel, etc.)
+#define msgWaitingHandler ERU0_3_IRQHandler
+#define clearToSendHandler ERU0_2_IRQHandler
 
 int main(void)
 {
@@ -31,10 +30,16 @@ int main(void)
 
   spiCfg_t spiConfig = {
       .spiModule = &Driver_SPI4,
+      .msgWaitingInput = {RTE_IOC_P1_0_ERU0},
+      .msgWaitingOut = 3, // must call msgWaitingISR from ERU0_3_IRQHandler
+      .msgWaitingIRQn = ERU0_3_IRQn,
+      .clearToSendInput = {RTE_IOC_P1_1_ERU0},
+      .clearToSendOut = 2, // must call clearToSendISR from ERU0_2_IRQHandler
+      .clearToSendIRQn = ERU0_2_IRQn,
       .baudHz = 1000000,
       .busMode = BUS_MODE_MAIN,
       .ssActiveLow = true,
-      .spiIrqPriority = spiTxBuf_priority,
+      .spiIrqPriority = spiTxBuf_priority, // TODO: check if this is used.
   };
   fmt_initSpi(spiConfig);
 
@@ -67,4 +72,14 @@ void periodicA()
   comm_handleTelemetry();
   fmt_handleRx();
   ctl_updateVoltageISR();
+}
+
+void msgWaitingHandler(void)
+{
+  fmt_msgWaitingISR();
+}
+
+void clearToSendHandler(void)
+{
+  fmt_clearToSendISR();
 }
