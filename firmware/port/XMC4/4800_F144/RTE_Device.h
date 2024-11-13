@@ -17,7 +17,7 @@
  * excludes all project-specific config.  It can therefore be used, unmodified,
  * by any XMC48/47_F144 project.
  * 
- * This file is meant to be used in concert with "RTE_ProjectConfig.h" that 
+ * This file is meant to be used in concert with "RTE_DeviceConfig.h" that 
  * contains just the project-specific configuration that conventionally appears
  * in RTE_Device.h files. 
  * 
@@ -56,7 +56,7 @@
 
 #pragma once
 
-#include "RTE_ProjectConfig.h"
+#include "RTE_DeviceConfig.h"
 #include "xmc_device.h"
 #include "xmc_gpio.h"
 #include "xmc4_gpio_map.h"

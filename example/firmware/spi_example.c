@@ -7,6 +7,7 @@
 #include "XMC4700.h"
 #endif
 
+#include "ISR_Config.h"
 #include <fmt_spi.h>
 #include <fmt_rx.h>
 #include <port/XMC4/fmt_periodic_xmc.h>
@@ -14,18 +15,13 @@
 #include "project_comms.h"
 #include "frequency.h"
 
-#define periodicA CCU40_0_IRQHandler
-#define periodicA_IRQn CCU40_0_IRQn
-#define periodicA_priority 30
-#define spiTxBuf_priority 25
-#define msgWaitingHandler ERU0_3_IRQHandler
-#define clearToSendHandler ERU0_2_IRQHandler
-
 int main(void)
 {
 
-  /* fmt_initSpi selects which SPI module to use for fmt.  The selected module
-  must be made available and configured in "RTE_ProjectConfig.h". */
+  /* fmt_initSpi selects which SPI module to use for fmt.
+  The selected module must be provided and configured in "RTE_DeviceConfig.h"
+  The 
+  */
   extern ARM_DRIVER_SPI Driver_SPI4;
 
   spiCfg_t spiConfig = {
@@ -72,14 +68,4 @@ void periodicA()
   comm_handleTelemetry();
   fmt_handleRx();
   ctl_updateVoltageISR();
-}
-
-void msgWaitingHandler(void)
-{
-  fmt_msgWaitingISR();
-}
-
-void clearToSendHandler(void)
-{
-  fmt_clearToSendISR();
 }

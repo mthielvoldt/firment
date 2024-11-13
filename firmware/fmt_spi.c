@@ -2,7 +2,6 @@
 #include <cmsis_gcc.h> // __BKPT()
 #include "fmt_crc.h"
 #include "fmt_ioc.h"
-
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
@@ -28,7 +27,7 @@ ARM_SPI_SignalEvent_t callback;
 
 /* Declarations of private functions */
 static void SendNextPacket(void);
-static void spiEventHandler(uint32_t event);
+static void spiEventHandlerISR(uint32_t event);
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 
 /* Public function definitions */
@@ -36,7 +35,7 @@ bool fmt_initSpi(spiCfg_t cfg)
 {
   spi = cfg.spiModule;
 
-  spi->Initialize(spiEventHandler);
+  spi->Initialize(spiEventHandlerISR);
   spi->PowerControl(ARM_POWER_FULL);
 
   crc->Initialize();
@@ -167,18 +166,13 @@ static void SendNextPacket(void)
   }
 }
 
-/**Message Waiting ISR
- * Runs when the ESP drives a rising edge on the Message Waiting GPIO.
- *
- * Immediately starts a chain of transactions to flush the ESP's buffer until
- * the queued message is transferred.
- */
-void fmt_msgWaitingISR(void)
+
+void subMsgWaitingISR(void)
 {
   XMC_GPIO_ToggleOutput(LED_PORT, LED_PIN);
 }
 
-void fmt_clearToSendISR(void)
+void subClearToSendISR(void)
 {
 }
 
@@ -196,7 +190,13 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
   }
 }
 
-static void spiEventHandler(uint32_t event)
+/** Event Handler ISR
+ * Runs when the SPI module detects one of the following events: 
+ * - Transaction completes
+ * - Incoming Data is Lost (Should not fire, applies in sub mode only)
+ * - Mode Fault (sub-select line deactivated at invalid time)
+ */
+static void spiEventHandlerISR(uint32_t event)
 {
   switch (event)
   {
