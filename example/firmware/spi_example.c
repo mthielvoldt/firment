@@ -26,10 +26,10 @@ int main(void)
 
   spiCfg_t spiConfig = {
       .spiModule = &Driver_SPI4,
-      .msgWaitingInput = {RTE_IOC_P1_0_ERU0},
+      .msgWaitingInput = {RTE_IOC_P1_0_ERU0}, // ERU0.3
       .msgWaitingOut = 3, // must call msgWaitingISR from ERU0_3_IRQHandler
       .msgWaitingIRQn = ERU0_3_IRQn,
-      .clearToSendInput = {RTE_IOC_P1_1_ERU0},
+      .clearToSendInput = {RTE_IOC_P0_4_ERU0}, // ERU0.2
       .clearToSendOut = 2, // must call clearToSendISR from ERU0_2_IRQHandler
       .clearToSendIRQn = ERU0_2_IRQn,
       .baudHz = 1000000,

@@ -21,3 +21,7 @@ void fmt_initIoc(
     uint8_t outputChannel,
     uint8_t IRQn,
     uint32_t priority);
+
+void fmt_enableIoc(RTE_IOC_t inputConfig);
+
+void fmt_disableIoc(RTE_IOC_t inputConfig);

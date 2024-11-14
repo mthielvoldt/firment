@@ -16,7 +16,6 @@
 
 #include "spi_app.h"
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////// Please update the following configuration according to your HardWare spec /////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +24,8 @@
 #else
 #define RCV_HOST SPI2_HOST
 #endif
+
+static int lastRealMessagePosition = 0;
 
 // Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
 void my_post_setup_cb(spi_slave_transaction_t *trans)
@@ -35,6 +36,10 @@ void my_post_setup_cb(spi_slave_transaction_t *trans)
 // Called after transaction is sent/received. We use this to set the handshake line low.
 void my_post_trans_cb(spi_slave_transaction_t *trans)
 {
+  if (--lastRealMessagePosition <= 0)
+  {
+    gpio_set_level(GPIO_MESSAGE_WAITING, 0);
+  }
   gpio_set_level(GPIO_CLEAR_TO_SEND, 0);
 }
 
@@ -72,13 +77,12 @@ static const gpio_config_t clearToSendPin_conf = {
     .pin_bit_mask = BIT64(GPIO_CLEAR_TO_SEND),
 };
 static const gpio_config_t messagePendingPin_conf = {
-  .intr_type = GPIO_INTR_DISABLE,
-  .mode = GPIO_MODE_OUTPUT,
-  .pin_bit_mask = BIT64(GPIO_MESSAGE_WAITING),
+    .intr_type = GPIO_INTR_DISABLE,
+    .mode = GPIO_MODE_OUTPUT,
+    .pin_bit_mask = BIT64(GPIO_MESSAGE_WAITING),
 };
 
 static int spiTxCount = 0;
-static int lastRealMessagePosition = 0;
 
 typedef struct buff_s
 {
@@ -155,13 +159,13 @@ bool sendMessage(uint8_t *toSend)
   {
     // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
     uint32_t crcPosition = getCRCPosition(toSend);
-    uint16_t crc = crc16_le(0x00, (uint8_t*)toSend, crcPosition);
+    uint16_t crc = crc16_le(0x00, (uint8_t *)toSend, crcPosition);
 
     uint32_t writeIdx = txPreQ.readIdx + txPreQ.numWaiting;
     if (writeIdx >= NUM_TX_BUFFERS)
       writeIdx -= NUM_TX_BUFFERS;
-    
-    *(uint16_t*)(&txBufs[writeIdx].data[crcPosition]) = crc;
+
+    *(uint16_t *)(&txBufs[writeIdx].data[crcPosition]) = crc;
     memcpy(&txBufs[writeIdx], toSend, crcPosition);
     txPreQ.numWaiting++;
 
@@ -233,10 +237,6 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
   {
     // Regardless of CRC/Length, we lost an item from the transaction queue.
     numTransactionsQueued--;
-
-    if (--lastRealMessagePosition <= 0) {
-      gpio_set_level(GPIO_MESSAGE_WAITING, 0);
-    }
 
     bool crcGood = true; // placeholder.
     /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/

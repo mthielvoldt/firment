@@ -71,12 +71,12 @@
 #define FIFO_SIZE_32 5
 
 typedef struct _RTE_IOC {
-  XMC_GPIO_PORT_t *const port; 
-  const uint8_t pin;
-  XMC_ERU_t *const eru; 
-  const uint8_t etlNum;
-  const XMC_ERU_ETL_SOURCE_t source;
-  const uint8_t inputChannel; 
+  XMC_GPIO_PORT_t *port; 
+  uint8_t pin;
+  XMC_ERU_t *eru; 
+  uint8_t etlNum;
+  XMC_ERU_ETL_SOURCE_t source;
+  uint8_t inputChannel; 
 } RTE_IOC_t;
 
 

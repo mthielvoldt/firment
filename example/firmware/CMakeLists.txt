@@ -46,6 +46,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/port/XMC4/fmt_periodic_xmc.c
   ../../firmware/port/XMC4/fmt_crc_xmc4.c
   ../../firmware/port/XMC4/fmt_ioc_xmc4.c
+  ../../firmware/port/XMC4/fmt_gpio_xmc.c
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
   ../../firmware/fmt_log.c

@@ -2,6 +2,7 @@
 #include <cmsis_gcc.h> // __BKPT()
 #include "fmt_crc.h"
 #include "fmt_ioc.h"
+#include "fmt_gpio.h"
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
@@ -19,6 +20,8 @@ static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
 static ARM_DRIVER_SPI *spi;
+static RTE_IOC_t clearToSendInput; // An Interrupt-on-Change config.
+static RTE_IOC_t msgWaitingInput;
 
 extern FMT_DRIVER_CRC Driver_CRC0;
 static FMT_DRIVER_CRC *crc = &Driver_CRC0;
@@ -34,6 +37,8 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 bool fmt_initSpi(spiCfg_t cfg)
 {
   spi = cfg.spiModule;
+  clearToSendInput = cfg.clearToSendInput;
+  msgWaitingInput = cfg.msgWaitingInput;
 
   spi->Initialize(spiEventHandlerISR);
   spi->PowerControl(ARM_POWER_FULL);
@@ -134,46 +139,76 @@ static void SendNextPacket(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
 
-  // fmt_sendMsg calls this fn, which is async with spi status, so check spi ready.
-  bool spiReady = !spi->GetStatus().busy;
-
   /*
   If we've finished transmitting the previous message, but there are still
   messages in the queue, pull a new packet out of the queue and keep Txing. */
 
-  if (spiReady && dequeueFront(&sendQueue, txPacket))
+  // fmt_sendMsg calls this fn at any time, so check spi ready.
+  bool spiReady = !spi->GetStatus().busy;
+  if (spiReady)
   {
-    /** Note: If application has multiple subs, this driver will need the
-     * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.
-     * see https://arm-software.github.io/CMSIS-Driver/latest/driver_SPI.html */
-    spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
+    bool clearToSend =
+        fmt_readPort(clearToSendInput.port) & (1U << clearToSendInput.pin);
 
-    /** Note: in SPI we're using fixed-width data frames to simplify staying
-     * synchronized in the presence of data corruption.
-     * Note: this call only starts the transfer, it doesn't block.*/
-    spi->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
+    if (clearToSend)
+    {
+      bool txWaiting = numItemsInQueue(&sendQueue);
+      bool rxWaiting = fmt_readPort(msgWaitingInput.port) & (1U << msgWaitingInput.pin);
 
-    /* Some test code for counting bytes that get through.*/
-    // static uint8_t substitutePacket[] = {
-    //     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-    //     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-    //     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-    //     30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-    //     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-    //     50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
-    //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
-    // spi->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
+      if (txWaiting || rxWaiting)
+      {
+        if (txWaiting) 
+        {
+          dequeueFront(&sendQueue, txPacket);
+        }
+        else // Implies rxWaiting.
+        {
+          // Send empty (zero-length) message.
+          memset(txPacket, 0, MAX_PACKET_SIZE_BYTES);
+        }
+
+        /** Note: If application has multiple subs, this driver will need the
+         * "MultiSlave wrapper" <SPI_MultiSlave.h> added underneath it.
+         * see https://arm-software.github.io/CMSIS-Driver/latest/driver_SPI.html */
+        spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
+
+        /** Note: in SPI we're using fixed-width data frames to simplify staying
+         * synchronized in the presence of data corruption.
+         * Note: this call only starts the transfer, it doesn't block.*/
+        spi->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
+
+        /* Some test code for counting bytes that get through.*/
+        // static uint8_t substitutePacket[] = {
+        //     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        //     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        //     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        //     30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+        //     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+        //     50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+        //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
+        // spi->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
+      }
+    }
+    else // not clear to send.  Enable cts ISR to restart when cts re-asserted.
+    {
+      fmt_enableIoc(clearToSendInput);
+    }
   }
 }
-
 
 void subMsgWaitingISR(void)
 {
   XMC_GPIO_ToggleOutput(LED_PORT, LED_PIN);
+  SendNextPacket();
 }
 
 void subClearToSendISR(void)
 {
+  // disable self (one-shot behavior)
+  fmt_disableIoc(clearToSendInput);
+
+  // Re-start the transaction chain.
+  SendNextPacket();
 }
 
 /* PRIVATE (static) functions */
@@ -191,7 +226,7 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
 }
 
 /** Event Handler ISR
- * Runs when the SPI module detects one of the following events: 
+ * Runs when the SPI module detects one of the following events:
  * - Transaction completes
  * - Incoming Data is Lost (Should not fire, applies in sub mode only)
  * - Mode Fault (sub-select line deactivated at invalid time)
@@ -216,7 +251,13 @@ static void spiEventHandlerISR(uint32_t event)
         enqueueBack(&rxQueue, rxPacket);
       }
     }
-    SendNextPacket();
+    /* This will trigger a Send as soon as CTS pin has a rising edge. 
+    We do this instead of calling SendNextPacket() because the ESP doesn't lower
+    CTS until a few us AFTER a transaction completes, so this event handler gets
+    there too early, while CTS is still high, but the ESP isn't actually ready.
+    One consequence is that we now depend on the CTS signal pulsing low between
+    each transaction.*/
+    fmt_enableIoc(clearToSendInput);
     break;
   case ARM_SPI_EVENT_DATA_LOST:
     /*  Occurs in slave mode when data is requested/sent by master

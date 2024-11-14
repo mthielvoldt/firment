@@ -46,3 +46,13 @@ void fmt_initIoc(
 
   NVIC_EnableIRQ(IRQn);
 }
+
+void fmt_enableIoc(RTE_IOC_t inputConfig)
+{
+  inputConfig.eru->EXICON_b[inputConfig.etlNum].PE = true;
+}
+
+void fmt_disableIoc(RTE_IOC_t inputConfig)
+{
+  inputConfig.eru->EXICON_b[inputConfig.etlNum].PE = false;
+}
