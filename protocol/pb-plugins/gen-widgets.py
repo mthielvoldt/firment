@@ -35,7 +35,6 @@ def get_message_widget(message: DescriptorProto):
   else:
     return "" # Perhaps an error?
 
-
 def get_ctl_widget(message: DescriptorProto):
   state = f"{message.name}State"
   field_strings = ""
@@ -86,7 +85,6 @@ export function {message.name}({{}}) {{
 }}
 '''
 
-
 def get_tlm_widget(message: DescriptorProto):
   # spec a div with a name
   message_name = message.name
@@ -127,8 +125,8 @@ export function {message_name}({{}}) {{
     </div>
   );
 }}
-
 '''
+
 def get_log_widget() :
   return '''
 interface LogMessage {
@@ -141,12 +139,18 @@ export function Log({}) {
 
   function appendToLog(newLogMessage: LogMessage) {
     setLogState(prevLogState => {
-      let newState = prevLogState.slice(Math.max(prevLogState.length - 10, 0));
-      newState.push({
-        id: newLogMessage.count,
-        text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
-      });
-      return newState;
+      if (newLogMessage.count > prevLogState[prevLogState.length - 1].id)
+      {
+        let newState = prevLogState.slice(Math.max(prevLogState.length - 10, 0));
+        newState.push({
+          id: newLogMessage.count,
+          text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
+        });
+        return newState;
+      } else {
+        // Enforce log message ID's always increase to avoid duplicate keys.
+        return prevLogState;
+      }
     });
   }
   useEffect( () => {
