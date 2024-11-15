@@ -1,8 +1,12 @@
 import { useEffect, useRef } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
 
-let webglp: WebglPlot;
+let wglp: WebglPlot;
 let line: WebglLine;
+// let data: number[];
+let fpsCounter = 0;
+let scaleY = 1;
+let fpsDivder = 2;
 
 type prop = {
   freq: number;
@@ -12,6 +16,7 @@ type prop = {
 
 export default function Plot({ freq, amp, noise }: prop) {
   const canvasMain = useRef<HTMLCanvasElement>(null);
+  const data = useRef([0]);
 
   useEffect(() => {
     if (canvasMain.current) {
@@ -21,36 +26,58 @@ export default function Plot({ freq, amp, noise }: prop) {
       canvasMain.current.height =
         canvasMain.current.clientHeight * devicePixelRatio;
 
-      webglp = new WebglPlot(canvasMain.current);
+      wglp = new WebglPlot(canvasMain.current);
       const numX = 1000;
 
       line = new WebglLine(new ColorRGBA(0.3, 1, 0.2, 1), numX);
-      webglp.addLine(line);
-
+      wglp.addLine(line);
       line.arrangeX();
+
+      function newData() {
+        // const newData = Array.from({length:5}).map(Math.random); 
+        console.log(data.current.push(...[0, 0.1, 0.2, 0.3]));
+      }
+      setInterval(newData, 500);
     }
   }, []);
 
   useEffect(() => {
     let id = 0;
-    let renderPlot = () => {
-      //const freq = 0.001;
-      //const noise = 0.1;
-      //const amp = 0.5;
-      const noise1 = noise || 0.1;
+    // let newFrame = () => {
+    //   const noise1 = noise || 0.1;
+    //   for (let i = 0; i < line.numPoints; i++) {
+    //     const ySin = Math.sin(Math.PI * i * freq * Math.PI * 2);
+    //     const yNoise = Math.random() - 0.5;
+    //     line.setY(i, ySin * amp + yNoise * noise1);
+    //   }
+    //   // line.replaceArrayY(data.current);
+    //   id = requestAnimationFrame(newFrame);
+    //   wglp.update();
+    // };
 
-      for (let i = 0; i < line.numPoints; i++) {
-        const ySin = Math.sin(Math.PI * i * freq * Math.PI * 2);
-        const yNoise = Math.random() - 0.5;
-        line.setY(i, ySin * amp + yNoise * noise1);
+    let newFrame = () => {
+      // Run this once every fpsDivider.
+      if (fpsCounter === 0) {
+        wglp.linesData.forEach((line) => {
+          const yArray = new Float32Array([0, 0.1, 0.2, 0.3]);
+          (line as WebglLine).shiftAdd(yArray);
+        });
+    
+        wglp.gScaleY = scaleY;
+        wglp.update();
       }
-      id = requestAnimationFrame(renderPlot);
-      webglp.update();
-    };
-    id = requestAnimationFrame(renderPlot);
+    
+      fpsCounter++;
+    
+      if (fpsCounter >= fpsDivder) {
+        fpsCounter = 0;
+      }
+      requestAnimationFrame(newFrame);
+    }
+    id = requestAnimationFrame(newFrame);
 
     return () => {
-      renderPlot = () => {};
+      newFrame = () => {};
       cancelAnimationFrame(id);
     };
   }, [freq, amp, noise]);
