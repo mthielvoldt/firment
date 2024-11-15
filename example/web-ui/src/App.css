@@ -10,6 +10,7 @@
 }
 
 .widget {
+  min-width: 200px;
   margin: 4px;
   flex-basis: 45%;
   padding: 6px;
