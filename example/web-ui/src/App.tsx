@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { setupMq, teardownMq} from './mqclient';
 
 import * as widgets from './generated/widgets.pb';
+import Plot from './Plot';
 import './App.css'
 
 function App() {
@@ -22,6 +23,10 @@ function App() {
           <h2>Telemetry</h2>
           <widgets.WaveformTlm />
           <widgets.Log />
+        </div>
+        <div>
+          <h2>Plots</h2>
+          <Plot amp={0.5} freq={0.001} noise={0.1}/>
         </div>
       </div>
     </>
