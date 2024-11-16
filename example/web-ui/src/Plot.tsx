@@ -15,6 +15,8 @@ let prevDataTime = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 let line: (WebglLine | null) = null;
+let data: number[] = [];
+let firstUnrenderedIndex = 0;
 
 type prop = {
   freq: number;
@@ -25,9 +27,8 @@ type prop = {
 export default function Plot({ freq, amp, noise }: prop) {
   const [numPoints, setNumPoints] = useState(secPerWindow / secPerPoint);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const data = useRef([0]);
 
-  // One-time setup: canvas size, handler for new data.
+  // Setup canvas, Plot and line objects, handler for new data.
   useEffect(() => {
     if (canvas.current) {
       if (wglp === null) {
@@ -58,7 +59,7 @@ export default function Plot({ freq, amp, noise }: prop) {
         while (prevDataTime > (freq * Math.PI * 2)) {
           prevDataTime -= (freq * Math.PI * 2);
         }
-        data.current.push(...newData);
+        data.push(...newData);
       }
       let intervalId = setInterval(handleNewData, 1000 / messagesPerSec);
 
@@ -76,11 +77,14 @@ export default function Plot({ freq, amp, noise }: prop) {
     console.log("Setup animation.")
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if (wglp && (data.current.length > 0) && (fpsCounter >= fpsDivder)) {
+      if (wglp && (data.length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
         fpsCounter = 0;
         wglp.linesData.forEach((line) => {
-          const yArray = new Float32Array(data.current);
-          data.current = [];
+          const yArray = new Float32Array(
+            data.slice(firstUnrenderedIndex));
+
+          // indicate we've now rendered all the data.
+          firstUnrenderedIndex = data.length;
           (line as WebglLine).shiftAdd(yArray);
         });
 
