@@ -24,19 +24,18 @@ type prop = {
 };
 
 export default function Plot({ freq, amp, noise }: prop) {
-  const canvasMain = useRef<HTMLCanvasElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
   const data = useRef([0]);
 
+  // One-time setup: canvas size, handler for new data.
   useEffect(() => {
-    if (canvasMain.current) {
+    if (canvas.current) {
       const devicePixelRatio = window.devicePixelRatio || 1;
-      canvasMain.current.width =
-        canvasMain.current.clientWidth * devicePixelRatio;
-      canvasMain.current.height =
-        canvasMain.current.clientHeight * devicePixelRatio;
+      canvas.current.width = canvas.current.clientWidth * devicePixelRatio;
+      canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
 
-      wglp = new WebglPlot(canvasMain.current);
       line = new WebglLine(new ColorRGBA(0.3, 1, 0.2, 1), numPoints);
+      wglp = new WebglPlot(canvas.current);
       wglp.addLine(line);
       line.arrangeX();
 
@@ -66,18 +65,18 @@ export default function Plot({ freq, amp, noise }: prop) {
 
   }, []);
 
+  // Animation engine: updates frame when new data is available.
   useEffect(() => {
-
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if ( wglp && (fpsCounter >= fpsDivder) ) {
+      if ( wglp && (data.current.length > 0) && (fpsCounter >= fpsDivder) ) {
         fpsCounter = 0;
         wglp.linesData.forEach((line) => {
           const yArray = new Float32Array(data.current);
           data.current = [];
           (line as WebglLine).shiftAdd(yArray);
         });
-        
+
         wglp.gScaleY = scaleY;
         wglp.update();
       }
@@ -99,7 +98,7 @@ export default function Plot({ freq, amp, noise }: prop) {
 
   return (
     <div>
-      <canvas style={canvasStyle} ref={canvasMain} />
+      <canvas style={canvasStyle} ref={canvas} />
     </div>
   );
 }
