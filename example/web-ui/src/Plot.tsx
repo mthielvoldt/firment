@@ -46,6 +46,11 @@ export default function Plot({ freq, amp, noise }: prop) {
       wglp.removeAllLines();
       wglp.addLine(line);
       line.arrangeX();
+      if (numPoints < data.length) {
+        line.replaceArrayY(data.slice(-numPoints));
+      } else {
+        line.replaceArrayY(Array(numPoints - data.length).fill(0).concat(data));
+      }
 
       function handleNewData() {
         const newData =
