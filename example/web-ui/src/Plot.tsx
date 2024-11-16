@@ -1,12 +1,21 @@
 import { useEffect, useRef } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
 
-let wglp: WebglPlot;
-let line: WebglLine;
-// let data: number[];
+// Hand-adjustable parameters
+const pointsPerSec = 1000;
+const messagesPerSec = 25;
+const secPerWindow = 1;
+const fpsDivder = 2;
+const scaleY = 0.8;
+
+// Derived resources
+const pointsPerMsg = pointsPerSec / messagesPerSec;
+const secPerPoint = 1 / pointsPerSec;
+const numPoints = secPerWindow / secPerPoint; // aka points per window
+let prevDataTime = 0;
 let fpsCounter = 0;
-let scaleY = 1;
-let fpsDivder = 2;
+let wglp: (WebglPlot | null);
+let line: (WebglLine | null);
 
 type prop = {
   freq: number;
@@ -27,54 +36,58 @@ export default function Plot({ freq, amp, noise }: prop) {
         canvasMain.current.clientHeight * devicePixelRatio;
 
       wglp = new WebglPlot(canvasMain.current);
-      const numX = 1000;
-
-      line = new WebglLine(new ColorRGBA(0.3, 1, 0.2, 1), numX);
+      line = new WebglLine(new ColorRGBA(0.3, 1, 0.2, 1), numPoints);
       wglp.addLine(line);
       line.arrangeX();
 
-      function newData() {
-        // const newData = Array.from({length:5}).map(Math.random); 
-        data.current.push(...Array.from({length:20}).map(Math.random));
+      function handleNewData() {
+        const newData =
+          Array.from({ length: pointsPerMsg }).map((_, index) => {
+            const dt = index * secPerPoint;
+            const ySin = Math.sin((prevDataTime + dt) * freq * Math.PI * 2);
+            const yNoise = Math.random() - 0.5;
+            return ySin + yNoise * (noise || 0);
+          });
+        prevDataTime += secPerPoint * pointsPerMsg;
+        while (prevDataTime > (freq * Math.PI * 2)) {
+          prevDataTime -= (freq * Math.PI * 2);
+        }
+        data.current.push(...newData);
       }
-      setInterval(newData, 20);
+      let intervalId = setInterval(handleNewData, 1000 / messagesPerSec);
+
+      // cleanup
+      return () => {
+        clearInterval(intervalId);
+        wglp = null;
+        line = null;
+      };
     }
+
   }, []);
 
   useEffect(() => {
-    let id = 0;
-    // let newFrame = () => {
-    //   const noise1 = noise || 0.1;
-    //   for (let i = 0; i < line.numPoints; i++) {
-    //     const ySin = Math.sin(Math.PI * i * freq * Math.PI * 2);
-    //     const yNoise = Math.random() - 0.5;
-    //     line.setY(i, ySin * amp + yNoise * noise1);
-    //   }
-    //   // line.replaceArrayY(data.current);
-    //   id = requestAnimationFrame(newFrame);
-    //   wglp.update();
-    // };
 
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if (fpsCounter >= fpsDivder) {
+      if ( wglp && (fpsCounter >= fpsDivder) ) {
         fpsCounter = 0;
         wglp.linesData.forEach((line) => {
           const yArray = new Float32Array(data.current);
           data.current = [];
           (line as WebglLine).shiftAdd(yArray);
         });
-    
+        
         wglp.gScaleY = scaleY;
         wglp.update();
       }
       fpsCounter++;
       requestAnimationFrame(newFrame);
     }
-    id = requestAnimationFrame(newFrame);
+    let id = requestAnimationFrame(newFrame);
 
     return () => {
-      newFrame = () => {};
+      newFrame = () => { };
       cancelAnimationFrame(id);
     };
   }, [freq, amp, noise]);
