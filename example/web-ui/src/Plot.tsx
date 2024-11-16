@@ -35,9 +35,9 @@ export default function Plot({ freq, amp, noise }: prop) {
 
       function newData() {
         // const newData = Array.from({length:5}).map(Math.random); 
-        console.log(data.current.push(...[0, 0.1, 0.2, 0.3]));
+        data.current.push(...Array.from({length:20}).map(Math.random));
       }
-      setInterval(newData, 500);
+      setInterval(newData, 20);
     }
   }, []);
 
@@ -57,21 +57,18 @@ export default function Plot({ freq, amp, noise }: prop) {
 
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if (fpsCounter === 0) {
+      if (fpsCounter >= fpsDivder) {
+        fpsCounter = 0;
         wglp.linesData.forEach((line) => {
-          const yArray = new Float32Array([0, 0.1, 0.2, 0.3]);
+          const yArray = new Float32Array(data.current);
+          data.current = [];
           (line as WebglLine).shiftAdd(yArray);
         });
     
         wglp.gScaleY = scaleY;
         wglp.update();
       }
-    
       fpsCounter++;
-    
-      if (fpsCounter >= fpsDivder) {
-        fpsCounter = 0;
-      }
       requestAnimationFrame(newFrame);
     }
     id = requestAnimationFrame(newFrame);
