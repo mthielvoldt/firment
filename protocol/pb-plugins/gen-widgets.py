@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
+from typing import Dict
 from google.protobuf.compiler.plugin_pb2 import CodeGeneratorResponse, CodeGeneratorRequest
-from google.protobuf.descriptor_pb2 import FileDescriptorProto, DescriptorProto
+from google.protobuf.descriptor_pb2 import FileDescriptorProto, DescriptorProto, EnumDescriptorProto
 from google.protobuf.descriptor import FieldDescriptor
 
 
@@ -27,15 +28,15 @@ integer_fields = (
   FieldDescriptor.TYPE_SFIXED64
 )
 
-def get_message_widget(message: DescriptorProto):
+def get_message_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProto]):
   if message.name.endswith("Ctl"):
-    return get_ctl_widget(message)
+    return get_ctl_widget(message, enums)
   elif message.name.endswith("Tlm"):
     return get_tlm_widget(message)
   else:
     return "" # Perhaps an error?
 
-def get_ctl_widget(message: DescriptorProto):
+def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProto]):
   field_strings = ""
   initial_state = {}
 
@@ -68,9 +69,23 @@ def get_ctl_widget(message: DescriptorProto):
           onChange={{e => setState({{...state, {field.name}:e.target.checked}})}} />
         {field.name}
       </label>
-      '''
+      <br/>'''
     if field.type == FieldDescriptor.TYPE_ENUM:
       initial_state[field.name] = 0
+
+      # TODO: extract next 4 to a function
+      options = ""
+      for value in enums[field.type_name[1:]].value:
+        options += f'''
+          <option value="{value.number}">{value.name}</option>'''
+        
+      field_strings += f'''
+      <label>
+        <select name="{field.name}">{options}
+        </select>
+        {field.name}
+      </label>
+      <br/>'''
 
   initial_state_str = str(initial_state).replace("True", "true").replace("False","false")
   return f'''
@@ -138,9 +153,19 @@ export function {message_name}({{}}) {{
   
 def digest_proto(proto: FileDescriptorProto):
   ret = ""
+  enums = { enum.name: enum for enum in proto.enum_type }
+
   for message in proto.message_type:
-    widget_str = get_message_widget(message)
+    widget_str = get_message_widget(message, enums)
     ret += widget_str
+
+  ret += "/*"
+  ret += str(enums)
+  # ret += str(type(enums["WaveShape"]))
+  ret += str(proto)
+  # ret += str(type(proto))
+  # ret += str(type(proto.enum_type))
+  ret += "*/"
   return ret
 
 def generate_widgets(request: CodeGeneratorRequest) -> str:
