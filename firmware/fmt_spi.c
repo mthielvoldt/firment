@@ -1,3 +1,7 @@
+  // TODO: there is an issue where the ESP resets and the XMC gets stuck not 
+  // sending anything. 
+  // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
+
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
 #include "fmt_crc.h"
