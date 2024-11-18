@@ -36,40 +36,50 @@ def get_message_widget(message: DescriptorProto):
     return "" # Perhaps an error?
 
 def get_ctl_widget(message: DescriptorProto):
-  state = f"{message.name}State"
   field_strings = ""
   initial_state = {}
-  setState = f"set{state}"
 
   for field in message.field:
     if field.type in integer_fields:
       initial_state[field.name] = 0
       field_strings += f'''
       <label>
-        {field.name}: 
         <input className="field" type="number" step="1" 
-          value={{{state}.{field.name}}} name="{field.name}"
-          onChange={{e => set{state}({{...{state}, {field.name}:e.target.value}})}}/>
+          value={{state.{field.name}}} name="{field.name}"
+          onChange={{e => setState({{...state, {field.name}:Number(e.target.value)}})}}/>
+        {field.name}
       </label>
       <br/>'''
     if field.type in float_fields:
       initial_state[field.name] = 0
       field_strings += f'''
       <label>
-        {field.name}: 
         <input className="field" type="number" step="0.01" 
-          value={{{state}.{field.name}}} name="{field.name}"
-          onChange={{e => set{state}({{...{state}, {field.name}:e.target.value}})}}/>
+          value={{state.{field.name}}} name="{field.name}"
+          onChange={{e => setState({{...state, {field.name}:Number(e.target.value)}})}}/>
+        {field.name}
       </label>
       <br/>'''
+    if field.type == FieldDescriptor.TYPE_BOOL:
+      initial_state[field.name] = False
+      field_strings += f'''
+      <label>
+        <input className="field" type="checkbox" checked={{state.{field.name}}}
+          onChange={{e => setState({{...state, {field.name}:e.target.checked}})}} />
+        {field.name}
+      </label>
+      '''
+    if field.type == FieldDescriptor.TYPE_ENUM:
+      initial_state[field.name] = 0
 
+  initial_state_str = str(initial_state).replace("True", "true").replace("False","false")
   return f'''
 export function {message.name}({{}}) {{
-  const [{state}, {setState}] = useState({initial_state});
+  const [state, setState] = useState({initial_state_str});
 
   function handleSubmit(e) {{
     e.preventDefault();
-    sendMessage("{message.name}", {state});
+    sendMessage("{message.name}", state);
   }}
 
   return (
