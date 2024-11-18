@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { setupMq, teardownMq} from './mqclient';
 
 import * as widgets from './generated/widgets.pb';
+import { Log } from './Log';
 import Plot from './Plot';
 import './App.css'
 
@@ -18,11 +19,12 @@ function App() {
         <div>
           <h2>Commands</h2>
           <widgets.WaveformCtl />
+          <widgets.RunScanCtl />
         </div>
         <div>
           <h2>Telemetry</h2>
           <widgets.WaveformTlm />
-          <widgets.Log />
+          <Log />
         </div>
         <div>
           <h2>Plots</h2>

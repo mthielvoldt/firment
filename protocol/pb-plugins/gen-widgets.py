@@ -69,14 +69,13 @@ export function {message.name}({{}}) {{
 
   function handleSubmit(e) {{
     e.preventDefault();
-    console.log({state});
     sendMessage("{message.name}", {state});
   }}
 
   return (
     <form className="widget" onSubmit={{handleSubmit}}>
       <p className="widget-head">
-        <span >WaveformCtl </span>
+        <span >{message.name} </span>
         <button type="submit">Send</button>
       </p>
       {field_strings}
@@ -126,51 +125,9 @@ export function {message_name}({{}}) {{
   );
 }}
 '''
-
-def get_log_widget() :
-  return '''
-interface LogMessage {
-  text: string;
-  value: number;
-  count: number;
-}
-export function Log({}) {
-  const [LogState, setLogState] = useState([{id: 0, text: ""}]);
-
-  function appendToLog(newLogMessage: LogMessage) {
-    setLogState(prevLogState => {
-      if (newLogMessage.count > prevLogState[prevLogState.length - 1].id)
-      {
-        let newState = prevLogState.slice(Math.max(prevLogState.length - 10, 0));
-        newState.push({
-          id: newLogMessage.count,
-          text: newLogMessage.count + "	" + newLogMessage.text + newLogMessage.value
-        });
-        return newState;
-      } else {
-        // Enforce log message ID's always increase to avoid duplicate keys.
-        return prevLogState;
-      }
-    });
-  }
-  useEffect( () => {
-    addTopicCallback("Log", appendToLog);
-  }, []);
-
-  const messages = LogState.map((message) => 
-    <p key={message.id}>{message.text}</p>)
-
-  return (
-    <div className="widget">
-      <h4>Log</h4>
-      {messages}
-    </div>
-  )
-}
-'''
   
 def digest_proto(proto: FileDescriptorProto):
-  ret = get_log_widget()
+  ret = ""
   for message in proto.message_type:
     widget_str = get_message_widget(message)
     ret += widget_str
