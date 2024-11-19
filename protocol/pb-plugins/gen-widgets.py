@@ -81,7 +81,9 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
         
       field_strings += f'''
       <label>
-        <select name="{field.name}">{options}
+        <select name="{field.name}" value={{state.shape}}
+          onChange={{e => setState({{
+            ...state, {field.name}:Number(e.target.value)}})}}>{options}
         </select>
         {field.name}
       </label>
