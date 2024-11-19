@@ -47,14 +47,6 @@ void comm_handleTelemetry(void)
                 .currentMa = telem.currentMa,
                 .voltageV = telem.voltage}}});
 
-    // fmt_sendMsg((const Top){
-    //     .which_sub = Top_WaveformTlm_tag,
-    //     .sub = {
-    //         .WaveformTlm = {
-    //             .currentMa = telem.currentMa,
-    //             .voltageV = telem.voltage}}});
-
-    // XMC_GPIO_ToggleOutput(led.port, led.pin);
     break;
   }
   case 200:
