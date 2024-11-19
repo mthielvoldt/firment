@@ -3,28 +3,28 @@
 #include <cmsis_gcc.h> // __BKPT()
 
 // RunScanCtl has 4 bytes for isContinuous and freq, leaving the rest for the
-// padIds.  Each padId takes 2 bytes.  They come at the end.
+// testPointIds.  Each testPointId takes 2 bytes.  They come at the end.
 #define NUM_PROBES ((RunScanCtl_size - 4) / 2)
 
-static probePad_t pads[_PadId_ARRAYSIZE];
+static testPoint_t testPoints[_TestPointId_ARRAYSIZE];
 
-static PadId activePads[NUM_PROBES];
+static TestPointId activeTestPoints[NUM_PROBES];
 static bool running = false;
 static uint32_t numActiveProbes = 0;
 static SampleFreq selectedFreq = 0;
 // static uint32_t freqDividers[_SampleFreq_ARRAYSIZE] = 0;
 
-static ProbeSignal readPad(PadId padId);
+static ProbeSignal readTestPoint(TestPointId testPoint);
 
 void gp_init(void)
 {
 }
 
-void gp_initProbe(PadId id, void *src, srcType_t type)
+void gp_initProbe(TestPointId id, void *src, srcType_t type)
 {
-  if (id < _PadId_ARRAYSIZE)
+  if (id < _TestPointId_ARRAYSIZE)
   {
-    pads[id] = (const probePad_t){.src = src, .type = type};
+    testPoints[id] = (const testPoint_t){.src = src, .type = type};
   }
   else
   {
@@ -36,15 +36,15 @@ void handleRunScanCtl(RunScanCtl scanCtl)
 {
 
   numActiveProbes = 0;
-  PadId *padIds = &(scanCtl.padId0);
+  TestPointId *ids = &(scanCtl.probe_0);
 
   for (unsigned i = 0; i < NUM_PROBES; i++)
   {
-    PadId thisPadId = padIds[i];
-    if (thisPadId != PadId_DISCONNECTED)
+    TestPointId thisId = ids[i];
+    if (thisId != TestPointId_DISCONNECTED)
     {
       numActiveProbes++;
-      activePads[i] = thisPadId;
+      activeTestPoints[i] = thisId;
     }
   }
   selectedFreq = scanCtl.freq;
@@ -63,7 +63,7 @@ void gp_periodic(SampleFreq freqId)
     ProbeSignals signals = {0};
     for (unsigned i = 0; i < numActiveProbes; i++)
     {
-      signals.probeSignals[i] = readPad(activePads[i]);
+      signals.probeSignals[i] = readTestPoint(activeTestPoints[i]);
     }
     fmt_sendMsg((const Top){
         .which_sub = Top_ProbeSignals_tag,
@@ -72,11 +72,11 @@ void gp_periodic(SampleFreq freqId)
   }
 }
 
-static ProbeSignal readPad(PadId padId)
+static ProbeSignal readTestPoint(TestPointId id)
 {
   ProbeSignal signal;
-  signal.id = padId;
-  probePad_t pad = pads[padId];
+  signal.id = id;
+  testPoint_t pad = testPoints[id];
   switch (pad.type)
   {
   case SRC_TYPE_FLOAT:
