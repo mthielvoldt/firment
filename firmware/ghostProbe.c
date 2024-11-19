@@ -21,7 +21,7 @@ void gp_init(uint32_t periodicCallFrequencyHz)
   periodicFreqHz = periodicCallFrequencyHz;
 }
 
-void gp_initProbe(TestPointId id, void *src, srcType_t type)
+void gp_initTestPoint(TestPointId id, void *src, srcType_t type)
 {
   if (id < _TestPointId_ARRAYSIZE)
   {
@@ -35,23 +35,29 @@ void gp_initProbe(TestPointId id, void *src, srcType_t type)
 
 void handleRunScanCtl(RunScanCtl scanCtl)
 {
-
-  numActiveProbes = 0;
-  TestPointId *ids = &(scanCtl.probe_0);
-
-  for (unsigned i = 0; i < NUM_PROBES; i++)
+  if (scanCtl.freq > SampleFreq_SCAN_DISABLED)
   {
-    TestPointId thisId = ids[i];
-    if (thisId != TestPointId_DISCONNECTED)
+    /* Integer division.  If scanFreqDivider set to 0, periodic will send signals
+    on ever call, same as if scanFreqDivider == 1. */
+    scanFreqDivider = periodicFreqHz / scanCtl.freq;
+
+    numActiveProbes = 0;
+    TestPointId *ids = &(scanCtl.probe_0);
+    for (unsigned i = 0; i < NUM_PROBES; i++)
     {
-      numActiveProbes++;
-      activeTestPoints[i] = thisId;
+      TestPointId thisId = ids[i];
+      if (thisId != TestPointId_DISCONNECTED)
+      {
+        numActiveProbes++;
+        activeTestPoints[i] = thisId;
+      }
     }
+    running = true;
   }
-  /* Integer division.  If scanFreqDivider set to 0, periodic will send signals
-  on ever call, same as if scanFreqDivider == 1. */
-  scanFreqDivider = periodicFreqHz / scanCtl.freq;
-  running = true;
+  else
+  {
+    running = false;
+  }
 }
 
 void gp_stopScan()
@@ -65,7 +71,7 @@ void gp_periodic(void)
   if (running && (++callCount >= scanFreqDivider))
   {
     callCount = 0;
-    ProbeSignals signals = {0};
+    ProbeSignals signals = {.probeSignals_count = numActiveProbes};
     for (unsigned i = 0; i < numActiveProbes; i++)
     {
       signals.probeSignals[i] = readTestPoint(activeTestPoints[i]);

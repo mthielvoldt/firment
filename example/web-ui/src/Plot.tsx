@@ -1,5 +1,14 @@
+/** Ghost Probe Plot widget
+ * A react component that delivers an oscilloscope-like interface to the time-
+ * series data from an embedded target. 
+ * 
+ * The data is delivered by MQTT message over WebSockets.  mqclient.tsx provides
+ * an interface through addTopicCallback to register a state updater function to
+ * refresh the view when new data comes in.
+ */
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
+import { addTopicCallback } from "./mqclient";
 
 // Hand-adjustable parameters
 const pointsPerSec = 1000;
@@ -10,8 +19,9 @@ const scaleY = 0.8;
 
 // Derived resources
 const pointsPerMsg = pointsPerSec / messagesPerSec;
-const secPerPoint = 1 / pointsPerSec;
 let prevDataTime = 0;
+
+const secPerPoint = 1 / pointsPerSec;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 let line: (WebglLine | null) = null;
@@ -38,12 +48,10 @@ export default function Plot({ freq, amp, noise }: prop) {
         canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
         wglp = new WebglPlot(canvas.current);
       }
-
-      console.log("setup line with numPoints:", numPoints);
       line = new WebglLine(
         new ColorRGBA(Math.random() / 2 + 0.5, Math.random() / 2 + 0.5, Math.random(), 1),
         numPoints);
-      wglp.removeAllLines();
+      // wglp.removeAllLines();
       wglp.addLine(line);
       line.arrangeX();
       if (numPoints < data.length) {
@@ -52,26 +60,42 @@ export default function Plot({ freq, amp, noise }: prop) {
         line.replaceArrayY(Array(numPoints - data.length).fill(0).concat(data));
       }
 
-      function handleNewData() {
-        const newData =
-          Array.from({ length: pointsPerMsg }).map((_, index) => {
-            const dt = index * secPerPoint;
-            const ySin = Math.sin((prevDataTime + dt) * freq * Math.PI * 2);
-            const yNoise = Math.random() - 0.5;
-            return ySin + yNoise * (noise || 0);
-          });
-        prevDataTime += secPerPoint * pointsPerMsg;
-        while (prevDataTime > (freq * Math.PI * 2)) {
-          prevDataTime -= (freq * Math.PI * 2);
-        }
-        data.push(...newData);
-      }
-      let intervalId = setInterval(handleNewData, 1000 / messagesPerSec);
+      /**
+       * TODO: extract this to a test-code file.
+       */
+      // function mockPeriodicData() {
+      //   const newData =
+      //     Array.from({ length: pointsPerMsg }).map((_, index) => {
+      //       const dt = index * secPerPoint;
+      //       const ySin = Math.sin((prevDataTime + dt) * freq * Math.PI * 2);
+      //       const yNoise = Math.random() - 0.5;
+      //       return ySin + yNoise * (noise || 0);
+      //     });
+      //   prevDataTime += secPerPoint * pointsPerMsg;
+      //   while (prevDataTime > (freq * Math.PI * 2)) {
+      //     prevDataTime -= (freq * Math.PI * 2);
+      //   }
+      //   data.push(...newData);
+      // }
+      // let intervalId = setInterval(mockPeriodicData, 1000 / messagesPerSec);
+
+      type ProbeSignal = {
+        id: number;
+        value: number;
+      };
+      type ProbeSignals = {
+        probeSignals: ProbeSignal[];
+      };
+
+      addTopicCallback("ProbeSignals", (signals: ProbeSignals) => {
+        data.push(signals.probeSignals[0].value);
+      })
 
       // cleanup
       return () => {
-        console.log("Cleanup canvas.")
-        clearInterval(intervalId);
+        console.log("Cleanup canvas.");
+        (typeof intervalId !== "undefined") && clearInterval(intervalId);
+        (wglp) && wglp.removeAllLines();
         line = null;
       };
     }

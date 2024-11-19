@@ -28,7 +28,7 @@ typedef struct _testPoint {
  */
 void gp_init(uint32_t periodicCallFrequencyHz);
 
-void gp_initProbe(TestPointId id, void *src, srcType_t type);
+void gp_initTestPoint(TestPointId id, void *src, srcType_t type);
 
 /** Called by generated fmt_rx.pb.c 
  * See 
