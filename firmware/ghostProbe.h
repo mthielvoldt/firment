@@ -18,17 +18,17 @@ typedef enum _srcType {
   SRC_TYPE_INT32,
 } srcType_t;
 
-typedef struct _probePad {
+typedef struct _testPoint {
   void *src;
   srcType_t type;
-} probePad_t;
+} testPoint_t;
 
 /** Init GhostProbe
  * 
  */
 void gp_init(void);
 
-void gp_initProbe(PadId id, void *src, srcType_t type);
+void gp_initProbe(TestPointId id, void *src, srcType_t type);
 
 /** Called by generated fmt_rx.pb.c 
  * See 

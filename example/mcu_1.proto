@@ -26,14 +26,14 @@ message WaveformTlm {
 /** We use an enum to ID the messages.
 This enum will be available in FW.
 All signal messages have the same format  */
-enum PadId {
+enum TestPointId {
   DISCONNECTED = 0;
   RAMP_SIGNAL = 1;
   VOLTAGE_1 = 2;
 }
 
 message ProbeSignal {
-  PadId id = 1;
+  TestPointId id = 1;
   float value = 2;
 }
 /* An optimization to reduce msg lengths for int types*/
@@ -49,21 +49,21 @@ message ProbeSignals {
 }
 
 enum SampleFreq {
-  FREQ_100_HZ = 0;
-  FREQ_1_KHZ = 1;
-  // FREQ_10_KHZ = 2;
-  // FREQ_100_KHZ = 3;
+  SCAN_DISABLED = 0;
+  FREQ_100_HZ = 100;
+  FREQ_1_KHZ = 1000;
+  FREQ_10_KHZ = 10000;
 }
 
 message RunScanCtl {
   bool isContinuous = 1;
   SampleFreq freq = 2;
-  PadId padId0 = 3;
-  PadId padId1 = 4;
-  PadId padId2 = 5;
-  PadId padId3 = 6;
-  PadId padId4 = 7;
-  PadId padId5 = 8;
+  TestPointId probe_0 = 3;
+  TestPointId probe_1 = 4;
+  TestPointId probe_2 = 5;
+  TestPointId probe_3 = 6;
+  TestPointId probe_4 = 7;
+  TestPointId probe_5 = 8;
 }
 
 /* Standard messages follow */
