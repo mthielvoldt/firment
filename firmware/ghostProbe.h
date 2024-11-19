@@ -26,7 +26,7 @@ typedef struct _testPoint {
 /** Init GhostProbe
  * 
  */
-void gp_init(void);
+void gp_init(uint32_t periodicCallFrequencyHz);
 
 void gp_initProbe(TestPointId id, void *src, srcType_t type);
 
@@ -36,4 +36,4 @@ void gp_initProbe(TestPointId id, void *src, srcType_t type);
 #define USE_RunScanCtl
 void handleRunScanCtl(RunScanCtl scanCtl);
 
-void gp_periodic(SampleFreq freqId);
+void gp_periodic(void);

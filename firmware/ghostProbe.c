@@ -11,13 +11,14 @@ static testPoint_t testPoints[_TestPointId_ARRAYSIZE];
 static TestPointId activeTestPoints[NUM_PROBES];
 static bool running = false;
 static uint32_t numActiveProbes = 0;
-static SampleFreq selectedFreq = 0;
-// static uint32_t freqDividers[_SampleFreq_ARRAYSIZE] = 0;
+static uint32_t scanFreqDivider = 0;
+static uint32_t periodicFreqHz = 0;
 
 static ProbeSignal readTestPoint(TestPointId testPoint);
 
-void gp_init(void)
+void gp_init(uint32_t periodicCallFrequencyHz)
 {
+  periodicFreqHz = periodicCallFrequencyHz;
 }
 
 void gp_initProbe(TestPointId id, void *src, srcType_t type)
@@ -47,7 +48,9 @@ void handleRunScanCtl(RunScanCtl scanCtl)
       activeTestPoints[i] = thisId;
     }
   }
-  selectedFreq = scanCtl.freq;
+  /* Integer division.  If scanFreqDivider set to 0, periodic will send signals
+  on ever call, same as if scanFreqDivider == 1. */
+  scanFreqDivider = periodicFreqHz / scanCtl.freq;
   running = true;
 }
 
@@ -56,10 +59,12 @@ void gp_stopScan()
   running = false;
 }
 
-void gp_periodic(SampleFreq freqId)
+void gp_periodic(void)
 {
-  if (running && (freqId == selectedFreq))
+  static uint_fast32_t callCount = 0;
+  if (running && (++callCount >= scanFreqDivider))
   {
+    callCount = 0;
     ProbeSignals signals = {0};
     for (unsigned i = 0; i < numActiveProbes; i++)
     {

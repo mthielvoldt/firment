@@ -16,7 +16,6 @@
 #include "project_comms.h"
 #include "control.h"
 #include <fmt_log.h>
-#include <ghostProbe.h>
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
@@ -69,14 +68,6 @@ void comm_handleTelemetry(void)
     count = 0;
     break;
   }
-
-  uint32_t gpCount = 0;
-  if (++gpCount == 10)
-  {
-    gpCount = 0;
-    gp_periodic(SampleFreq_FREQ_100_HZ);
-  }
-  gp_periodic(SampleFreq_FREQ_1_KHZ);
 }
 
 void handleWaveformCtl(WaveformCtl msg)
