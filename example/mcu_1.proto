@@ -50,6 +50,8 @@ message ProbeSignals {
 
 enum SampleFreq {
   SCAN_DISABLED = 0;
+  FREQ_2_HZ = 2;
+  FREQ_10_HZ = 10;
   FREQ_100_HZ = 100;
   FREQ_1_KHZ = 1000;
   FREQ_10_KHZ = 10000;

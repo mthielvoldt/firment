@@ -10,6 +10,7 @@
 #include "ISR_Config.h"
 #include <fmt_spi.h>
 #include <fmt_rx.h>
+#include <ghostProbe.h>
 #include <port/XMC4/fmt_periodic_xmc.h>
 #include "control.h"
 #include "project_comms.h"
@@ -51,6 +52,7 @@ int main(void)
       periodicA_priority);
 
   ctl_init(WAVE_UPDATE_FREQ);
+  gp_init(GHOST_PROBE_CALL_FREQ);
 
   for (;;)
   {
@@ -68,4 +70,5 @@ void periodicA()
   comm_handleTelemetry();
   fmt_handleRx();
   ctl_updateVoltageISR();
+  gp_periodic();
 }
