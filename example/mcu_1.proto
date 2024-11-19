@@ -3,6 +3,7 @@
 syntax = "proto3";
 import "nanopb.proto";
 
+/* Project-specific messages */
 enum WaveShape {
   WAVE_SHAPE_UNSPECIFIED = 0;
   WAVE_SHAPE_SINE = 1;
@@ -22,6 +23,50 @@ message WaveformTlm {
   sint32 currentMa = 2;
 }
 
+/** We use an enum to ID the messages.
+This enum will be available in FW.
+All signal messages have the same format  */
+enum PadId {
+  DISCONNECTED = 0;
+  RAMP_SIGNAL = 1;
+  VOLTAGE_1 = 2;
+}
+
+message ProbeSignal {
+  PadId id = 1;
+  float value = 2;
+}
+/* An optimization to reduce msg lengths for int types*/
+// message probeSignal {
+//   oneof signal {
+//     intSignal intSig = 1;
+//     floatSignal floatSig = 2;
+//   }
+// }
+
+message ProbeSignals {
+  repeated ProbeSignal probeSignals = 1 [(nanopb).max_count = 5];
+}
+
+enum SampleFreq {
+  FREQ_100_HZ = 0;
+  FREQ_1_KHZ = 1;
+  // FREQ_10_KHZ = 2;
+  // FREQ_100_KHZ = 3;
+}
+
+message RunScanCtl {
+  bool isContinuous = 1;
+  SampleFreq freq = 2;
+  PadId padId0 = 3;
+  PadId padId1 = 4;
+  PadId padId2 = 5;
+  PadId padId3 = 6;
+  PadId padId4 = 7;
+  PadId padId5 = 8;
+}
+
+/* Standard messages follow */
 message Ack {
   fixed32 refCRC = 1;
 }
@@ -51,6 +96,8 @@ message Top {
     Ack Ack = 1;
     Log Log = 2;
     TouchParam TouchParam = 3;
+    ProbeSignals ProbeSignals = 4;
+    RunScanCtl RunScanCtl = 5;
     WaveformCtl WaveformCtl = 8;
     WaveformTlm WaveformTlm = 9;
   }

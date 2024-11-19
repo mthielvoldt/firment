@@ -34,6 +34,7 @@ def generate_code(request: CodeGeneratorRequest) -> str:
  * Provides first-level handling of received messages.
  * */
 #include <project_comms.h>
+#include <ghostProbe.h>
 
 void fmt_handleRx(void)
 {
