@@ -50,6 +50,7 @@ add_executable(${EXECUTABLE}
   ../../firmware/fmt_hardfault.c
   ../../firmware/fmt_waveform.c
   ../../firmware/fmt_log.c
+  ../../firmware/ghostProbe.c
   ${XMC_SYSTEM_FILE}
   ${XMC_STARTUP_FILE}
   lib/XMC4000_DFP/RTE_Driver/SPI.c

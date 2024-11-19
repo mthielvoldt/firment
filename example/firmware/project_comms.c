@@ -16,9 +16,9 @@
 #include "project_comms.h"
 #include "control.h"
 #include <fmt_log.h>
+#include <ghostProbe.h>
 
-// This must be a power of 2.
-#define CALLS_PER_FULL_ROTATION 1024U
+#define CALLS_PER_FULL_ROTATION 1000U
 
 // optimization: stop storing the config.
 static portPin_t led = {0};
@@ -35,7 +35,7 @@ void comm_handleTelemetry(void)
   static uint32_t rotations = 0;
 
   // execute 8 different operations, one each call in round-robin
-  switch (++count & (CALLS_PER_FULL_ROTATION - 1))
+  switch (count++)
   {
   case 0:
   {
@@ -65,7 +65,18 @@ void comm_handleTelemetry(void)
   }
   case 400:
     break;
+  case CALLS_PER_FULL_ROTATION:
+    count = 0;
+    break;
   }
+
+  uint32_t gpCount = 0;
+  if (++gpCount == 10)
+  {
+    gpCount = 0;
+    gp_periodic(SampleFreq_FREQ_100_HZ);
+  }
+  gp_periodic(SampleFreq_FREQ_1_KHZ);
 }
 
 void handleWaveformCtl(WaveformCtl msg)
