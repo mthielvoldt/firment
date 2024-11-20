@@ -11,7 +11,7 @@ header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
 import { useState, useEffect } from "react";
-import { addTopicCallback, sendMessage } from "../mqclient";"""
+import { setMessageHandler, sendMessage } from "../mqclient";"""
 
 float_fields = (
   FieldDescriptor.TYPE_FLOAT,
@@ -141,7 +141,7 @@ def get_tlm_widget(message: DescriptorProto):
 export function {message_name}({{}}) {{
   const [{message_name}State, {setState}] = useState({initial_state});
   useEffect( () => {{
-    addTopicCallback("{message_name}", {setState});
+    setMessageHandler("{message_name}", {setState});
   }}, []);
 
   return (
