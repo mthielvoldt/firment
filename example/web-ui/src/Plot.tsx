@@ -10,6 +10,19 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
 import { addTopicCallback } from "./mqclient";
 
+type ProbeSignal = {
+  id: number;
+  value: number;
+};
+type ProbeSignals = {
+  probeSignals: ProbeSignal[];
+};
+type prop = {
+  freq: number;
+  amp: number;
+  noise?: number;
+};
+
 // Hand-adjustable parameters
 const pointsPerSec = 1000;
 const messagesPerSec = 25;
@@ -24,15 +37,41 @@ let prevDataTime = 0;
 const secPerPoint = 1 / pointsPerSec;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
-let line: (WebglLine | null) = null;
-let data: number[] = [];
+/* array of arrays of numbers.  
+[
+  [ probe0_point0, probe0_point1, probe0_point2 ...],
+  [ probe1_point0, probe1_point1, probe1_point2 ...],
+  [ probe2_point0, probe2_point1, probe2_point2 ...],
+  ... up to the number of probes reporting data.
+]
+*/
+let data: number[][] = [[]];
+let lastSignals: ProbeSignal[] = [];
 let firstUnrenderedIndex = 0;
 
-type prop = {
-  freq: number;
-  amp: number;
-  noise?: number;
-};
+function replaceLines(numPoints: number) {
+  console.log("replace lines")
+  let lines = Array.from({ length: data.length }, () => new WebglLine(
+    new ColorRGBA(
+      Math.random() / 2 + 0.5,
+      Math.random() / 2 + 0.5,
+      Math.random(), 1),
+    numPoints));
+  wglp.removeAllLines();
+  wglp?.clear();
+
+  lines.forEach((line, i) => {
+    wglp.addLine(line);
+    line.arrangeX();
+    if (numPoints < data[0].length) {
+      line.replaceArrayY(data[i].slice(-numPoints));
+    } else {
+      line.replaceArrayY(
+        Array(numPoints - data[i].length).fill(0).concat(data[i]));
+    }
+  });
+}
+
 
 export default function Plot({ freq, amp, noise }: prop) {
   const [numPoints, setNumPoints] = useState(secPerWindow / secPerPoint);
@@ -47,17 +86,6 @@ export default function Plot({ freq, amp, noise }: prop) {
         canvas.current.width = canvas.current.clientWidth * devicePixelRatio;
         canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
         wglp = new WebglPlot(canvas.current);
-      }
-      line = new WebglLine(
-        new ColorRGBA(Math.random() / 2 + 0.5, Math.random() / 2 + 0.5, Math.random(), 1),
-        numPoints);
-      // wglp.removeAllLines();
-      wglp.addLine(line);
-      line.arrangeX();
-      if (numPoints < data.length) {
-        line.replaceArrayY(data.slice(-numPoints));
-      } else {
-        line.replaceArrayY(Array(numPoints - data.length).fill(0).concat(data));
       }
 
       /**
@@ -79,16 +107,36 @@ export default function Plot({ freq, amp, noise }: prop) {
       // }
       // let intervalId = setInterval(mockPeriodicData, 1000 / messagesPerSec);
 
-      type ProbeSignal = {
-        id: number;
-        value: number;
-      };
-      type ProbeSignals = {
-        probeSignals: ProbeSignal[];
-      };
 
       addTopicCallback("ProbeSignals", (signals: ProbeSignals) => {
-        data.push(signals.probeSignals[0].value);
+
+        const idsSame =
+          (signals.probeSignals.length == lastSignals.length) &&
+          signals.probeSignals.reduce((accum, signal, index) =>
+            accum && (signal.id == lastSignals[index].id), true);
+
+        lastSignals = signals.probeSignals;
+
+        if (!idsSame) {
+          // Need to mutate the original data object, not replace.
+          for (let index = 0; index < data.length; index++) {
+            if (index < signals.probeSignals.length) {
+              data[index] = [];
+            } else {
+              data.pop();
+            }
+          }
+          for (let index = data.length; index < signals.probeSignals.length; index++) {
+            data.push([]);
+          }
+          // data = Array.from({ length: signals.probeSignals.length }, () => []);
+          console.log(data);
+          firstUnrenderedIndex = 0;
+          replaceLines(numPoints);
+        }
+        signals.probeSignals.forEach((signal, index) => {
+          data[index].push(signal.value);
+        })
       })
 
       // cleanup
@@ -96,26 +144,29 @@ export default function Plot({ freq, amp, noise }: prop) {
         console.log("Cleanup canvas.");
         (typeof intervalId !== "undefined") && clearInterval(intervalId);
         (wglp) && wglp.removeAllLines();
-        line = null;
       };
     }
-  }, [numPoints]);
+  }, []);
+
+  useEffect(() => {replaceLines(numPoints);}, [numPoints]);
 
   // Animation engine: updates frame when new data is available.
   useEffect(() => {
     console.log("Setup animation.")
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if (wglp && (data.length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
+      if (wglp && (data[0].length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
         fpsCounter = 0;
-        wglp.linesData.forEach((line) => {
-          const yArray = new Float32Array(
-            data.slice(firstUnrenderedIndex));
 
-          // indicate we've now rendered all the data.
-          firstUnrenderedIndex = data.length;
+        // console.log(wglp.linesData, data); 
+        console.log("newFrame. data.length: ", data.length)
+
+        wglp.linesData.forEach((line, i) => {
+          const yArray = new Float32Array(data[i].slice(firstUnrenderedIndex));
           (line as WebglLine).shiftAdd(yArray);
         });
+        // indicate we've now rendered all the data.
+        firstUnrenderedIndex = data[0].length;
 
         wglp.gScaleY = scaleY;
         wglp.update();
@@ -147,7 +198,7 @@ export default function Plot({ freq, amp, noise }: prop) {
       <canvas style={canvasStyle} ref={canvas} />
       <label>
         Num Points:
-        <input type="number" className="" value={numPoints} step={numPoints/2}
+        <input type="number" className="" value={numPoints} step={numPoints / 2}
           onChange={changeNumPoints} />
       </label>
     </div>
