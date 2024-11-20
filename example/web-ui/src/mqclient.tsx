@@ -2,12 +2,12 @@ import mqtt, { MqttClient } from "mqtt"; // import namespace "mqtt"
 import * as pb from "./generated/mcu_1.es6.js";
 
 let client: MqttClient;
-/** callbacks is an object containing:
+/** messageHandlers is an object containing:
  * keys: widget/message names, values: the setState functions of those widgets.
  * When an MQTT message comes in, after decoding, the message name is looked up,
  * which will be the same as the name of a widget.  That lets us call the 
  * right widget's setState function, passing it that message's data.*/
-let callbacks = {}
+let messageHandlers: { [index: string]: ({ }) => void } = {}
 let ranOnce = false;
 
 export function setupMq() {
@@ -32,14 +32,17 @@ export function setupMq() {
     }
     catch (error) {
       console.error(error);
-      // callbacks["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
+      // messageHandlers["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
     }
     console.log("decoded = ", JSON.stringify(message));
 
     // call the state updater for the widget this message addresses. 
     const subMsgType = Object.keys(message)[0];
     const newState = message[subMsgType];
-    callbacks[subMsgType](newState);
+    if (messageHandlers.hasOwnProperty(subMsgType))
+      messageHandlers[subMsgType](newState);
+    else
+      console.warn("message handler not found for message, ", subMsgType);
 
     // client.end();
   });
@@ -56,8 +59,10 @@ export function teardownMq() {
 This is called by generated widget code to register a callback that updates the
 widget when a new message is received.
 */
-export function addTopicCallback(topic: string, callback) {
-  callbacks[topic] = callback;
+type MessageHandler = (message: any) => void;
+export function setMessageHandler(messageName: string, callback: MessageHandler) {
+  messageHandlers[messageName] = callback;
+  return () => {delete messageHandlers[messageName];}
 }
 
 export function sendMessage(message_name: string, state_obj: object) {

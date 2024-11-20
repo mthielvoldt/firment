@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { addTopicCallback } from "./mqclient";
+import { setMessageHandler } from "./mqclient";
 
 
 interface LogMessage {
@@ -27,7 +27,7 @@ export function Log({}) {
     });
   }
   useEffect( () => {
-    addTopicCallback("Log", appendToLog);
+    setMessageHandler("Log", appendToLog);
   }, []);
 
   const messages = LogState.map((message) => 

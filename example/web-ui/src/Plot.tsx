@@ -3,12 +3,15 @@
  * series data from an embedded target. 
  * 
  * The data is delivered by MQTT message over WebSockets.  mqclient.tsx provides
- * an interface through addTopicCallback to register a state updater function to
+ * an interface through setMessageHandler to register a state updater function to
  * refresh the view when new data comes in.
  */
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
-import { addTopicCallback } from "./mqclient";
+import { setMessageHandler } from "./mqclient";
+
+/* Replace the above line with the following one to mock Ghost Probe signal. */
+// import { default as setMessageHandler } from "./mockSignal";
 
 type ProbeSignal = {
   id: number;
@@ -17,24 +20,10 @@ type ProbeSignal = {
 type ProbeSignals = {
   probeSignals: ProbeSignal[];
 };
-type prop = {
-  freq: number;
-  amp: number;
-  noise?: number;
-};
 
-// Hand-adjustable parameters
-const pointsPerSec = 1000;
-const messagesPerSec = 25;
-const secPerWindow = 1;
 const fpsDivder = 2;
 const scaleY = 0.8;
 
-// Derived resources
-const pointsPerMsg = pointsPerSec / messagesPerSec;
-let prevDataTime = 0;
-
-const secPerPoint = 1 / pointsPerSec;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 /* array of arrays of numbers.  
@@ -73,8 +62,8 @@ function replaceLines(numPoints: number) {
 }
 
 
-export default function Plot({ freq, amp, noise }: prop) {
-  const [numPoints, setNumPoints] = useState(secPerWindow / secPerPoint);
+export default function Plot({ }) {
+  const [numPoints, setNumPoints] = useState(1000);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   // Setup canvas, Plot and line objects, handler for new data.
@@ -88,28 +77,8 @@ export default function Plot({ freq, amp, noise }: prop) {
         wglp = new WebglPlot(canvas.current);
       }
 
-      /**
-       * TODO: extract this to a test-code file.
-       */
-      // function mockPeriodicData() {
-      //   const newData =
-      //     Array.from({ length: pointsPerMsg }).map((_, index) => {
-      //       const dt = index * secPerPoint;
-      //       const ySin = Math.sin((prevDataTime + dt) * freq * Math.PI * 2);
-      //       const yNoise = Math.random() - 0.5;
-      //       return ySin + yNoise * (noise || 0);
-      //     });
-      //   prevDataTime += secPerPoint * pointsPerMsg;
-      //   while (prevDataTime > (freq * Math.PI * 2)) {
-      //     prevDataTime -= (freq * Math.PI * 2);
-      //   }
-      //   data.push(...newData);
-      // }
-      // let intervalId = setInterval(mockPeriodicData, 1000 / messagesPerSec);
 
-
-      addTopicCallback("ProbeSignals", (signals: ProbeSignals) => {
-
+      let clearHandler = setMessageHandler("ProbeSignals", (signals: ProbeSignals) => {
         const idsSame =
           (signals.probeSignals.length == lastSignals.length) &&
           signals.probeSignals.reduce((accum, signal, index) =>
@@ -142,13 +111,13 @@ export default function Plot({ freq, amp, noise }: prop) {
       // cleanup
       return () => {
         console.log("Cleanup canvas.");
-        (typeof intervalId !== "undefined") && clearInterval(intervalId);
+        clearHandler();
         (wglp) && wglp.removeAllLines();
       };
     }
   }, []);
 
-  useEffect(() => {replaceLines(numPoints);}, [numPoints]);
+  useEffect(() => { replaceLines(numPoints); }, [numPoints]);
 
   // Animation engine: updates frame when new data is available.
   useEffect(() => {
@@ -157,9 +126,6 @@ export default function Plot({ freq, amp, noise }: prop) {
       // Run this once every fpsDivider.
       if (wglp && (data[0].length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
         fpsCounter = 0;
-
-        // console.log(wglp.linesData, data); 
-        console.log("newFrame. data.length: ", data.length)
 
         wglp.linesData.forEach((line, i) => {
           const yArray = new Float32Array(data[i].slice(firstUnrenderedIndex));
@@ -181,7 +147,7 @@ export default function Plot({ freq, amp, noise }: prop) {
       newFrame = () => { };
       cancelAnimationFrame(id);
     };
-  }, [freq, amp, noise, numPoints]);
+  }, [numPoints]);
 
   const canvasStyle = {
     width: "500px",
