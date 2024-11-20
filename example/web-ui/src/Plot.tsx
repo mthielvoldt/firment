@@ -7,8 +7,9 @@
  * refresh the view when new data comes in.
  */
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
+import { WebglPlot, WebglLine } from "webgl-plot";
 import { setMessageHandler } from "./mqclient";
+import { getPlotColors } from "./plotTools";
 
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
@@ -40,11 +41,8 @@ let firstUnrenderedIndex = 0;
 
 function replaceLines(numPoints: number) {
   console.log("replace lines")
-  let lines = Array.from({ length: data.length }, () => new WebglLine(
-    new ColorRGBA(
-      Math.random() / 2 + 0.5,
-      Math.random() / 2 + 0.5,
-      Math.random(), 1),
+  let lines = Array.from({ length: data.length }, (_, i) => new WebglLine(
+    getPlotColors(i),
     numPoints));
   wglp.removeAllLines();
   wglp?.clear();
