@@ -28,8 +28,10 @@ This enum will be available in FW.
 All signal messages have the same format  */
 enum TestPointId {
   DISCONNECTED = 0;
-  RAMP_SIGNAL = 1;
-  VOLTAGE_1 = 2;
+  SINE = 2;
+  SINE_INV = 3;
+  SINE_PLUS = 4;
+  SAWTOOTH = 5;
 }
 
 message ProbeSignal {
@@ -52,9 +54,11 @@ enum SampleFreq {
   SCAN_DISABLED = 0;
   FREQ_2_HZ = 2;
   FREQ_10_HZ = 10;
+  FREQ_15_HZ = 15;
+  FREQ_20_HZ = 20;
+  FREQ_25_HZ = 25;
+  FREQ_40_HZ = 40;
   FREQ_100_HZ = 100;
-  FREQ_1_KHZ = 1000;
-  FREQ_10_KHZ = 10000;
 }
 
 message RunScanCtl {
