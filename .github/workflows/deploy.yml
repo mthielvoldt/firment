@@ -44,9 +44,9 @@ jobs:
       - name: Install node dependencies
         run: npm ci
       - name: Install python dependencies
-        run: pip3 install -r ../../protocol/requirements.txt
-      - name: Install protobuf
-        run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
+        run: pip3 install --upgrade -r ../../protocol/nanopb/requirements.txt
+      # - name: Install protobuf
+      #   run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
       - name: Build protobuf messages
         run: cd .. && source gen-proto.sh
       - name: Build
