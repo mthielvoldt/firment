@@ -2,6 +2,9 @@ if [ -d "../protocol/gen-venv" ]; then
   source ../protocol/gen-venv/bin/activate
 fi
 
+mkdir -p firmware/generated
+mkdir -p web-ui/src/generated
+
 ../protocol/nanopb/generator/protoc -I./ \
   --nanopb_out=firmware/generated \
   --plugin=protoc-gen-firment=../protocol/pb-plugins/gen-firment.py --firment_out=firmware/generated \
