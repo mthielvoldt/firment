@@ -24,25 +24,23 @@ export function setupMq() {
     })
   });
 
-  client.on("message", (topic, buffer) => {
+  client.on("message", (_, buffer) => {
     // Parse the protobuf buffer
-    let message
     try {
-      message = pb.Top.decode(buffer, buffer.length);
+      let message = pb.Top.decode(buffer, buffer.length);
+      console.log("decoded = ", JSON.stringify(message));
+      // call the state updater for the widget this message addresses. 
+      const subMsgType = Object.keys(message)[0];
+      const newState = Object.values(message)[0];
+      if (messageHandlers.hasOwnProperty(subMsgType))
+        messageHandlers[subMsgType](newState);
+      else
+        console.warn("message handler not found for message, ", subMsgType);
     }
     catch (error) {
       console.error(error);
       // messageHandlers["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
     }
-    console.log("decoded = ", JSON.stringify(message));
-
-    // call the state updater for the widget this message addresses. 
-    const subMsgType = Object.keys(message)[0];
-    const newState = message[subMsgType];
-    if (messageHandlers.hasOwnProperty(subMsgType))
-      messageHandlers[subMsgType](newState);
-    else
-      console.warn("message handler not found for message, ", subMsgType);
 
     // client.end();
   });
@@ -62,12 +60,12 @@ widget when a new message is received.
 type MessageHandler = (message: any) => void;
 export function setMessageHandler(messageName: string, callback: MessageHandler) {
   messageHandlers[messageName] = callback;
-  return () => {delete messageHandlers[messageName];}
+  return () => { delete messageHandlers[messageName]; }
 }
 
 export function sendMessage(message_name: string, state_obj: object) {
   let message = { [message_name]: state_obj }
-  let packet = pb.Top.encodeDelimited(message).finish();
+  let packet = pb.Top.encodeDelimited(message).finish().toString();
   client.publish("edge-bound", packet);
   console.log(JSON.stringify(message), "packet: ", packet);
 }

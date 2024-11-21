@@ -28,7 +28,7 @@ function App() {
         </div>
         <div>
           <h2>Plots</h2>
-          <Plot amp={0.5} freq={2} noise={0.1}/>
+          <Plot />
         </div>
       </div>
     </>
