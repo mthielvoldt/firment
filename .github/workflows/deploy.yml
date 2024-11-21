@@ -46,7 +46,7 @@ jobs:
       - name: Install python dependencies
         run: pip3 install -r ../../protocol/requirements.txt
       - name: Install protobuf
-        run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler
+        run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
       - name: Build protobuf messages
         run: cd .. && source gen-proto.sh
       - name: Build
