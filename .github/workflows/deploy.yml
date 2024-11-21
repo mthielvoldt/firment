@@ -41,6 +41,8 @@ jobs:
           cache-dependency-path: example/web-ui/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Build protobuf messages
+        run: cd .. && source gen-proto.sh
       - name: Build
         run: npm run build
       - name: Setup Pages
