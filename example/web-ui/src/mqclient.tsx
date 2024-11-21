@@ -65,7 +65,8 @@ export function setMessageHandler(messageName: string, callback: MessageHandler)
 
 export function sendMessage(message_name: string, state_obj: object) {
   let message = { [message_name]: state_obj }
-  let packet = pb.Top.encodeDelimited(message).finish().toString();
-  client.publish("edge-bound", packet);
+  const packet: Uint8Array = pb.Top.encodeDelimited(message).finish();
+  const packetStr = new TextDecoder().decode(packet);
+  client.publish("edge-bound", packetStr);
   console.log(JSON.stringify(message), "packet: ", packet);
 }

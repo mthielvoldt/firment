@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ISR_Config.h>
-#include <project_comms.h>  // Needed for Top message definition.
+#include <generated/mcu_1.pb.h>
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
 #include "fmt_ioc.h"
