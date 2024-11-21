@@ -1,20 +1,17 @@
-import { useEffect } from 'react'
-import { setupMq, teardownMq} from './mqclient';
-
 import * as widgets from './generated/widgets.pb';
+import BrokerAddress from './BrokerAddress';
 import { Log } from './Log';
 import Plot from './Plot';
 import './App.css'
 
 function App() {
-  useEffect( () => {
-    setupMq();
-    return teardownMq;
-  }, []);
 
   return (
     <>
-      <h1>Your Embedded UI</h1>
+      <div className='row-container'>
+        <h1>Your Embedded UI</h1>
+        <BrokerAddress />
+      </div>
       <div className="row-container">
         <div>
           <h2>Commands</h2>

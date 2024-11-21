@@ -10,13 +10,13 @@ let client: MqttClient;
 let messageHandlers: { [index: string]: ({ }) => void } = {}
 let ranOnce = false;
 
-export function setupMq() {
+export function setupMq(brokerAddress: string) {
   if (ranOnce) {
-    return;
+    teardownMq();
   }
   console.log("Attempting to connect");
   ranOnce = true;
-  client = mqtt.connect("mqtt://localhost:8080");
+  client = mqtt.connect("mqtt://" + brokerAddress + ":8080");
   client.on("connect", () => {
     client.subscribe("hq-bound", (err) => {
       if (!err) { console.log("Subscribed to 'hq-bound'"); }
@@ -47,10 +47,8 @@ export function setupMq() {
 }
 
 export function teardownMq() {
-  if (client.connected) {
-    console.log("Disconnecting from broker.");
-    client.end();
-  }
+  console.log("Disconnecting from broker.");
+  client.end();
 }
 
 /*
