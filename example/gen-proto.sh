@@ -7,4 +7,8 @@ source ../protocol/gen-venv/bin/activate
 
 web-ui/node_modules/protobufjs-cli/bin/pbjs \
   -p ../protocol/nanopb/generator/proto \
-  -t static-module -w es6 -o web-ui/src/generated/mcu_1.es6.tsx ./mcu_1.proto
+  -t static-module -w es6 -o web-ui/src/generated/mcu_1.es6.js ./mcu_1.proto
+
+web-ui/node_modules/protobufjs-cli/bin/pbts \
+  --no-comments \
+  -o web-ui/src/generated/mcu_1.es6.d.ts web-ui/src/generated/mcu_1.es6.js

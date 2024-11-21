@@ -6,7 +6,7 @@
  * an interface through setMessageHandler to register a state updater function to
  * refresh the view when new data comes in.
  */
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { setMessageHandler } from "./mqclient";
 import { getPlotColors } from "./plotTools";
@@ -40,23 +40,23 @@ let lastSignals: ProbeSignal[] = [];
 let firstUnrenderedIndex = 0;
 
 function replaceLines(numPoints: number) {
-  console.log("replace lines")
-  let lines = Array.from({ length: data.length }, (_, i) => new WebglLine(
-    getPlotColors(i),
-    numPoints));
-  wglp.removeAllLines();
-  wglp?.clear();
+  if (wglp !== null) {
+    console.log("replace lines")
+    wglp.removeAllLines();
+    wglp.clear();
 
-  lines.forEach((line, i) => {
-    wglp.addLine(line);
-    line.arrangeX();
-    if (numPoints < data[0].length) {
-      line.replaceArrayY(data[i].slice(-numPoints));
-    } else {
-      line.replaceArrayY(
-        Array(numPoints - data[i].length).fill(0).concat(data[i]));
+    for (let i = 0; i < data.length; i++) {
+      const line = new WebglLine(getPlotColors(i), numPoints);
+      line.arrangeX();
+      if (numPoints < data[0].length) {
+        line.replaceArrayY(data[i].slice(-numPoints));
+      } else {
+        line.replaceArrayY(
+          Array(numPoints - data[i].length).fill(0).concat(data[i]));
+      }
+      wglp.addLine(line);
     }
-  });
+  }
 }
 
 
@@ -152,7 +152,7 @@ export default function Plot({ }) {
     height: "70vh"
   };
 
-  function changeNumPoints(e: ChangeEvent) {
+  function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
     setNumPoints(Number.parseInt(e.currentTarget.value));
   }

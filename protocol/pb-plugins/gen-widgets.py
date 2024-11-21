@@ -81,7 +81,7 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
         
       field_strings += f'''
       <label>
-        <select name="{field.name}" value={{state.shape}}
+        <select name="{field.name}" value={{state.{field.name}}}
           onChange={{e => setState({{
             ...state, {field.name}:Number(e.target.value)}})}}>{options}
         </select>
@@ -94,7 +94,7 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
 export function {message.name}({{}}) {{
   const [state, setState] = useState({initial_state_str});
 
-  function handleSubmit(e) {{
+  function handleSubmit(e: React.FormEvent) {{
     e.preventDefault();
     sendMessage("{message.name}", state);
   }}
