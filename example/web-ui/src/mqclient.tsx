@@ -1,4 +1,4 @@
-import mqtt, { MqttClient } from "mqtt"; // import namespace "mqtt"
+import mqtt, { MqttClient, MqttProtocol } from "mqtt"; // import namespace "mqtt"
 import * as pb from "./generated/mcu_1.es6.js";
 
 let client: MqttClient;
@@ -16,7 +16,19 @@ export function setupMq(brokerAddress: string) {
   }
   console.log("Attempting to connect");
   ranOnce = true;
-  client = mqtt.connect("mqtt://" + brokerAddress + ":8080");
+  const protocol: MqttProtocol = "mqtts";
+  const options = {
+    host: brokerAddress,
+    port: 8883,
+    protocol: protocol,
+    clientId: 'firment-client',
+    rejectUnauthorized: false
+  }
+  // client = mqtt.connect("ws://" + brokerAddress + ":8080",
+  //   {rejectUnauthorized: false}); 
+
+  client = mqtt.connect(options); 
+
   client.on("connect", () => {
     client.subscribe("hq-bound", (err) => {
       if (!err) { console.log("Subscribed to 'hq-bound'"); }
