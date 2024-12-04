@@ -39,11 +39,40 @@ let data: number[][] = [[]];
 let lastSignals: ProbeSignal[] = [];
 let firstUnrenderedIndex = 0;
 
+function handleProbeSignals(signals: ProbeSignals) {
+  const idsSame =
+    (signals.probeSignals.length == lastSignals.length) &&
+    signals.probeSignals.reduce((accum, signal, index) =>
+      accum && (signal.id == lastSignals[index].id), true);
+
+  lastSignals = signals.probeSignals;
+
+  // If probes->signals routing has changed, start new data row.
+  if (!idsSame) {
+    // Need to mutate the original data object, not replace.
+    for (let index = 0; index < data.length; index++) {
+      if (index < signals.probeSignals.length) {
+        data[index] = [];
+      } else {
+        data.pop();
+      }
+    }
+    for (let index = data.length; index < signals.probeSignals.length; index++) {
+      data.push([]);
+    }
+    // data = Array.from({ length: signals.probeSignals.length }, () => []);
+    console.log(data);
+    firstUnrenderedIndex = 0;
+  }
+  signals.probeSignals.forEach((signal, index) => {
+    data[index].push(signal.value);
+  })
+}
+
+// View
 function replaceLines(numPoints: number) {
   if (wglp !== null) {
-    console.log("replace lines")
-    wglp.removeAllLines();
-    wglp.clear();
+    console.log("replace lines.  numPoints: ", numPoints);
 
     for (let i = 0; i < data.length; i++) {
       const line = new WebglLine(getPlotColors(i), numPoints);
@@ -64,7 +93,7 @@ export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  // Setup canvas, Plot and line objects, handler for new data.
+  // One-time setup: canvas, Plot and line objects, handler for new data.
   useEffect(() => {
     if (canvas.current) {
       if (wglp === null) {
@@ -75,36 +104,8 @@ export default function Plot({ }) {
         wglp = new WebglPlot(canvas.current);
       }
 
-
-      let clearHandler = setMessageHandler("ProbeSignals", (signals: ProbeSignals) => {
-        const idsSame =
-          (signals.probeSignals.length == lastSignals.length) &&
-          signals.probeSignals.reduce((accum, signal, index) =>
-            accum && (signal.id == lastSignals[index].id), true);
-
-        lastSignals = signals.probeSignals;
-
-        if (!idsSame) {
-          // Need to mutate the original data object, not replace.
-          for (let index = 0; index < data.length; index++) {
-            if (index < signals.probeSignals.length) {
-              data[index] = [];
-            } else {
-              data.pop();
-            }
-          }
-          for (let index = data.length; index < signals.probeSignals.length; index++) {
-            data.push([]);
-          }
-          // data = Array.from({ length: signals.probeSignals.length }, () => []);
-          console.log(data);
-          firstUnrenderedIndex = 0;
-          replaceLines(numPoints);
-        }
-        signals.probeSignals.forEach((signal, index) => {
-          data[index].push(signal.value);
-        })
-      })
+      // Model: register function that mutates data model on message rx.
+      let clearHandler = setMessageHandler("ProbeSignals", handleProbeSignals);
 
       // cleanup
       return () => {
@@ -115,20 +116,29 @@ export default function Plot({ }) {
     }
   }, []);
 
-  useEffect(() => { replaceLines(numPoints); }, [numPoints]);
-
   // Animation engine: updates frame when new data is available.
   useEffect(() => {
-    console.log("Setup animation.")
+    console.log("Setup animation.");
+
+    // If numPoints changed, trigger a full line-replacement because each line
+    // stores numPoints as immutable. 
+    firstUnrenderedIndex = 0;
+    let frameId = 0;
+
     let newFrame = () => {
       // Run this once every fpsDivider.
       if (wglp && (data[0].length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
         fpsCounter = 0;
 
-        wglp.linesData.forEach((line, i) => {
-          const yArray = new Float32Array(data[i].slice(firstUnrenderedIndex));
-          (line as WebglLine).shiftAdd(yArray);
-        });
+        // If probe routing has changed, replace all lines.
+        if (firstUnrenderedIndex === 0) {
+          replaceLines(numPoints);
+        } else {
+          wglp.linesData.forEach((line, i) => {
+            const yArray = new Float32Array(data[i].slice(firstUnrenderedIndex));
+            (line as WebglLine).shiftAdd(yArray);
+          });
+        }
         // indicate we've now rendered all the data.
         firstUnrenderedIndex = data[0].length;
 
@@ -136,14 +146,18 @@ export default function Plot({ }) {
         wglp.update();
       }
       fpsCounter++;
-      requestAnimationFrame(newFrame);
+      frameId = requestAnimationFrame(newFrame);
     }
-    let id = requestAnimationFrame(newFrame);
+    frameId = requestAnimationFrame(newFrame);
 
     return () => {
       console.log("Cleanup animation.")
       newFrame = () => { };
-      cancelAnimationFrame(id);
+      cancelAnimationFrame(frameId);
+      if (wglp !== null) {
+        wglp.removeAllLines();
+        wglp.clear();
+      }
     };
   }, [numPoints]);
 
