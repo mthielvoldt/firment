@@ -36,6 +36,16 @@ export function setupMq(brokerAddress: string) {
     })
   });
 
+  client.on("error", (error) => {
+    console.error("Error while attempting to connect.", error);
+  })
+  // client.on("packetsend", (packet) => {console.log("packetsend: ", packet)});
+  // client.on("packetreceive", (packet) => {console.log("packetreceive: ", packet)});
+  client.on("disconnect", () => {console.log("disconnect")});
+  client.on("close", () => {console.log("close")});
+  client.on("end", () => {console.log("end")});
+
+
   client.on("message", (_, buffer) => {
     // Parse the protobuf buffer
     try {
