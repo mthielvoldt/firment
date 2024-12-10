@@ -15,14 +15,21 @@
 #include "esp_netif.h"
 #include "protocol_examples_common.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "mqtt_client.h"
 #include "freertos/task.h"
 
 #include "spi_app.h"
 
 #define MAX_PAYLOAD_BYTES 64
+#define MQTT_BUFFER_SIZE (100 * MAX_PAYLOAD_BYTES)
 // #define START_KEY 0xABCDEF00
 #define MSG_TIMEOUT_MS 2000
+#define MQTT_PUB_PERIOD_US 500000U
+
+static uint8_t mqttBuffer[MQTT_BUFFER_SIZE];
+static uint32_t mqttWritePos = 0;
+static uint32_t lastResetTimeUs = 0;
 
 static const char *TAG = "mqtt5_example";
 
@@ -316,18 +323,30 @@ void logMsgContents(uint8_t msg[])
   }
 }
 
+uint32_t usSinceTx(void) {
+  return esp_timer_get_time() - lastResetTimeUs;
+}
+void resetTxTimer(void) { lastResetTimeUs = esp_timer_get_time(); }
+
 void handleSpiMsg(esp_err_t spiResult, uint8_t pbMsg[])
 {
   switch (spiResult)
   {
   case ESP_OK:
   {
-    int msgLength = pbMsg[0];
-    if (msgLength > 0)
+    // Assumes length < 127. TODO: permit larger.
+    int msgLength = pbMsg[0] + 1; // +1 is for the message size prefix.
+    if (msgLength > 0 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
     {
+      memcpy(mqttBuffer + mqttWritePos, pbMsg, msgLength);
+      mqttWritePos += msgLength;
+      // logMsgContents(pbMsg);
+    }
+    if (usSinceTx() > MQTT_PUB_PERIOD_US  && (mqttWritePos > 0)) {
       esp_mqtt_client_publish(
-          client, "hq-bound", (char *)&pbMsg[1], msgLength, 1, 1);
-      logMsgContents(pbMsg);
+          client, "hq-bound", (char *)mqttBuffer, mqttWritePos, 1, 1);
+      mqttWritePos = 0;
+      resetTxTimer();
     }
     break;
   }

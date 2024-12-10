@@ -1,5 +1,6 @@
 import mqtt, { MqttClient, MqttProtocol } from "mqtt"; // import namespace "mqtt"
 import * as pb from "./generated/mcu_1.es6.js";
+import { Reader } from "protobufjs/minimal.js";
 
 let client: MqttClient;
 /** messageHandlers is an object containing:
@@ -27,7 +28,7 @@ export function setupMq(brokerAddress: string) {
   // client = mqtt.connect("ws://" + brokerAddress + ":8080",
   //   {rejectUnauthorized: false}); 
 
-  client = mqtt.connect(options); 
+  client = mqtt.connect(options);
 
   client.on("connect", () => {
     client.subscribe("hq-bound", (err) => {
@@ -41,28 +42,36 @@ export function setupMq(brokerAddress: string) {
   })
   // client.on("packetsend", (packet) => {console.log("packetsend: ", packet)});
   // client.on("packetreceive", (packet) => {console.log("packetreceive: ", packet)});
-  client.on("disconnect", () => {console.log("disconnect")});
-  client.on("close", () => {console.log("close")});
-  client.on("end", () => {console.log("end")});
+  client.on("disconnect", () => { console.log("disconnect") });
+  client.on("close", () => { console.log("close") });
+  client.on("end", () => { console.log("end") });
 
 
   client.on("message", (_, buffer) => {
     // Parse the protobuf buffer
-    try {
-      let message = pb.Top.decode(buffer, buffer.length);
-      console.log("decoded = ", JSON.stringify(message));
-      // call the state updater for the widget this message addresses. 
-      const subMsgType = Object.keys(message)[0];
-      const newState = Object.values(message)[0];
-      if (messageHandlers.hasOwnProperty(subMsgType))
-        messageHandlers[subMsgType](newState);
-      else
-        console.warn("message handler not found for message, ", subMsgType);
+    let msgsDecoded = 0;
+    const reader = Reader.create(buffer);
+    while (reader.pos < reader.len) {
+      try {
+        let message = pb.Top.decodeDelimited(reader);
+
+        // console.log("decoded = ", JSON.stringify(message));
+        // call the state updater for the widget this message addresses. 
+        const subMsgType = Object.keys(message)[0];
+        const newState = Object.values(message)[0];
+        if (messageHandlers.hasOwnProperty(subMsgType)) {
+          messageHandlers[subMsgType](newState);
+          msgsDecoded++
+        }
+        else
+          console.warn("message handler not found for message, ", subMsgType);
+      }
+      catch (error) {
+        console.error(error);
+        // messageHandlers["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
+      }
     }
-    catch (error) {
-      console.error(error);
-      // messageHandlers["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
-    }
+    console.log("Messages: ", msgsDecoded, "in ", buffer.length, " bytes.");
 
     // client.end();
   });
