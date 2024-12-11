@@ -135,6 +135,9 @@ bool fmt_getMsg(Top *message)
     pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
     /* Now we are ready to decode the message. */
     success = pb_decode(&stream, Top_fields, message);
+    if (!success) {
+      __BKPT(5);
+    }
   }
   return success;
 }

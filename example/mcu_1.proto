@@ -54,11 +54,11 @@ enum SampleFreq {
   SCAN_DISABLED = 0;
   FREQ_2_HZ = 2;
   FREQ_10_HZ = 10;
-  FREQ_15_HZ = 15;
-  FREQ_20_HZ = 20;
-  FREQ_25_HZ = 25;
-  FREQ_40_HZ = 40;
+  FREQ_30_HZ = 30;
   FREQ_100_HZ = 100;
+  FREQ_250_HZ = 250;
+  FREQ_500_HZ = 500;
+  FREQ_1_KHZ = 1000;
 }
 
 message RunScanCtl {
