@@ -10,16 +10,23 @@ import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { setMessageHandler } from "./mqclient";
 import { getPlotColors } from "./plotTools";
+import { TestPointId } from "./generated/mcu_1.es6";
 
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
 
-type ProbeSignal = {
+type ProbeSignal = {  // candidate rename: ProbeSample
   id: number;
   value: number;
 };
-type ProbeSignals = {
+type ProbeSignals = { // SampleSet
   probeSignals: ProbeSignal[];
+};
+
+type Series = {
+  testPointId: number;
+  testPointName: string;
+  data: number[];
 };
 
 const fpsDivder = 2;
@@ -35,7 +42,7 @@ let wglp: (WebglPlot | null) = null;
   ... up to the number of probes reporting data.
 ]
 */
-let data: number[][] = [[]];
+let data: Series[][] = [[]];
 let lastSignals: ProbeSignal[] = [];
 let firstUnrenderedIndex = 0;
 
@@ -49,23 +56,19 @@ function handleProbeSignals(signals: ProbeSignals) {
 
   // If probes->signals routing has changed, start new data row.
   if (!idsSame) {
-    // Need to mutate the original data object, not replace.
-    for (let index = 0; index < data.length; index++) {
-      if (index < signals.probeSignals.length) {
-        data[index] = [];
-      } else {
-        data.pop();
+    const newRecord = signals.probeSignals.map((signal, index) => (
+      {
+        testPointId: signal.id,
+        testPointName: TestPointId[signal.id],
+        data: [],
       }
-    }
-    for (let index = data.length; index < signals.probeSignals.length; index++) {
-      data.push([]);
-    }
-    // data = Array.from({ length: signals.probeSignals.length }, () => []);
-    console.log(data);
+    ));
+    data.push(newRecord);
     firstUnrenderedIndex = 0;
+    console.log("newRecord: ", newRecord);
   }
   signals.probeSignals.forEach((signal, index) => {
-    data[index].push(signal.value);
+    data[data.length-1][index].data.push(signal.value);
   })
 }
 
@@ -74,14 +77,14 @@ function replaceLines(numPoints: number) {
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
 
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data[data.length-1].length; i++) {
       const line = new WebglLine(getPlotColors(i), numPoints);
       line.arrangeX();
-      if (numPoints < data[0].length) {
-        line.replaceArrayY(data[i].slice(-numPoints));
+      if (numPoints < data[data.length-1][0].data.length) {
+        line.replaceArrayY(data[data.length-1][i].data.slice(-numPoints));
       } else {
         line.replaceArrayY(
-          Array(numPoints - data[i].length).fill(0).concat(data[i]));
+          Array(numPoints - data[data.length-1][i].data.length).fill(0).concat(data[i]));
       }
       wglp.addLine(line);
     }
@@ -91,6 +94,12 @@ function replaceLines(numPoints: number) {
 
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
+  const [recordId, setRecordId] = useState(0);
+
+  const legend = data[recordId] ? 
+    data[recordId].map((signal) => signal.testPointName) :
+    [];
+  console.log("legend: ",legend);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
@@ -127,7 +136,8 @@ export default function Plot({ }) {
 
     let newFrame = () => {
       // Run this once every fpsDivider.
-      if (wglp && (data[0].length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
+      if (wglp && data[recordId] && data[recordId][0] &&
+          (data[recordId][0].data.length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
         fpsCounter = 0;
 
         // If probe routing has changed, replace all lines.
@@ -135,12 +145,12 @@ export default function Plot({ }) {
           replaceLines(numPoints);
         } else {
           wglp.linesData.forEach((line, i) => {
-            const yArray = new Float32Array(data[i].slice(firstUnrenderedIndex));
+            const yArray = new Float32Array(data[recordId][i].data.slice(firstUnrenderedIndex));
             (line as WebglLine).shiftAdd(yArray);
           });
         }
         // indicate we've now rendered all the data.
-        firstUnrenderedIndex = data[0].length;
+        firstUnrenderedIndex = data[recordId][0].data.length;
 
         wglp.gScaleY = scaleY;
         wglp.update();
@@ -174,6 +184,14 @@ export default function Plot({ }) {
   return (
     <div>
       <canvas style={canvasStyle} ref={canvas} />
+      <div className="row-container">
+
+      </div>
+      <label>
+        Record:
+        <input type="number" className="" value={recordId}
+          onChange={(e) => setRecordId(Number.parseInt(e.currentTarget.value))} />
+      </label>
       <label>
         Num Points:
         <input type="number" className="" value={numPoints} step={numPoints / 2}
