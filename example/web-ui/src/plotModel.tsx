@@ -40,7 +40,7 @@ export function handleProbeSignals(signals: ProbeSignals) {
 
   // If probes->signals routing has changed, start new data row.
   if (!idsSame) {
-    const newRecord = signals.probeSignals.map((signal, index) => (
+    const newRecord = signals.probeSignals.map((signal) => (
       {
         testPointId: signal.id,
         testPointName: TestPointId[signal.id],
