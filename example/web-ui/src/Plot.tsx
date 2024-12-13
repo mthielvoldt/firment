@@ -8,86 +8,60 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
-import { setMessageHandler } from "./mqclient";
 import { getPlotColors } from "./plotTools";
-import { TestPointId } from "./generated/mcu_1.es6";
-
+import * as model from "./plotModel";
+import { setMessageHandler } from "./mqclient";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
 
-type ProbeSignal = {  // candidate rename: ProbeSample
-  id: number;
-  value: number;
-};
-type ProbeSignals = { // SampleSet
-  probeSignals: ProbeSignal[];
-};
-
-type Series = {
-  testPointId: number;
-  testPointName: string;
-  data: number[];
-};
 
 const fpsDivder = 2;
 const scaleY = 0.8;
-
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
-/* array of arrays of numbers.  
-[
-  [ probe0_point0, probe0_point1, probe0_point2 ...],
-  [ probe1_point0, probe1_point1, probe1_point2 ...],
-  [ probe2_point0, probe2_point1, probe2_point2 ...],
-  ... up to the number of probes reporting data.
-]
-*/
-let data: Series[][] = [[]];
-let lastSignals: ProbeSignal[] = [];
-let firstUnrenderedIndex = 0;
 
-function handleProbeSignals(signals: ProbeSignals) {
-  const idsSame =
-    (signals.probeSignals.length == lastSignals.length) &&
-    signals.probeSignals.reduce((accum, signal, index) =>
-      accum && (signal.id == lastSignals[index].id), true);
 
-  lastSignals = signals.probeSignals;
-
-  // If probes->signals routing has changed, start new data row.
-  if (!idsSame) {
-    const newRecord = signals.probeSignals.map((signal, index) => (
-      {
-        testPointId: signal.id,
-        testPointName: TestPointId[signal.id],
-        data: [],
-      }
-    ));
-    data.push(newRecord);
-    firstUnrenderedIndex = 0;
-    console.log("newRecord: ", newRecord);
-  }
-  signals.probeSignals.forEach((signal, index) => {
-    data[data.length-1][index].data.push(signal.value);
-  })
-}
-
-// View
-function replaceLines(numPoints: number) {
+function replaceLines(numPoints: number, record: number) {
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
 
-    for (let i = 0; i < data[data.length-1].length; i++) {
+    const { traces, traceLen } = model.getRecord(record);
+
+    for (let i = 0; i < traces.length; i++) {
       const line = new WebglLine(getPlotColors(i), numPoints);
+      const trace = traces[i];
+      wglp.addLine(line);
+
       line.arrangeX();
-      if (numPoints < data[data.length-1][0].data.length) {
-        line.replaceArrayY(data[data.length-1][i].data.slice(-numPoints));
+      if (numPoints < traceLen) {
+        line.replaceArrayY(trace.data.slice(-numPoints));
       } else {
         line.replaceArrayY(
-          Array(numPoints - data[data.length-1][i].data.length).fill(0).concat(data[i]));
+          Array(numPoints - trace.data.length).fill(0).concat(trace.data));
       }
-      wglp.addLine(line);
     }
+    wglp.update();
+  }
+}
+
+let frameId = 0;
+function newFrame(recordId: number) {
+  // Run this once every fpsDivider.
+  if (wglp !== null) {
+
+    // New data in the record we're currently plotting.
+    if (fpsCounter >= fpsDivder && model.hasNewData(recordId)) {
+      fpsCounter = 0;
+      const newData = model.getNewData(recordId);
+      wglp.linesData.forEach((line, i) => {
+        (line as WebglLine).shiftAdd(newData[i]);
+      });
+
+      wglp.gScaleY = scaleY;
+      wglp.update();
+    }
+    fpsCounter++;
+    frameId = requestAnimationFrame(() => newFrame(recordId));
   }
 }
 
@@ -96,10 +70,8 @@ export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
 
-  const legend = data[recordId] ? 
-    data[recordId].map((signal) => signal.testPointName) :
-    [];
-  console.log("legend: ",legend);
+  const legend = model.getLegend(recordId);
+  console.log("legend: ", legend);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
@@ -114,7 +86,8 @@ export default function Plot({ }) {
       }
 
       // Model: register function that mutates data model on message rx.
-      let clearHandler = setMessageHandler("ProbeSignals", handleProbeSignals);
+      let clearHandler = setMessageHandler("ProbeSignals",
+        model.handleProbeSignals);
 
       // cleanup
       return () => {
@@ -129,47 +102,21 @@ export default function Plot({ }) {
   useEffect(() => {
     console.log("Setup animation.");
 
-    // If numPoints changed, trigger a full line-replacement because each line
-    // stores numPoints as immutable. 
-    firstUnrenderedIndex = 0;
-    let frameId = 0;
+    /* If numPoints or recordId changed, this function is re-called.  Full 
+    line-replacement is needed because each line stores numPoints as immutable. */
+    replaceLines(numPoints, recordId);
 
-    let newFrame = () => {
-      // Run this once every fpsDivider.
-      if (wglp && data[recordId] && data[recordId][0] &&
-          (data[recordId][0].data.length > firstUnrenderedIndex) && (fpsCounter >= fpsDivder)) {
-        fpsCounter = 0;
-
-        // If probe routing has changed, replace all lines.
-        if (firstUnrenderedIndex === 0) {
-          replaceLines(numPoints);
-        } else {
-          wglp.linesData.forEach((line, i) => {
-            const yArray = new Float32Array(data[recordId][i].data.slice(firstUnrenderedIndex));
-            (line as WebglLine).shiftAdd(yArray);
-          });
-        }
-        // indicate we've now rendered all the data.
-        firstUnrenderedIndex = data[recordId][0].data.length;
-
-        wglp.gScaleY = scaleY;
-        wglp.update();
-      }
-      fpsCounter++;
-      frameId = requestAnimationFrame(newFrame);
-    }
-    frameId = requestAnimationFrame(newFrame);
+    frameId = requestAnimationFrame(() => newFrame(recordId));
 
     return () => {
       console.log("Cleanup animation.")
-      newFrame = () => { };
       cancelAnimationFrame(frameId);
       if (wglp !== null) {
         wglp.removeAllLines();
         wglp.clear();
       }
     };
-  }, [numPoints]);
+  }, [numPoints, recordId]);
 
   const canvasStyle = {
     width: "500px",
