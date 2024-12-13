@@ -71,7 +71,7 @@ export function setupMq(brokerAddress: string) {
         // messageHandlers["Log"](pb.Log.fromObject({count: 0, text: "error", value: 0}));
       }
     }
-    console.log("Messages: ", msgsDecoded, "in ", buffer.length, " bytes.");
+    console.info("Messages: ", msgsDecoded, "in ", buffer.length, " bytes.");
 
     // client.end();
   });

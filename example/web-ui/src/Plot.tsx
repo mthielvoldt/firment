@@ -123,7 +123,7 @@ export default function Plot({ }) {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = {backgroundColor: rgbStr}
     return (
-      <div className="legend-item">
+      <div className="legend-item" key={i}>
         <div className="color-box" style={colorStyle}></div><span>{name}</span>
       </div>
     );
