@@ -8,7 +8,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
-import { getPlotColors } from "./plotTools";
+import { getColorAsString, getPlotColors } from "./plotTools";
 import * as model from "./plotModel";
 import { setMessageHandler } from "./mqclient";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
@@ -69,9 +69,6 @@ function newFrame(recordId: number) {
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
-
-  const legend = model.getLegend(recordId);
-  console.log("legend: ", legend);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
@@ -122,6 +119,15 @@ export default function Plot({ }) {
     width: "500px",
     height: "70vh"
   };
+  const legend = model.getLegend(recordId).map((name, i) => {
+    const rgbStr = "rgb(" + getColorAsString(i) + ")";
+    const colorStyle = {backgroundColor: rgbStr}
+    return (
+      <div className="legend-item">
+        <div className="color-box" style={colorStyle}></div><span>{name}</span>
+      </div>
+    );
+  });
 
   function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
@@ -131,8 +137,8 @@ export default function Plot({ }) {
   return (
     <div>
       <canvas style={canvasStyle} ref={canvas} />
-      <div className="row-container">
-
+      <div className="legend-container">
+        {legend}
       </div>
       <label>
         Record:

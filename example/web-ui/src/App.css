@@ -40,3 +40,20 @@
   line-height: 1.5;
 }
 
+.legend-container {
+  display: flex;
+}
+.legend-item {
+  /* width: 100%; */
+  flex-basis: 20%;
+  border: 1px solid #eaeaea;
+
+}
+.color-box {
+  opacity: 100%;
+  background-color:burlywood;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+

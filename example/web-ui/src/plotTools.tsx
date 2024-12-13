@@ -20,3 +20,12 @@ const colors = [
 export function getPlotColors(i: number) {
   return colors[i];
 }
+
+export function getColorAsString(i: number) {
+  const c = colors[i];
+  return scaleTo255(c.r) + " " + scaleTo255(c.g) + " " + scaleTo255(c.b);
+}
+
+function scaleTo255(colorChannel: number) {
+  return Math.floor((colorChannel * 255)).toString();
+}
