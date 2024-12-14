@@ -8,7 +8,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
-import { getColorAsString, getPlotColors } from "./plotTools";
+import { getColorAsString, getPlotColors, gridColor } from "./plotTools";
 import * as model from "./plotModel";
 import { setMessageHandler } from "./mqclient";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
@@ -17,6 +17,7 @@ import { setMessageHandler } from "./mqclient";
 
 const fpsDivder = 2;
 const scaleY = 0.8;
+let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 
@@ -40,12 +41,14 @@ function replaceLines(numPoints: number, record: number) {
           Array(numPoints - trace.data.length).fill(0).concat(trace.data));
       }
     }
+    canvasLeftDataPos = traceLen - numPoints;
+    recalculateGrid(wglp, numPoints);
     wglp.update();
   }
 }
 
 let frameId = 0;
-function newFrame(recordId: number) {
+function newFrame(numPoints: number, recordId: number) {
   // Run this once every fpsDivider.
   if (wglp !== null) {
 
@@ -53,17 +56,75 @@ function newFrame(recordId: number) {
     if (fpsCounter >= fpsDivder && model.hasNewData(recordId)) {
       fpsCounter = 0;
       const newData = model.getNewData(recordId);
+      canvasLeftDataPos += newData[0].length;
       wglp.linesData.forEach((line, i) => {
         (line as WebglLine).shiftAdd(newData[i]);
       });
 
       wglp.gScaleY = scaleY;
+      wglp.gScaleX = 1.0;
+      recalculateGrid(wglp, numPoints);
       wglp.update();
     }
     fpsCounter++;
-    frameId = requestAnimationFrame(() => newFrame(recordId));
+    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId));
   }
 }
+
+// called when numPoints changes. 
+function recalculateGrid(wglp: WebglPlot, numPoints: number) {
+  // Sz is in window units (2 = whole window)
+  const dataStepSz = 2 / numPoints;
+  const ptsPerGridX = 100;
+  const numGridLines = Math.floor(numPoints / ptsPerGridX)
+  const gridXStepSz = ptsPerGridX * dataStepSz
+  const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepSz;
+
+  wglp.removeAuxLines()
+  const xGrid = new WebglLine(gridColor, 2 * numGridLines)
+  wglp.addAuxLine(xGrid);
+  // console.log("xy length", xGrid.xy.length)
+
+  // populate the points.  Each grid line comprises 2 points.
+  let rising = true;
+  for (let gridLineIndex = 0; gridLineIndex < numGridLines ; gridLineIndex++) {
+    const point0Index = gridLineIndex * 2;
+    const point1Index = point0Index + 1;
+    xGrid.setX(point0Index, firstLineX + gridLineIndex * gridXStepSz);
+    xGrid.setY(point0Index, rising? -2:2);
+    xGrid.setX(point1Index, firstLineX + gridLineIndex * gridXStepSz);
+    xGrid.setY(point1Index, rising? 2:-2);
+    rising = !rising;
+  }
+
+
+  /** How does x grid keep up with dataLine.shiftAdd()?
+   * Should I call recalculateGrid each time I shiftAdd()?
+   * ShiftAdd() calls setY for every point in full numPoints. Wow! 
+   * so yeah, recalcing wouldn't be inoridnately much work. 
+   * 
+   * keeping track of where zero is could be a hassle.  As I keep shifting data,
+   * I need to keep track of how far I've shifted total.  Alternatively, I could
+   * have my grid lines divvy up the whole space, and run shiftAdd on them too.
+   * So let's say I have numPoints (for data line) = 10, and I have grid at 5 marks.
+   * I'm seeing this: 
+   * 2 3 4 5 6 7 8 9 10 11
+   *       |          |   
+   * So here's the deal, the X's for the data lines are fixed to the window, 
+   * distributed linearly by line.arrangeX(). 
+   * But unless we want as many points for the grid lines, shifting by the same 
+   * number won't work, we need to move the X values (way fewer points to move).
+   * 
+   * We're going to need to know the offset, so keeping track isn't out of the way.
+   * Let's track zero position in the data. 
+   * - When we replaceLines we init the zeroXPos = 0.  
+   * - When we shift the data, we move the zeroXPos. 
+   * - When we zoom with gScale and gOffset, zeroXPos doesn't change, because
+   *   it represents the relative position of the line's first point and the data's zero. 
+   *   and we haven't moved the line data. 
+   */
+}
+
 
 
 export default function Plot({ }) {
@@ -103,13 +164,13 @@ export default function Plot({ }) {
     line-replacement is needed because each line stores numPoints as immutable. */
     replaceLines(numPoints, recordId);
 
-    frameId = requestAnimationFrame(() => newFrame(recordId));
+    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId));
 
     return () => {
       console.log("Cleanup animation.")
       cancelAnimationFrame(frameId);
       if (wglp !== null) {
-        wglp.removeAllLines();
+        wglp.removeDataLines();
         wglp.clear();
       }
     };
@@ -121,7 +182,7 @@ export default function Plot({ }) {
   };
   const legend = model.getLegend(recordId).map((name, i) => {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
-    const colorStyle = {backgroundColor: rgbStr}
+    const colorStyle = { backgroundColor: rgbStr }
     return (
       <div className="legend-item" key={i}>
         <div className="color-box" style={colorStyle}></div><span>{name}</span>
