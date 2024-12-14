@@ -21,6 +21,8 @@ export function getPlotColors(i: number) {
   return colors[i];
 }
 
+export const gridColor = new ColorRGBA(0.7, 0.6, 0.3, 0.5);
+
 export function getColorAsString(i: number) {
   const c = colors[i];
   return scaleTo255(c.r) + " " + scaleTo255(c.g) + " " + scaleTo255(c.b);
