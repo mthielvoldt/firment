@@ -73,10 +73,14 @@ function newFrame(numPoints: number, recordId: number) {
 
 // called when numPoints changes. 
 function recalculateGrid(wglp: WebglPlot, numPoints: number) {
-  // Sz is in window units (2 = whole window)
+  // Sz is in window units (2 = whole window - -1:1)
   const dataStepSz = 2 / numPoints;
-  const ptsPerGridX = 100;
-  const numGridLines = Math.floor(numPoints / ptsPerGridX)
+  const minGridlineCount = 8;
+  const exactPtsPerGridX = numPoints / minGridlineCount;
+  const ptsPerGridX = getNearestRoundNumber(exactPtsPerGridX);
+  
+
+  const numGridLines = Math.ceil(numPoints / ptsPerGridX)
   const gridXStepSz = ptsPerGridX * dataStepSz
   const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepSz;
 
@@ -95,6 +99,27 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number) {
     xGrid.setX(point1Index, firstLineX + gridLineIndex * gridXStepSz);
     xGrid.setY(point1Index, rising? 2:-2);
     rising = !rising;
+  }
+
+  /** Finds the greatest number that's less than the input that is in the set:
+   * {1, 2, 5, 10, 20, 50, 100, 200, 500 ...}  (1,2,or 5 * 10^N).  N a whole #
+   * Examples: input=>return 777=>500  45=>20
+   */
+  function getNearestRoundNumber(input: number) { 
+    input = (input > 0) ? input : -input;
+    let output = 1;
+
+    while (input > 10) {
+      input /= 10;
+      output *= 10;
+    }
+    if (input > 5) {
+      output *= 5;
+    }
+    else if (input > 2) {
+      output *= 2;
+    }
+    return output;
   }
 
 
