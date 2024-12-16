@@ -10,19 +10,22 @@ import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { getColorAsString, getPlotColors, gridColor } from "./plotTools";
 import * as model from "./plotModel";
+import './Plot.css'
 import { setMessageHandler } from "./mqclient";
+import { PlotLabels, AxisLabel } from "./PlotLabels";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
 
 
 const fpsDivder = 2;
 const scaleY = 0.8;
+let canvasWidthPx = 0, canvasHeight = 0;
 let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 
 
-function replaceLines(numPoints: number, record: number) {
+function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>> ) {
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
 
@@ -42,13 +45,13 @@ function replaceLines(numPoints: number, record: number) {
       }
     }
     canvasLeftDataPos = traceLen - numPoints;
-    recalculateGrid(wglp, numPoints);
+    recalculateGrid(wglp, numPoints, setLabels);
     wglp.update();
   }
 }
 
 let frameId = 0;
-function newFrame(numPoints: number, recordId: number) {
+function newFrame(numPoints: number, recordId: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
   // Run this once every fpsDivider.
   if (wglp !== null) {
 
@@ -63,30 +66,31 @@ function newFrame(numPoints: number, recordId: number) {
 
       wglp.gScaleY = scaleY;
       wglp.gScaleX = 1.0;
-      recalculateGrid(wglp, numPoints);
+      recalculateGrid(wglp, numPoints, setLabels);
       wglp.update();
     }
     fpsCounter++;
-    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId));
+    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId, setLabels));
   }
 }
 
 // called when numPoints changes. 
-function recalculateGrid(wglp: WebglPlot, numPoints: number) {
-  // Sz is in window units (2 = whole window - -1:1)
-  const dataStepSz = 2 / numPoints;
+function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
+  // Gl is in WebGL units (2.0 = whole canvas - from -1:1)
+  const dataStepGl = 2 / numPoints;
   const minGridlineCount = 8;
   const exactPtsPerGridX = numPoints / minGridlineCount;
   const ptsPerGridX = getNearestRoundNumber(exactPtsPerGridX);
   
 
   const numGridLines = Math.ceil(numPoints / ptsPerGridX)
-  const gridXStepSz = ptsPerGridX * dataStepSz
-  const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepSz;
+  const gridXStepSz = ptsPerGridX * dataStepGl
+  const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepGl;
 
   wglp.removeAuxLines()
   const xGrid = new WebglLine(gridColor, 2 * numGridLines)
   wglp.addAuxLine(xGrid);
+  const newLabels: AxisLabel[] = []; 
   // console.log("xy length", xGrid.xy.length)
 
   // populate the points.  Each grid line comprises 2 points.
@@ -94,13 +98,17 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number) {
   for (let gridLineIndex = 0; gridLineIndex < numGridLines ; gridLineIndex++) {
     const point0Index = gridLineIndex * 2;
     const point1Index = point0Index + 1;
-    xGrid.setX(point0Index, firstLineX + gridLineIndex * gridXStepSz);
+    const xPosGl = firstLineX + gridLineIndex * gridXStepSz;  // gl units [-1,1]
+    const xPosPix = Math.floor((xPosGl + 1) * canvasWidthPx / 2);
+    newLabels.push({position:{x: xPosPix, y:0}, text:gridLineIndex.toString()})
+
+    xGrid.setX(point0Index, xPosGl);
     xGrid.setY(point0Index, rising? -2:2);
-    xGrid.setX(point1Index, firstLineX + gridLineIndex * gridXStepSz);
+    xGrid.setX(point1Index, xPosGl);
     xGrid.setY(point1Index, rising? 2:-2);
     rising = !rising;
   }
-
+  setLabels(newLabels);
   /** Finds the greatest number that's less than the input that is in the set:
    * {1, 2, 5, 10, 20, 50, 100, 200, 500 ...}  (1,2,or 5 * 10^N).  N a whole #
    * Examples: input=>return 777=>500  45=>20
@@ -122,31 +130,12 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number) {
     return output;
   }
 
-
-  /** How does x grid keep up with dataLine.shiftAdd()?
-   * Should I call recalculateGrid each time I shiftAdd()?
-   * ShiftAdd() calls setY for every point in full numPoints. Wow! 
-   * so yeah, recalcing wouldn't be inoridnately much work. 
-   * 
-   * keeping track of where zero is could be a hassle.  As I keep shifting data,
-   * I need to keep track of how far I've shifted total.  Alternatively, I could
-   * have my grid lines divvy up the whole space, and run shiftAdd on them too.
-   * So let's say I have numPoints (for data line) = 10, and I have grid at 5 marks.
-   * I'm seeing this: 
-   * 2 3 4 5 6 7 8 9 10 11
-   *       |          |   
-   * So here's the deal, the X's for the data lines are fixed to the window, 
-   * distributed linearly by line.arrangeX(). 
-   * But unless we want as many points for the grid lines, shifting by the same 
-   * number won't work, we need to move the X values (way fewer points to move).
-   * 
-   * We're going to need to know the offset, so keeping track isn't out of the way.
-   * Let's track zero position in the data. 
+  /** We track the relative position of the zero position in the data and the 
+   * first displayed data point in the XY arrays. 
    * - When we replaceLines we init the zeroXPos = 0.  
    * - When we shift the data, we move the zeroXPos. 
    * - When we zoom with gScale and gOffset, zeroXPos doesn't change, because
-   *   it represents the relative position of the line's first point and the data's zero. 
-   *   and we haven't moved the line data. 
+   *   zooming doesn't change the xy arrays, just global scales.
    */
 }
 
@@ -155,6 +144,7 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number) {
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
+  const [labels, setLabels] = useState<AxisLabel[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
@@ -163,9 +153,10 @@ export default function Plot({ }) {
       if (wglp === null) {
         console.log("Setup canvas, wglp === null. numPoints: ", numPoints);
         const devicePixelRatio = window.devicePixelRatio || 1;
-        canvas.current.width = canvas.current.clientWidth * devicePixelRatio;
-        canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
+        canvasWidthPx = canvas.current.width = canvas.current.clientWidth * devicePixelRatio;
+        canvasHeight = canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
         wglp = new WebglPlot(canvas.current);
+        console.log("width, height", canvasWidthPx, canvasHeight);
       }
 
       // Model: register function that mutates data model on message rx.
@@ -187,9 +178,9 @@ export default function Plot({ }) {
 
     /* If numPoints or recordId changed, this function is re-called.  Full 
     line-replacement is needed because each line stores numPoints as immutable. */
-    replaceLines(numPoints, recordId);
+    replaceLines(numPoints, recordId, setLabels);
 
-    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId));
+    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId, setLabels));
 
     return () => {
       console.log("Cleanup animation.")
@@ -221,8 +212,9 @@ export default function Plot({ }) {
   }
 
   return (
-    <div>
+    <div className="plot-div">
       <canvas style={canvasStyle} ref={canvas} />
+      <PlotLabels xAxis={labels}/>
       <div className="legend-container">
         {legend}
       </div>
