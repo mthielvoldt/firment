@@ -13,17 +13,17 @@ function App() {
         <BrokerAddress />
       </div>
       <div className="row-container">
-        <div>
+        <div className='widget-column'>
           <h2>Commands</h2>
           <widgets.WaveformCtl />
           <widgets.RunScanCtl />
         </div>
-        <div>
+        <div className='widget-column'>
           <h2>Telemetry</h2>
           <widgets.WaveformTlm />
           <Log />
         </div>
-        <div>
+        <div className='plot-column'>
           <h2>Plots</h2>
           <Plot />
         </div>

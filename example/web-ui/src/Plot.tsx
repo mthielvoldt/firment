@@ -25,7 +25,7 @@ let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 
 
-function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>> ) {
+function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
 
@@ -81,31 +81,35 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Di
   const minGridlineCount = 8;
   const exactPtsPerGridX = numPoints / minGridlineCount;
   const ptsPerGridX = getNearestRoundNumber(exactPtsPerGridX);
-  
+
 
   const numGridLines = Math.ceil(numPoints / ptsPerGridX)
   const gridXStepSz = ptsPerGridX * dataStepGl
+  const firstLineDataPos = Math.floor(canvasLeftDataPos / ptsPerGridX) * ptsPerGridX;
   const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepGl;
 
   wglp.removeAuxLines()
   const xGrid = new WebglLine(gridColor, 2 * numGridLines)
   wglp.addAuxLine(xGrid);
-  const newLabels: AxisLabel[] = []; 
+  const newLabels: AxisLabel[] = [];
   // console.log("xy length", xGrid.xy.length)
 
   // populate the points.  Each grid line comprises 2 points.
   let rising = true;
-  for (let gridLineIndex = 0; gridLineIndex < numGridLines ; gridLineIndex++) {
+  for (let gridLineIndex = 0; gridLineIndex < numGridLines; gridLineIndex++) {
     const point0Index = gridLineIndex * 2;
     const point1Index = point0Index + 1;
     const xPosGl = firstLineX + gridLineIndex * gridXStepSz;  // gl units [-1,1]
     const xPosPix = Math.floor((xPosGl + 1) * canvasWidthPx / 2);
-    newLabels.push({position:{x: xPosPix, y:0}, text:gridLineIndex.toString()})
+    newLabels.push({
+      position: { x: xPosPix, y: 0 },
+      text: (firstLineDataPos + gridLineIndex * ptsPerGridX).toString()
+    });
 
     xGrid.setX(point0Index, xPosGl);
-    xGrid.setY(point0Index, rising? -2:2);
+    xGrid.setY(point0Index, rising ? -2 : 2);
     xGrid.setX(point1Index, xPosGl);
-    xGrid.setY(point1Index, rising? 2:-2);
+    xGrid.setY(point1Index, rising ? 2 : -2);
     rising = !rising;
   }
   setLabels(newLabels);
@@ -113,7 +117,7 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Di
    * {1, 2, 5, 10, 20, 50, 100, 200, 500 ...}  (1,2,or 5 * 10^N).  N a whole #
    * Examples: input=>return 777=>500  45=>20
    */
-  function getNearestRoundNumber(input: number) { 
+  function getNearestRoundNumber(input: number) {
     input = (input > 0) ? input : -input;
     let output = 1;
 
@@ -193,7 +197,8 @@ export default function Plot({ }) {
   }, [numPoints, recordId]);
 
   const canvasStyle = {
-    width: "500px",
+    // flexBasis: "20vw",
+    width: "100%",
     height: "70vh"
   };
   const legend = model.getLegend(recordId).map((name, i) => {
@@ -212,9 +217,9 @@ export default function Plot({ }) {
   }
 
   return (
-    <div className="plot-div">
+    <div className="widget plot-div">
       <canvas style={canvasStyle} ref={canvas} />
-      <PlotLabels xAxis={labels}/>
+      <PlotLabels xAxis={labels} />
       <div className="legend-container">
         {legend}
       </div>
