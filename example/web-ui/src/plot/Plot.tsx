@@ -9,28 +9,33 @@
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { getColorAsString, getPlotColors } from "./plotColors";
-import { recalculateGrid, AxisLabel } from "./axisTools";
+import { calculateXGrid, AxisLabel, calculateYGrid } from "./axisTools";
 import * as model from "./plotModel";
-import './Plot.css'
-import { setMessageHandler } from "../mqclient";
 import { PlotLabels } from "./PlotLabels";
+import './Plot.css'
+// import { profile } from "../profiler";
+
+import { setMessageHandler } from "../mqclient";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
 
 
 const fpsDivder = 2;
 const scaleY = 0.8;
-let canvasWidthPx = 0, canvasHeight = 0;
+let canvasWidthPx = 0, canvasHeightPx = 0;
 let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 
 function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
-  const { xGrid, newLabels } =
-    recalculateGrid(numPoints, canvasLeftDataPos, canvasWidthPx);
-  setLabels(newLabels);
+  const { xGrid, xLabels } =
+    calculateXGrid(numPoints, canvasLeftDataPos, canvasWidthPx);
+  const { yGrid, yLabels } = 
+    calculateYGrid(-1, 1.1, canvasHeightPx, scaleY);
+  setLabels(xLabels.concat(yLabels));
   wglp && wglp.removeAuxLines();
   wglp && wglp.addAuxLine(xGrid);
+  wglp && wglp.addAuxLine(yGrid);
 }
 
 function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
@@ -96,14 +101,16 @@ export default function Plot({ }) {
         console.log("Setup canvas, wglp === null. numPoints: ", numPoints);
         const devicePixelRatio = window.devicePixelRatio || 1;
         canvasWidthPx = canvas.current.width = canvas.current.clientWidth * devicePixelRatio;
-        canvasHeight = canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
+        canvasHeightPx = canvas.current.height = canvas.current.clientHeight * devicePixelRatio;
         wglp = new WebglPlot(canvas.current);
-        console.log("width, height", canvasWidthPx, canvasHeight);
+        console.log("width, height", canvasWidthPx, canvasHeightPx);
       }
 
       // Model: register function that mutates data model on message rx.
       let clearHandler = setMessageHandler("ProbeSignals",
         model.handleProbeSignals);
+
+      // profile();
 
       // cleanup
       return () => {
