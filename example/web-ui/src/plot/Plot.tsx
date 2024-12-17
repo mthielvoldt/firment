@@ -8,10 +8,11 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
-import { getColorAsString, getPlotColors, gridColor } from "./plotTools";
+import { getColorAsString, getPlotColors, gridColor } from "./plotColors";
+import { getNearestRoundNumber } from "./axisTools";
 import * as model from "./plotModel";
 import './Plot.css'
-import { setMessageHandler } from "./mqclient";
+import { setMessageHandler } from "../mqclient";
 import { PlotLabels, AxisLabel } from "./PlotLabels";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
@@ -88,11 +89,10 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Di
   const firstLineDataPos = 
     Math.ceil(canvasLeftDataPos / ptsPerGridX) * ptsPerGridX;
 
-  /**                
-   * -8 -7 -6 -5 -4 |-3 -2 -1 0  canvasLeftDataPos = -3
-   *           |              |  ptsPerGridX = 5
-   * (5 - (-3 % 5)) = 5 - -3 = 8.  (one gridline too far right.)
-   * -(-3) % 5 = 3
+  /** Mod (%) operator gives the distance from canvasLeftDataPos to the nearest
+   * gridLine ***moving towards zero***.  If zero is to the right (inside canvas)
+   * then we can use this directly.  If it's to the left (off canvas), we find 
+   * that off-canvas gridline then offset one gridline back into the canvas.
    */
   const firstLineOffset = canvasLeftDataPos > 0 ? ptsPerGridX : 0;
   const firstLineX = (firstLineOffset - canvasLeftDataPos % ptsPerGridX)
@@ -123,26 +123,6 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Di
     rising = !rising;
   }
   setLabels(newLabels);
-  /** Finds the greatest number that's less than the input that is in the set:
-   * {1, 2, 5, 10, 20, 50, 100, 200, 500 ...}  (1,2,or 5 * 10^N).  N a whole #
-   * Examples: input=>return 777=>500  45=>20
-   */
-  function getNearestRoundNumber(input: number) {
-    input = (input > 0) ? input : -input;
-    let output = 1;
-
-    while (input > 10) {
-      input /= 10;
-      output *= 10;
-    }
-    if (input > 5) {
-      output *= 5;
-    }
-    else if (input > 2) {
-      output *= 2;
-    }
-    return output;
-  }
 
   /** We track the relative position of the zero position in the data and the 
    * first displayed data point in the XY arrays. 

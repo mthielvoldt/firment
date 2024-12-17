@@ -1,7 +1,7 @@
 import * as widgets from './generated/widgets.pb';
 import BrokerAddress from './BrokerAddress';
 import { Log } from './Log';
-import Plot from './Plot';
+import Plot from './plot/Plot';
 import './App.css'
 
 function App() {
