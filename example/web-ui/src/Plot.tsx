@@ -85,8 +85,18 @@ function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Di
 
   const numGridLines = Math.ceil(numPoints / ptsPerGridX)
   const gridXStepSz = ptsPerGridX * dataStepGl
-  const firstLineDataPos = Math.floor(canvasLeftDataPos / ptsPerGridX) * ptsPerGridX;
-  const firstLineX = -1 + (ptsPerGridX - canvasLeftDataPos % ptsPerGridX) * dataStepGl;
+  const firstLineDataPos = 
+    Math.ceil(canvasLeftDataPos / ptsPerGridX) * ptsPerGridX;
+
+  /**                
+   * -8 -7 -6 -5 -4 |-3 -2 -1 0  canvasLeftDataPos = -3
+   *           |              |  ptsPerGridX = 5
+   * (5 - (-3 % 5)) = 5 - -3 = 8.  (one gridline too far right.)
+   * -(-3) % 5 = 3
+   */
+  const firstLineOffset = canvasLeftDataPos > 0 ? ptsPerGridX : 0;
+  const firstLineX = (firstLineOffset - canvasLeftDataPos % ptsPerGridX)
+     * dataStepGl - 1.0;
 
   wglp.removeAuxLines()
   const xGrid = new WebglLine(gridColor, 2 * numGridLines)
@@ -197,7 +207,6 @@ export default function Plot({ }) {
   }, [numPoints, recordId]);
 
   const canvasStyle = {
-    // flexBasis: "20vw",
     width: "100%",
     height: "70vh"
   };
