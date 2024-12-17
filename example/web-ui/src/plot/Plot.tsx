@@ -8,12 +8,12 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
-import { getColorAsString, getPlotColors, gridColor } from "./plotColors";
-import { getNearestRoundNumber } from "./axisTools";
+import { getColorAsString, getPlotColors } from "./plotColors";
+import { recalculateGrid, AxisLabel } from "./axisTools";
 import * as model from "./plotModel";
 import './Plot.css'
 import { setMessageHandler } from "../mqclient";
-import { PlotLabels, AxisLabel } from "./PlotLabels";
+import { PlotLabels } from "./PlotLabels";
 /* Replace the above line with the following one to mock Ghost Probe signal. */
 // import { default as setMessageHandler } from "./mockSignal";
 
@@ -25,6 +25,13 @@ let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
 
+function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
+  const { xGrid, newLabels } =
+    recalculateGrid(numPoints, canvasLeftDataPos, canvasWidthPx);
+  setLabels(newLabels);
+  wglp && wglp.removeAuxLines();
+  wglp && wglp.addAuxLine(xGrid);
+}
 
 function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
   if (wglp !== null) {
@@ -46,7 +53,7 @@ function replaceLines(numPoints: number, record: number, setLabels: React.Dispat
       }
     }
     canvasLeftDataPos = traceLen - numPoints;
-    recalculateGrid(wglp, numPoints, setLabels);
+    updateGrid(numPoints, setLabels);
     wglp.update();
   }
 }
@@ -67,72 +74,13 @@ function newFrame(numPoints: number, recordId: number, setLabels: React.Dispatch
 
       wglp.gScaleY = scaleY;
       wglp.gScaleX = 1.0;
-      recalculateGrid(wglp, numPoints, setLabels);
+      updateGrid(numPoints, setLabels);
       wglp.update();
     }
     fpsCounter++;
     frameId = requestAnimationFrame(() => newFrame(numPoints, recordId, setLabels));
   }
 }
-
-// called when numPoints changes. 
-function recalculateGrid(wglp: WebglPlot, numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
-  // Gl is in WebGL units (2.0 = whole canvas - from -1:1)
-  const dataStepGl = 2 / numPoints;
-  const minGridlineCount = 8;
-  const exactPtsPerGridX = numPoints / minGridlineCount;
-  const ptsPerGridX = getNearestRoundNumber(exactPtsPerGridX);
-
-
-  const numGridLines = Math.ceil(numPoints / ptsPerGridX)
-  const gridXStepSz = ptsPerGridX * dataStepGl
-  const firstLineDataPos = 
-    Math.ceil(canvasLeftDataPos / ptsPerGridX) * ptsPerGridX;
-
-  /** Mod (%) operator gives the distance from canvasLeftDataPos to the nearest
-   * gridLine ***moving towards zero***.  If zero is to the right (inside canvas)
-   * then we can use this directly.  If it's to the left (off canvas), we find 
-   * that off-canvas gridline then offset one gridline back into the canvas.
-   */
-  const firstLineOffset = canvasLeftDataPos > 0 ? ptsPerGridX : 0;
-  const firstLineX = (firstLineOffset - canvasLeftDataPos % ptsPerGridX)
-     * dataStepGl - 1.0;
-
-  wglp.removeAuxLines()
-  const xGrid = new WebglLine(gridColor, 2 * numGridLines)
-  wglp.addAuxLine(xGrid);
-  const newLabels: AxisLabel[] = [];
-  // console.log("xy length", xGrid.xy.length)
-
-  // populate the points.  Each grid line comprises 2 points.
-  let rising = true;
-  for (let gridLineIndex = 0; gridLineIndex < numGridLines; gridLineIndex++) {
-    const point0Index = gridLineIndex * 2;
-    const point1Index = point0Index + 1;
-    const xPosGl = firstLineX + gridLineIndex * gridXStepSz;  // gl units [-1,1]
-    const xPosPix = Math.floor((xPosGl + 1) * canvasWidthPx / 2);
-    newLabels.push({
-      position: { x: xPosPix, y: 0 },
-      text: (firstLineDataPos + gridLineIndex * ptsPerGridX).toString()
-    });
-
-    xGrid.setX(point0Index, xPosGl);
-    xGrid.setY(point0Index, rising ? -2 : 2);
-    xGrid.setX(point1Index, xPosGl);
-    xGrid.setY(point1Index, rising ? 2 : -2);
-    rising = !rising;
-  }
-  setLabels(newLabels);
-
-  /** We track the relative position of the zero position in the data and the 
-   * first displayed data point in the XY arrays. 
-   * - When we replaceLines we init the zeroXPos = 0.  
-   * - When we shift the data, we move the zeroXPos. 
-   * - When we zoom with gScale and gOffset, zeroXPos doesn't change, because
-   *   zooming doesn't change the xy arrays, just global scales.
-   */
-}
-
 
 
 export default function Plot({ }) {

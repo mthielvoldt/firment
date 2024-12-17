@@ -1,12 +1,10 @@
+import { AxisLabel } from "./axisTools";
+
 /** Labels are text elements overlaid on a canvas, which is managed elsewhere.
  * there are 2 groups of labels: one for x-axis labels, one for y.  
  * Ultimately, a label needs to know its position and text content. 
  * Axis labels positionally and value-wise evenly spaced.  
  */
-export interface AxisLabel {
-  position: { x: number, y: number };
-  text: string;
-};
 
 export function PlotLabels({ xAxis }: { xAxis: AxisLabel[] }) {
   const labels = xAxis.map((label, i) => {
