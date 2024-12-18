@@ -10,12 +10,18 @@ enum WaveShape {
   WAVE_SHAPE_SQUARE = 2;
 }
 
+enum OutputChannel {
+  CHANNEL_A = 0;
+  CHANNEL_B = 1;
+}
+
 message WaveformCtl {
+  OutputChannel channel = 6;
+  bool enabled = 5;
+  WaveShape shape = 4;
   float amplitudeV = 1;
   float frequencyHz = 2;
   float offsetV = 3;
-  WaveShape shape = 4;
-  bool enabled = 5;
 }
 
 message WaveformTlm {
