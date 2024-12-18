@@ -4,7 +4,6 @@
 #pragma once
 
 #include <RTE_Device.h>
-#include <xmc_eru.h>
 #include <stdint.h>
 
 typedef enum

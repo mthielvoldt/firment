@@ -5,7 +5,7 @@
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
 #include "fmt_crc.h"
-#include "fmt_ioc.h"
+#include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_gpio.h"
 #include "queue.h"
 #include <pb_encode.h>

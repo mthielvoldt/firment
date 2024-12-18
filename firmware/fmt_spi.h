@@ -4,7 +4,7 @@
 #include <generated/mcu_1.pb.h>
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
-#include "fmt_ioc.h"
+#include "RTE_Device.h"  // Interrupt-on-change pins.  includes RTE_Device.
 
 typedef enum {
   BUS_MODE_MAIN,
