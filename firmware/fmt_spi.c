@@ -1,6 +1,6 @@
-  // TODO: there is an issue where the ESP resets and the XMC gets stuck not 
-  // sending anything. 
-  // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
+// TODO: there is an issue where the ESP resets and the XMC gets stuck not
+// sending anything.
+// Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
 
 #include "fmt_spi.h"
 #include <cmsis_gcc.h> // __BKPT()
@@ -10,10 +10,6 @@
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
-
-// Temporary
-#define LED_PORT XMC_GPIO_PORT5
-#define LED_PIN 9U
 
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
@@ -49,14 +45,6 @@ bool fmt_initSpi(spiCfg_t cfg)
 
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
-
-  // Temporary
-  const XMC_GPIO_CONFIG_t ledCfg = {
-      .mode = XMC_GPIO_MODE_OUTPUT_PUSH_PULL,
-      .output_level = XMC_GPIO_OUTPUT_LEVEL_LOW,
-      .output_strength = XMC_GPIO_OUTPUT_STRENGTH_MEDIUM,
-  };
-  XMC_GPIO_Init(LED_PORT, LED_PIN, &ledCfg);
 
   fmt_initIoc(cfg.clearToSendInput, EDGE_TYPE_RISING,
               cfg.clearToSendOut, cfg.clearToSendIRQn, cfg.spiIrqPriority);
@@ -135,7 +123,8 @@ bool fmt_getMsg(Top *message)
     pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
     /* Now we are ready to decode the message. */
     success = pb_decode(&stream, Top_fields, message);
-    if (!success) {
+    if (!success)
+    {
       __BKPT(5);
     }
   }
@@ -164,7 +153,7 @@ static void SendNextPacket(void)
 
       if (txWaiting || rxWaiting)
       {
-        if (txWaiting) 
+        if (txWaiting)
         {
           dequeueFront(&sendQueue, txPacket);
         }
@@ -205,7 +194,6 @@ static void SendNextPacket(void)
 
 void subMsgWaitingISR(void)
 {
-  XMC_GPIO_ToggleOutput(LED_PORT, LED_PIN);
   SendNextPacket();
 }
 
@@ -258,7 +246,7 @@ static void spiEventHandlerISR(uint32_t event)
         enqueueBack(&rxQueue, rxPacket);
       }
     }
-    /* This will trigger a Send as soon as CTS pin has a rising edge. 
+    /* This will trigger a Send as soon as CTS pin has a rising edge.
     We do this instead of calling SendNextPacket() because the ESP doesn't lower
     CTS until a few us AFTER a transaction completes, so this event handler gets
     there too early, while CTS is still high, but the ESP isn't actually ready.

@@ -39,8 +39,8 @@ int main(void)
       .spiIrqPriority = spiTxBuf_priority, // TODO: check if this is used.
   };
   fmt_initSpi(spiConfig);
-
-  comm_init((portPin_t){.port = XMC_GPIO_PORT0, .pin = 13U});
+  
+  comm_init((portPin_t){.port = XMC_GPIO_PORT5, .pin = 9U});
 
   // Set periodicA to 1kHz frequency.
   initPeriodicISR(
