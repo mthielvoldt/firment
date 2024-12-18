@@ -24,6 +24,7 @@ float wave0Value = 0.0F;
 float wave1Value = 0.0F;
 float sineInv;
 float sinePlus;
+float sinePlusInv;
 
 void ctl_init(float waveformUpdateFreq)
 {
@@ -39,6 +40,7 @@ void ctl_init(float waveformUpdateFreq)
   gp_initTestPoint(TestPointId_SINE, &wave0Value, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_SINE_INV, &sineInv, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_SINE_PLUS, &sinePlus, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_SINE_PLUS_INV, &sinePlusInv, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_SAWTOOTH, &wave1Value, SRC_TYPE_FLOAT);
 
 }
@@ -50,6 +52,7 @@ void ctl_updateVoltageISR(void)
   wave0Value = wave_getValue(&wave0);
   sineInv = -wave0Value;
   sinePlus = wave0Value + 0.1F;
+  sinePlusInv = -sinePlus;
   wave1Value = wave_getValue(&wave1);
 }
 

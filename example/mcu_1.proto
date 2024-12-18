@@ -31,7 +31,8 @@ enum TestPointId {
   SINE = 2;
   SINE_INV = 3;
   SINE_PLUS = 4;
-  SAWTOOTH = 5;
+  SINE_PLUS_INV = 5;
+  SAWTOOTH = 6;
 }
 
 message ProbeSignal {
