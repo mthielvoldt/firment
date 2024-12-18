@@ -1,5 +1,4 @@
 #include "control.h"
-#include <fmt_waveform.h>
 #include <ghostProbe.h>
 
 wave_t wave0 = {
@@ -32,10 +31,10 @@ void ctl_init(float waveformUpdateFreq)
   wave_initAll(waveformUpdateFreq);
 
   wave_add(&wave0);
-  wave_setFrequency(&wave0, 0.1);
+  wave_setFrequency(0, 0.1);
 
   wave_add(&wave1);
-  wave_setFrequency(&wave1, 0.15);
+  wave_setFrequency(1, 0.15);
 
   gp_initTestPoint(TestPointId_SINE, &wave0Value, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_SINE_INV, &sineInv, SRC_TYPE_FLOAT);
@@ -43,6 +42,13 @@ void ctl_init(float waveformUpdateFreq)
   gp_initTestPoint(TestPointId_SINE_PLUS_INV, &sinePlusInv, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_SAWTOOTH, &wave1Value, SRC_TYPE_FLOAT);
 
+}
+
+void ctl_setWaveform(waveCfg_t cfg) {
+  wave_setShape(cfg.id, cfg.shape);
+  wave_setAmplitude(cfg.id, cfg.amplitudeV);
+  wave_setFrequency(cfg.id, cfg.frequencyHz);
+  wave_setOffset(cfg.id, cfg.offsetV);
 }
 
 void ctl_updateVoltageISR(void)

@@ -33,7 +33,7 @@ void comm_handleTelemetry(void)
   static uint32_t count = 0;
   static uint32_t rotations = 0;
 
-  // execute 8 different operations, one each call in round-robin
+  // execute periodic telemetry sends in round-robin.
   switch (count++)
   {
   case 0:
@@ -69,4 +69,18 @@ void handleWaveformCtl(WaveformCtl msg)
   XMC_GPIO_ToggleOutput(led.port, led.pin);
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
+  const waveShape_t toControlShape[] = {
+    [WaveShape_WAVE_SHAPE_SINE] = WAVE_SHAPE_SINE,
+    [WaveShape_WAVE_SHAPE_SQUARE] = WAVE_SHAPE_SQUARE,
+    [WaveShape_WAVE_SHAPE_UNSPECIFIED] = WAVE_SHAPE_DC,
+  };
+  // opportunity here to limit input and notify if command exceeds limits.
+  const waveCfg_t cfg = {
+    .id = msg.channel,
+    .amplitudeV = msg.amplitudeV,
+    .frequencyHz = msg.frequencyHz, 
+    .offsetV = msg.offsetV,
+    .shape = toControlShape[msg.shape]
+  };
+  ctl_setWaveform(cfg);
 }
