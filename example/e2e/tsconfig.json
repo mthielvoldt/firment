@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    // Fixes issue in playwright.config.ts: Cannot find name 'process'. ts(2580)
+    "types": ["node"]
+  },
+}
