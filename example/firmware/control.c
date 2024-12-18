@@ -1,14 +1,14 @@
 #include "control.h"
 #include <ghostProbe.h>
 
-wave_t wave0 = {
+wave_t channelA = {
     .amplitude = 0.5f,
     .max = 1.0f,
     .min = 0.0f,
     .offset = 0.5f,
     .shape = WAVE_SHAPE_SINE};
 
-wave_t wave1 = {
+wave_t channelB = {
     .amplitude = 0.5f,
     .max = 1.0f,
     .min = 0.0f,
@@ -19,28 +19,28 @@ wave_t wave1 = {
 fmt_waveform only updates wave phases on wave_updateAll(), not the wave values.
 Here, we calculate the values and mirror them in this static variable so we can
 probe the values with ghostProbe. */
-float wave0Value = 0.0F;
-float wave1Value = 0.0F;
-float sineInv;
-float sinePlus;
-float sinePlusInv;
+float chanAOut = 0.0F;
+float chanBOut = 0.0F;
+float chanAInv;
+float chanAOffset;
+float chanAOffsetInv;
 
 void ctl_init(float waveformUpdateFreq)
 {
   // calling this from periodicA at 1000Hz.
   wave_initAll(waveformUpdateFreq);
 
-  wave_add(&wave0);
+  wave_add(&channelA);
   wave_setFrequency(0, 0.1);
 
-  wave_add(&wave1);
+  wave_add(&channelB);
   wave_setFrequency(1, 0.15);
 
-  gp_initTestPoint(TestPointId_SINE, &wave0Value, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_SINE_INV, &sineInv, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_SINE_PLUS, &sinePlus, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_SINE_PLUS_INV, &sinePlusInv, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_SAWTOOTH, &wave1Value, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_A, &chanAOut, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_A_INV, &chanAInv, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_A_PLUS, &chanAOffset, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_A_PLUS_INV, &chanAOffsetInv, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_B, &chanBOut, SRC_TYPE_FLOAT);
 
 }
 
@@ -55,11 +55,11 @@ void ctl_updateVoltageISR(void)
 {
   wave_updateAll();
   // calculate this every update so we can plot it. 
-  wave0Value = wave_getValue(&wave0);
-  sineInv = -wave0Value;
-  sinePlus = wave0Value + 0.1F;
-  sinePlusInv = -sinePlus;
-  wave1Value = wave_getValue(&wave1);
+  chanAOut = wave_getValue(&channelA);
+  chanAInv = -chanAOut;
+  chanAOffset = chanAOut + 0.1F;
+  chanAOffsetInv = -chanAOffset;
+  chanBOut = wave_getValue(&channelB);
 }
 
 // This is just a prototype.  
@@ -67,7 +67,7 @@ telem_t ctl_getTelem(void)
 {
   return (telem_t)
   {
-    .voltage = wave0Value,
+    .voltage = chanAOut,
     .currentMa = 5
   };
 }

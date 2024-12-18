@@ -70,16 +70,18 @@ void handleWaveformCtl(WaveformCtl msg)
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
   const waveShape_t toControlShape[] = {
-    [WaveShape_WAVE_SHAPE_SINE] = WAVE_SHAPE_SINE,
-    [WaveShape_WAVE_SHAPE_SQUARE] = WAVE_SHAPE_SQUARE,
-    [WaveShape_WAVE_SHAPE_UNSPECIFIED] = WAVE_SHAPE_DC,
+    [WaveShape_UNSPECIFIED] = WAVE_SHAPE_DC,
+    [WaveShape_SINE] = WAVE_SHAPE_SINE,
+    [WaveShape_SQUARE] = WAVE_SHAPE_SQUARE,
+    [WaveShape_SAWTOOTH] = WAVE_SHAPE_SAWTOOTH,
+    [WaveShape_DC] = WAVE_SHAPE_DC,
   };
   // opportunity here to limit input and notify if command exceeds limits.
   const waveCfg_t cfg = {
     .id = msg.channel,
-    .amplitudeV = msg.amplitudeV,
+    .amplitudeV = msg.enabled? msg.amplitudeV : 0.0F,
     .frequencyHz = msg.frequencyHz, 
-    .offsetV = msg.offsetV,
+    .offsetV = msg.enabled ? msg.offsetV : 0.0F,
     .shape = toControlShape[msg.shape]
   };
   ctl_setWaveform(cfg);

@@ -5,9 +5,11 @@ import "nanopb.proto";
 
 /* Project-specific messages */
 enum WaveShape {
-  WAVE_SHAPE_UNSPECIFIED = 0;
-  WAVE_SHAPE_SINE = 1;
-  WAVE_SHAPE_SQUARE = 2;
+  UNSPECIFIED = 0;
+  SINE = 1;
+  SQUARE = 2;
+  SAWTOOTH = 3;
+  DC = 4;
 }
 
 enum OutputChannel {
@@ -34,11 +36,11 @@ This enum will be available in FW.
 All signal messages have the same format  */
 enum TestPointId {
   DISCONNECTED = 0;
-  SINE = 2;
-  SINE_INV = 3;
-  SINE_PLUS = 4;
-  SINE_PLUS_INV = 5;
-  SAWTOOTH = 6;
+  CHAN_A = 2;
+  CHAN_A_INV = 3;
+  CHAN_A_PLUS = 4;
+  CHAN_A_PLUS_INV = 5;
+  CHAN_B = 6;
 }
 
 message ProbeSignal {
@@ -54,7 +56,7 @@ message ProbeSignal {
 // }
 
 message ProbeSignals {
-  repeated ProbeSignal probeSignals = 1 [(nanopb).max_count = 5];
+  repeated ProbeSignal probeSignals = 1 [(nanopb).max_count = 6];
 }
 
 enum SampleFreq {
