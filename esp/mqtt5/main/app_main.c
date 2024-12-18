@@ -336,7 +336,9 @@ void handleSpiMsg(esp_err_t spiResult, uint8_t pbMsg[])
   {
     // Assumes length < 127. TODO: permit larger.
     int msgLength = pbMsg[0] + 1; // +1 is for the message size prefix.
-    if (msgLength > 0 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
+
+    // Empty messages will have msgLength == 1 for prefix => Drop these.
+    if (msgLength > 1 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
     {
       memcpy(mqttBuffer + mqttWritePos, pbMsg, msgLength);
       mqttWritePos += msgLength;
