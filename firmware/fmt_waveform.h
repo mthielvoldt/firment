@@ -28,8 +28,6 @@ void wave_initAll(float updateFrequencyHz);
 
 bool wave_add(wave_t *wave);
 
-void wave_setFrequency(wave_t *wave, float frequencyHz);
-
 void wave_setPhase(wave_t *wave, float phaseRad);
 
 float wave_getValue(wave_t *wave);
@@ -37,11 +35,8 @@ float wave_getValue(wave_t *wave);
 /** A periodic that should be called at updateFrequencyHz */
 void wave_updateAll(void);
 
-/*
-typedef struct {
-} waveCfg_t;
-void wave_setShape(wave_t *wave, waveShape_t shape);
-void wave_setOffset(wave_t *wave, float dcOffset);
-void wave_setAmplitude(wave_t *wave, float amplitude);
-void wave_setLimits(wave_t *wave, float min, float max);
-*/
+void wave_setFrequency(uint32_t waveId, float frequencyHz);
+void wave_setShape(uint32_t waveId, waveShape_t shape);
+void wave_setOffset(uint32_t waveId, float dcOffset);
+void wave_setAmplitude(uint32_t waveId, float amplitude);
+void wave_setLimits(uint32_t waveId, float min, float max);

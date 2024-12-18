@@ -26,9 +26,33 @@ bool wave_add(wave_t *wave)
   return success;
 }
 
-void wave_setFrequency(wave_t *wave, float frequencyHz)
+void wave_setFrequency(uint32_t waveId, float frequencyHz)
 {
-  wave->deltaPhasePerUpdate = updatePeriodSec * TWO_PI * frequencyHz;
+  if (waveId < numWaves)
+    waves[waveId]->deltaPhasePerUpdate = updatePeriodSec * TWO_PI * frequencyHz;
+}
+void wave_setShape(uint32_t waveId, waveShape_t shape)
+{
+  if (waveId < numWaves)
+    waves[waveId]->shape = shape;
+}
+void wave_setOffset(uint32_t waveId, float dcOffset)
+{
+  if (waveId < numWaves)
+    waves[waveId]->offset = dcOffset;
+}
+void wave_setAmplitude(uint32_t waveId, float amplitude)
+{
+  if (waveId < numWaves)
+    waves[waveId]->amplitude = amplitude;
+}
+void wave_setLimits(uint32_t waveId, float min, float max)
+{
+  if (waveId < numWaves)
+  {
+    waves[waveId]->max = max;
+    waves[waveId]->min = min;
+  }
 }
 
 void wave_setPhase(wave_t *wave, float phaseRad)
