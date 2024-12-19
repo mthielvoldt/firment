@@ -100,7 +100,7 @@ export function {message.name}({{}}) {{
   }}
 
   return (
-    <form className="widget" onSubmit={{handleSubmit}}>
+    <form className="widget" aria-label="{message.name}" onSubmit={{handleSubmit}}>
       <p className="widget-head">
         <span >{message.name} </span>
         <button type="submit">Send</button>
