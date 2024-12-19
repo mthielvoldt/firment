@@ -45,7 +45,7 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       initial_state[field.name] = 0
       field_strings += f'''
       <label>
-        <input className="field" type="number" step="1" 
+        <input className="field" type="number" size={{5}} step="1" 
           value={{state.{field.name}}} name="{field.name}"
           onChange={{e => setState({{...state, {field.name}:Number(e.target.value)}})}}/>
         {field.name}
@@ -55,7 +55,7 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       initial_state[field.name] = 0
       field_strings += f'''
       <label>
-        <input className="field" type="number" step="0.01" 
+        <input className="field" type="number" size={{5}} step="0.01" 
           value={{state.{field.name}}} name="{field.name}"
           onChange={{e => setState({{...state, {field.name}:Number(e.target.value)}})}}/>
         {field.name}
