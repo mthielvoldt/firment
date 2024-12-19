@@ -47,7 +47,10 @@ Currently we're using [this development board](https://mischianti.org/vcc-gnd-st
 `sudo apt install python3 python3-venv`
 - ESPTool (a pip package) see next section. 
 - [Node >=18](https://nodejs.org/) Needed locally to install and run Playwright
-- Playwright `npm init playwright@latest`
+
+## Setup A New Project
+Create a directory structure with your firmware, ui, and end-to-end dirs.
+- Inside your end-to-end folder, init Playwright `npm init playwright@latest`
 
 
 ### ESPTool install
