@@ -36,7 +36,15 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // following sorts webGL error. Not sure if it's all necessary.
+        // TODO: determine individual effects of headless, no-sandbox, use-angle
+        headless: true,
+        launchOptions: {
+          args: ["--headless", "--no-sandbox", "--use-angle=gl"]
+        }
+      },
     },
 
     // {
