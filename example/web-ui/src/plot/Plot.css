@@ -20,18 +20,19 @@
 }
 
 .legend-container {
-  display: flex;
+  display: flex;  /* implies block outer */
+  flex-flow: row wrap;
+  min-height: 22px;
+  margin: 3px 0;
 }
 .legend-item {
-  /* width: 100%; */
-  flex-basis: 20%;
-  border: 1px solid #eaeaea;
+  flex: 0 0 auto;
+  border: 1px solid #b1b1b1;
 
 }
 .color-box {
-  opacity: 100%;
-  background-color:burlywood;
-  display: inline-flex;
-  width: 14px;
-  height: 14px;
+  display: inline-block;  /* allows width + height */
+  width: 13px;
+  height: 70%;
+  margin: auto 4px;
 }
