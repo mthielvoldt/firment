@@ -1,4 +1,9 @@
 
+export interface StatsText {
+  min: string;
+  max: string;
+  ave: string;
+};
 
 export class Stats {
   min: number;
@@ -34,9 +39,14 @@ export class Stats {
   }
 
   get text() {
-    return ` min: ${toText(this.min)} / max: ${toText(this.max)} / ave: ${toText(this.ave)}`;
+    return {
+      min: toText(this.min),
+      max: toText(this.max),
+      ave: toText(this.ave)
+    };
   }
 }
+
 function toText(num: number) {
   const sigFigs = 3
   const nonExpString = num.toPrecision(sigFigs);

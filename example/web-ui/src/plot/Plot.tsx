@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { getColorAsString, getPlotColors } from "./plotColors";
 import { calculateXGrid, AxisLabel, calculateYGrid } from "./axisTools";
-import { Stats } from "./traceStats";
+import { Stats, StatsText } from "./traceStats";
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
 import './Plot.css'
@@ -42,7 +42,7 @@ function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateA
 
 function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
   setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
-  setStats: React.Dispatch<React.SetStateAction<string[]>>) {
+  setStats: React.Dispatch<React.SetStateAction<StatsText[]>>) {
 
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
@@ -65,8 +65,8 @@ function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
         Array(numPoints - trace.data.length).fill(0).concat(visibleData));
     }
     canvasLeftDataPos = traceLen - numPoints;
-    updateGrid(numPoints, setLabels);
     setStats(recordStats.map(traceStats => traceStats.text));
+    updateGrid(numPoints, setLabels);
     wglp.update();
   }
 }
@@ -74,7 +74,7 @@ function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
 let frameId = 0;
 function newFrame(numPoints: number, recordId: number,
   setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
-  setStats: React.Dispatch<React.SetStateAction<string[]>>) {
+  setStats: React.Dispatch<React.SetStateAction<StatsText[]>>) {
 
   // Run this once every fpsDivider.
   if (wglp !== null) {
@@ -91,8 +91,8 @@ function newFrame(numPoints: number, recordId: number,
 
       wglp.gScaleY = scaleY;
       wglp.gScaleX = 1.0;
-      updateGrid(numPoints, setLabels);
       setStats(recordStats.map(traceStats => traceStats.text));
+      updateGrid(numPoints, setLabels);
       wglp.update();
     }
     fpsCounter++;
@@ -108,11 +108,11 @@ export default function Plot({ }) {
   const [recordId, setRecordId] = useState(0);
 
   // not expensive.  Reasonable to do whenever any state, eg labels, changes.
-  const record = model.getRecord(recordId); // get the record right away.
+  let record = model.getRecord(recordId); // get the record right away.
   // console.log("rerender.  record.traces.length", record.traces.length);
 
-  // init stats text to have length that matches length of the record.
-  const [statsText, setStatsText] = useState(record.traces.map(() => "No data."));
+  const initStatsText: StatsText = { min: "", max: "", ave: "" };
+  const [statsText, setStatsText] = useState<StatsText[]>([]);
   const [labels, setLabels] = useState<AxisLabel[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -168,17 +168,31 @@ export default function Plot({ }) {
     width: "100%",
     height: "70vh"
   };
+
+  console.log("statsText", statsText, "num traces: ", model.getLegend(recordId).length);
   const legend = model.getLegend(recordId).map((name, i) => {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
-      <div className="legend-item" key={i}>
-        <span className="color-box" style={colorStyle}></span>
-        <span>{name}</span>
-        <span>{statsText[i]}</span>
-      </div>
+      <tr className="legend-item" key={i}>
+        <td className="color-box" style={colorStyle}></td>
+        <td>{name}</td>
+        <td>{statsText[i].min}</td>
+        <td>{statsText[i].max}</td>
+        <td>{statsText[i].ave}</td>
+      </tr>
     );
   });
+
+  function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
+    setRecordId(Number.parseInt(e.currentTarget.value));
+
+    // resize statsText to match the number of traces in the new record.
+    // prevents attempting to access an undefined statsText item right after 
+    // changing the record to one with more traces than the previous.
+    record = model.getRecord(recordId);
+    setStatsText(record.traces.map(() => initStatsText));
+  }
 
   function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
@@ -189,13 +203,18 @@ export default function Plot({ }) {
     <div className="widget plot-div">
       <canvas style={canvasStyle} ref={canvas} />
       <PlotLabels xAxis={labels} />
-      <div className="legend-container">
-        {legend}
-      </div>
+      <table className="legend-container">
+        <thead>
+          <tr>
+            <th>Probe</th><th>TestPt</th><th>min</th><th>max</th><th>ave</th>
+          </tr>
+        </thead>
+        <tbody>{legend}</tbody>
+      </table>
       <label>
         Record:
         <input type="number" className="" value={recordId}
-          onChange={(e) => setRecordId(Number.parseInt(e.currentTarget.value))} />
+          onChange={changeRecordId} />
       </label>
       <label>
         Num Points:
