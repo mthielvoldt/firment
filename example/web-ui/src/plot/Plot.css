@@ -19,17 +19,28 @@
   color: orange;
 }
 
-.legend-container {
+table.legend {
   /* display: flex; */
   /* flex-flow: row wrap; */
+  border: 1px solid white;
+  border-collapse: collapse;
   min-height: 22px;
   margin: 3px 0;
+  letter-spacing: 0;  /* spaces letters out horizontally if > 0*/
+  text-align: center;
 }
-.legend-item {
-  /* flex: 0 0 auto; */
-  border: 1px solid #b1b1b1;
 
+td, th {
+  /* flex: 0 0 auto; */
+  border-style: dotted solid;
+  border-width: 1px;
+  border-color: #b1b1b1;
+  padding: 0 6px;
 }
+th {
+  border-bottom-style: solid;
+}
+
 .color-box {
   display: inline-block;  /* allows width + height */
   width: 13px;
