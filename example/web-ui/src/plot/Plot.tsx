@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { getColorAsString, getPlotColors } from "./plotColors";
 import { calculateXGrid, AxisLabel, calculateYGrid } from "./axisTools";
+import { Stats } from "./traceStats";
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
 import './Plot.css'
@@ -26,11 +27,12 @@ let canvasWidthPx = 0, canvasHeightPx = 0;
 let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
+let recordStats: Stats[];
 
 function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
   const { xGrid, xLabels } =
     calculateXGrid(numPoints, canvasLeftDataPos, canvasWidthPx);
-  const { yGrid, yLabels } = 
+  const { yGrid, yLabels } =
     calculateYGrid(-1, 1.1, canvasHeightPx, scaleY);
   setLabels(xLabels.concat(yLabels));
   wglp && wglp.removeAuxLines();
@@ -38,33 +40,42 @@ function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateA
   wglp && wglp.addAuxLine(yGrid);
 }
 
-function replaceLines(numPoints: number, record: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
+function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
+  setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
+  setStats: React.Dispatch<React.SetStateAction<string[]>>) {
+
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
 
-    const { traces, traceLen } = model.getRecord(record);
+    recordStats = Array<Stats>(traces.length);
 
     for (let i = 0; i < traces.length; i++) {
       const line = new WebglLine(getPlotColors(i), numPoints);
       const trace = traces[i];
       wglp.addLine(line);
-
       line.arrangeX();
-      if (numPoints < traceLen) {
-        line.replaceArrayY(trace.data.slice(-numPoints));
-      } else {
-        line.replaceArrayY(
-          Array(numPoints - trace.data.length).fill(0).concat(trace.data));
-      }
+
+      const visibleData = (numPoints < traceLen) ?
+        trace.data.slice(-numPoints) :
+        trace.data;
+
+      recordStats[i] = (new Stats(visibleData));
+      line.replaceArrayY(numPoints < traceLen ?
+        visibleData :
+        Array(numPoints - trace.data.length).fill(0).concat(visibleData));
     }
     canvasLeftDataPos = traceLen - numPoints;
     updateGrid(numPoints, setLabels);
+    setStats(recordStats.map(traceStats => traceStats.text));
     wglp.update();
   }
 }
 
 let frameId = 0;
-function newFrame(numPoints: number, recordId: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
+function newFrame(numPoints: number, recordId: number,
+  setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
+  setStats: React.Dispatch<React.SetStateAction<string[]>>) {
+
   // Run this once every fpsDivider.
   if (wglp !== null) {
 
@@ -75,15 +86,19 @@ function newFrame(numPoints: number, recordId: number, setLabels: React.Dispatch
       canvasLeftDataPos += newData[0].length;
       wglp.linesData.forEach((line, i) => {
         (line as WebglLine).shiftAdd(newData[i]);
+        recordStats[i].update(newData[i]);
       });
 
       wglp.gScaleY = scaleY;
       wglp.gScaleX = 1.0;
       updateGrid(numPoints, setLabels);
+      setStats(recordStats.map(traceStats => traceStats.text));
       wglp.update();
     }
     fpsCounter++;
-    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId, setLabels));
+    // Frame rate sets the frequency of polling the data model + update.
+    frameId = requestAnimationFrame(
+      () => newFrame(numPoints, recordId, setLabels, setStats));
   }
 }
 
@@ -91,6 +106,13 @@ function newFrame(numPoints: number, recordId: number, setLabels: React.Dispatch
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
+
+  // not expensive.  Reasonable to do whenever any state, eg labels, changes.
+  const record = model.getRecord(recordId); // get the record right away.
+  // console.log("rerender.  record.traces.length", record.traces.length);
+
+  // init stats text to have length that matches length of the record.
+  const [statsText, setStatsText] = useState(record.traces.map(() => "No data."));
   const [labels, setLabels] = useState<AxisLabel[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -127,9 +149,10 @@ export default function Plot({ }) {
 
     /* If numPoints or recordId changed, this function is re-called.  Full 
     line-replacement is needed because each line stores numPoints as immutable. */
-    replaceLines(numPoints, recordId, setLabels);
+    replaceLines(numPoints, record, setLabels, setStatsText);
 
-    frameId = requestAnimationFrame(() => newFrame(numPoints, recordId, setLabels));
+    frameId = requestAnimationFrame(
+      () => newFrame(numPoints, recordId, setLabels, setStatsText));
 
     return () => {
       console.log("Cleanup animation.")
@@ -150,7 +173,9 @@ export default function Plot({ }) {
     const colorStyle = { backgroundColor: rgbStr }
     return (
       <div className="legend-item" key={i}>
-        <div className="color-box" style={colorStyle}></div><span>{name}</span>
+        <span className="color-box" style={colorStyle}></span>
+        <span>{name}</span>
+        <span>{statsText[i]}</span>
       </div>
     );
   });

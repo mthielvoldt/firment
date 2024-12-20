@@ -16,7 +16,9 @@ type Trace = {
   testPointName: string;
   data: number[];
 };
-interface Record {
+
+/** a collection of Traces */
+export interface Record {
   traces: Trace[];
   traceLen: number;
 }
