@@ -169,13 +169,12 @@ export default function Plot({ }) {
     height: "70vh"
   };
 
-  console.log("statsText", statsText, "num traces: ", model.getLegend(recordId).length);
   const legend = model.getLegend(recordId).map((name, i) => {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
-      <tr className="legend-item" key={i}>
-        <td className="color-box" style={colorStyle}></td>
+      <tr key={i}>
+        <td> <span className="color-box" style={colorStyle}></span> </td>
         <td>{name}</td>
         <td>{statsText[i].min}</td>
         <td>{statsText[i].max}</td>
@@ -203,10 +202,10 @@ export default function Plot({ }) {
     <div className="widget plot-div">
       <canvas style={canvasStyle} ref={canvas} />
       <PlotLabels xAxis={labels} />
-      <table className="legend-container">
+      <table className="legend">
         <thead>
           <tr>
-            <th>Probe</th><th>TestPt</th><th>min</th><th>max</th><th>ave</th>
+            <th>Probe</th><th>Test point</th><th>min</th><th>max</th><th>ave</th>
           </tr>
         </thead>
         <tbody>{legend}</tbody>
