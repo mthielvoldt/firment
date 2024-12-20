@@ -11,6 +11,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --problem-background-color: 220,53,69;
+  --success-background-color: 29,155,94;
+  --warn-background-color: 255,193,7;
 }
 
 a {

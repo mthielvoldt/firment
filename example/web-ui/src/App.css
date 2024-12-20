@@ -45,4 +45,20 @@
   line-height: 1.5;
 }
 
-
+.pill {
+  padding: 0px 7px;
+  margin: 3px;
+  border-radius: 0.5rem;
+}
+.problem-colors {
+  background-color: RGBA(var(--problem-background-color));
+  color: #fff;
+}
+.success-colors {
+  background-color: RGBA(var(--success-background-color));
+  color: #fff;
+}
+.warn-colors {
+  background-color: RGBA(var(--warn-background-color));
+  color: #000;
+}

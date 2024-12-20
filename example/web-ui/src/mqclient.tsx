@@ -11,7 +11,8 @@ let client: MqttClient;
 let messageHandlers: { [index: string]: ({ }) => void } = {}
 let ranOnce = false;
 
-export function setupMq(brokerAddress: string) {
+export function setupMq(brokerHost: string, onSubscribe: () => void,
+  onMessage: () => void) {
   if (ranOnce) {
     teardownMq();
   }
@@ -19,20 +20,21 @@ export function setupMq(brokerAddress: string) {
   ranOnce = true;
   const protocol: MqttProtocol = "mqtts";
   const options = {
-    host: brokerAddress,
+    host: brokerHost,
     port: 8883,
     protocol: protocol,
     clientId: 'firment-client',
     rejectUnauthorized: false
   }
-  // client = mqtt.connect("ws://" + brokerAddress + ":8080",
-  //   {rejectUnauthorized: false}); 
 
   client = mqtt.connect(options);
 
   client.on("connect", () => {
     client.subscribe("hq-bound", (err) => {
-      if (!err) { console.log("Subscribed to 'hq-bound'"); }
+      if (!err) { 
+        console.log("Subscribed to 'hq-bound'");
+        onSubscribe();
+      }
       else { console.error("Failed to subscribe to hq-bound."); }
     })
   });
@@ -48,6 +50,7 @@ export function setupMq(brokerAddress: string) {
 
 
   client.on("message", (_, buffer) => {
+    onMessage();
     // Parse the protobuf buffer
     let msgsDecoded = 0;
     const reader = Reader.create(buffer);
