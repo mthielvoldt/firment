@@ -184,12 +184,13 @@ export default function Plot({ }) {
   });
 
   function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
-    setRecordId(Number.parseInt(e.currentTarget.value));
+    const newRecordId = Number.parseInt(e.currentTarget.value);
+    setRecordId(newRecordId);
 
     // resize statsText to match the number of traces in the new record.
     // prevents attempting to access an undefined statsText item right after 
     // changing the record to one with more traces than the previous.
-    record = model.getRecord(recordId);
+    record = model.getRecord(newRecordId);
     setStatsText(record.traces.map(() => initStatsText));
   }
 
