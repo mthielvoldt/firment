@@ -68,7 +68,7 @@ void wave_setPhase(wave_t *wave, float phaseRad)
   // Just subtracting 2Pi wasn't enough.  Do something more robust.
   if (phaseRad < 0.0F || phaseRad > TWO_PI)
   {
-    // neg. example: floor(-7/(2pi)) = -2.  -7 - (-2 * 2pi) = 5.56. (in range)
+    // neg. example: floor(-7/(2pi)) = -2.  -7 - (-2 * 2pi) ~ 5.57. (in range)
     phaseRad -= floorf(phaseRad / TWO_PI) * TWO_PI;
   }
   wave->phase = phaseRad;
