@@ -13,20 +13,20 @@ test('WaveformCtl can enable and disable channel A', async ({ page }) => {
 
   // page.on("console", msg => console.log(msg.text()));
   const voltageV = page.getByText("voltageV");
-  const waveformCtl = page.getByRole("form", {name: "WaveformCtl"});
+  const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
 
-  await waveformCtl.getByLabel("channel").selectOption({index: 0});
+  await waveformCtl.getByLabel("channel").selectOption({ index: 0 });
   await waveformCtl.getByLabel("enabled").setChecked(false);
   await waveformCtl.getByLabel("shape").selectOption("SINE");
   await waveformCtl.getByLabel("amplitudeV").fill("0.5");
   await waveformCtl.getByLabel("frequencyHz").fill("0.2");
   await waveformCtl.getByLabel("offsetV").fill("0.5");
-  await waveformCtl.getByRole("button", {name: "Send"}).click();
+  await waveformCtl.getByRole("button", { name: "Send" }).click();
 
   await expect(voltageV).toHaveText(/0.000/);
 
   await waveformCtl.getByLabel("enabled").setChecked(true);
-  await waveformCtl.getByRole("button", {name: "Send"}).click();
+  await waveformCtl.getByRole("button", { name: "Send" }).click();
   await expect(voltageV).not.toHaveText(/0.000/);
 });
 
@@ -34,39 +34,40 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
 
   // page.on("console", msg => console.log(msg.text()));
 
-  // Turn on Channel A.
-  test.skip('test', async ({ page }) => {
-    await page.getByLabel('enabled').check();
-    await page.getByLabel('enabled').press('Tab');
-    await page.getByLabel('UNSPECIFIEDSINESQUARESAWTOOTHDCshape').press('ArrowDown');
-    await page.getByLabel('UNSPECIFIEDSINESQUARESAWTOOTHDCshape').press('ArrowDown');
-    await page.getByLabel('UNSPECIFIEDSINESQUARESAWTOOTHDCshape').press('Tab');
-    await page.getByLabel('amplitudeV').fill('0.5');
-    await page.getByLabel('frequencyHz').click();
-    await page.getByLabel('frequencyHz').fill('01');
-    await page.getByLabel('frequencyHz').press('ArrowLeft');
-    await page.getByLabel('frequencyHz').fill('1');
-    await page.getByLabel('frequencyHz').press('ArrowDown');
-    await page.getByLabel('frequencyHz').press('ArrowUp');
-    await page.getByLabel('offsetV').click();
-    await page.getByLabel('offsetV').fill('0.5');
-    await page.getByLabel('offsetV').press('Enter');
-    await page.getByLabel('WaveformCtl').getByRole('button', { name: 'Send' }).click();
-    await page.getByLabel('SCAN_DISABLEDFREQ_2_HZFREQ_10_HZFREQ_30_HZFREQ_100_HZFREQ_250_HZFREQ_500_HZFREQ_').selectOption('10');
-    await page.getByLabel('DISCONNECTEDCHAN_ACHAN_A_INVCHAN_A_PLUSCHAN_A_PLUS_INVCHAN_Bprobe_0').selectOption('2');
-    await page.getByLabel('RunScanCtl').getByRole('button', { name: 'Send' }).click();
-    await page.getByLabel('Record:').click();
-    await page.getByLabel('Record:').press('ArrowUp');
-    await expect(page.locator('tbody')).toContainText('CHAN_A');
-    await page.getByRole('cell', { name: 'ave' }).click();
-    await page.getByRole('cell', { name: 'CHAN_A' }).click();
-    await expect(page.locator('tbody')).toContainText('0.500');
-  });
+  const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
 
-  // Turn on 
+  // Command sine wave at 1.2Hz, ranging 0 to 1 on Channel A
+  await waveformCtl.getByLabel('enabled').check();
+  await waveformCtl.getByLabel("channel").selectOption({ index: 0 }); // Sine
+  await waveformCtl.getByLabel('amplitudeV').fill('0.5');
+  await waveformCtl.getByLabel('frequencyHz').fill('1');
+  await waveformCtl.getByLabel('offsetV').fill('0.5');
+  await waveformCtl.getByRole('button', { name: 'Send' }).click();
 
+  // Turn on Scanning at 10Hz
+  const scanCtl = page.getByLabel('RunScanCtl');
+  await scanCtl.getByLabel('freq').selectOption('10');
+  await scanCtl.getByLabel('probe_0').selectOption('2');
+  await scanCtl.getByRole('button', { name: 'Send' }).click();
 
-  // switch the record to 1.
-  await page.getByLabel("Record:").press('ArrowUp');
+  // Switch plot view to active record.
+  await page.getByLabel('Record:').fill('1');
+
+  // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
+  const chanAAve = page.getByTestId('CHAN_A-ave');
+
+  // const pollOptions = {
+  //   message: "CHAN_A-ave didn't reach the range [0.4, 0.6] in 5 seconds.",
+  //   timeout: 5000,
+  //   intervals: [1000]
+  // };
+  // await expect.poll(async () => {
+  //   return Number(chanAAve.innerText());
+  // }, pollOptions).toBeGreaterThan(0.4);
+
+  await expect(async () => {
+    expect(Number(chanAAve.innerText())).toBeLessThan(0.6);
+    expect(Number(chanAAve.innerText())).toBeGreaterThan(0.4);
+  }).toPass({ intervals: [1000], timeout: 5000 });
 
 });

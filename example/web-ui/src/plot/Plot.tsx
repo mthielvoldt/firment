@@ -176,9 +176,9 @@ export default function Plot({ }) {
       <tr key={i}>
         <td> <span className="color-box" style={colorStyle}></span> </td>
         <td>{name}</td>
-        <td>{statsText[i].min}</td>
-        <td>{statsText[i].max}</td>
-        <td>{statsText[i].ave}</td>
+        <td data-testid={name + "-min"}>{statsText[i].min}</td>
+        <td data-testid={name + "-max"}>{statsText[i].max}</td>
+        <td data-testid={name + "-ave"}>{statsText[i].ave}</td>
       </tr>
     );
   });
