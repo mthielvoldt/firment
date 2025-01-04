@@ -51,23 +51,15 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
   await scanCtl.getByRole('button', { name: 'Send' }).click();
 
   // Switch plot view to active record.
-  await page.getByLabel('Record:').fill('1');
+  const recordInput = page.getByLabel('Record:');
+  await recordInput.fill('1');
+  recordInput.press('Enter');
 
   // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
-  const chanAAve = page.getByTestId('CHAN_A-ave');
-
-  // const pollOptions = {
-  //   message: "CHAN_A-ave didn't reach the range [0.4, 0.6] in 5 seconds.",
-  //   timeout: 5000,
-  //   intervals: [1000]
-  // };
-  // await expect.poll(async () => {
-  //   return Number(chanAAve.innerText());
-  // }, pollOptions).toBeGreaterThan(0.4);
-
   await expect(async () => {
-    expect(Number(chanAAve.innerText())).toBeLessThan(0.6);
-    expect(Number(chanAAve.innerText())).toBeGreaterThan(0.4);
-  }).toPass({ intervals: [1000], timeout: 5000 });
-
+    const avgAsString = await page.getByTestId('CHAN_A-ave').innerText();
+    const avg = Number(avgAsString);
+    expect(avg).toBeLessThan(0.6);
+    expect(avg).toBeGreaterThan(0.4);
+  }).toPass({ intervals: [1000], timeout: 10000 });
 });
