@@ -11,6 +11,9 @@ void comm_init(portPin_t ledPin); // kinda hate xmc gpio being here - for main, 
 #define USE_WaveformCtl
 void handleWaveformCtl(WaveformCtl msg);
 
+#define USE_Reset
+void handleReset(Reset msg);
+
 /** Comms Periodic
  * To be called periodically either by making this a timer-driven ISR,
  * or called within a periodic RTOS task.

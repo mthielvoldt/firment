@@ -86,3 +86,8 @@ void handleWaveformCtl(WaveformCtl msg)
   };
   ctl_setWaveform(cfg);
 }
+
+void handleReset(Reset msg)
+{
+  NVIC_SystemReset();
+}

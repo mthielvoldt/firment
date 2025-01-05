@@ -3,6 +3,7 @@ import BrokerAddress from './BrokerAddress';
 import { Log } from './Log';
 import Plot from './plot/Plot';
 import './App.css'
+import Reset from './Reset';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
           <h2>Commands</h2>
           <widgets.WaveformCtl />
           <widgets.RunScanCtl />
+          <Reset />
         </div>
         <div className='widget-column'>
           <h2>Telemetry</h2>

@@ -31,6 +31,8 @@ message WaveformTlm {
   sint32 currentMa = 2;
 }
 
+message Reset {}
+
 /** We use an enum to ID the messages.
 This enum will be available in FW.
 All signal messages have the same format  */
@@ -115,5 +117,6 @@ message Top {
     RunScanCtl RunScanCtl = 5;
     WaveformCtl WaveformCtl = 8;
     WaveformTlm WaveformTlm = 9;
+    Reset Reset = 10;
   }
 }

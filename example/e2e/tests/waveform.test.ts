@@ -8,6 +8,12 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByText(/Active/)).toBeVisible();
 });
 
+test.afterEach(async ({ page }) => {
+  await page.getByRole("form", { name: "Reset" })
+    .getByRole("button", { name: "Send" })
+    .click();
+})
+
 
 test('WaveformCtl can enable and disable channel A', async ({ page }) => {
 
