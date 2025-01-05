@@ -23,7 +23,7 @@ export function setupMq(brokerHost: string, onSubscribe: () => void,
     host: brokerHost,
     port: 8883,
     protocol: protocol,
-    clientId: 'firment-client',
+    clientId: 'firment-client' + crypto.randomUUID(),
     rejectUnauthorized: false
   }
 
