@@ -1,7 +1,27 @@
 {
+  "name": "firment-ui",
+  "version": "0.0.0",
+  "description": "Web-UI tools for firment-based embedded projects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mthielvoldt/firment.git"
+  },
+  "author": "Mike Thielvoldt",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "homepage": "https://github.com/mthielvoldt/firment#readme",
+  "bugs": {
+    "url": "https://github.com/mthielvoldt/firment/issues"
+  },
   "dependencies": {
     "mqtt": "^5.10.3",
     "protobufjs": "^7.4.0",
     "webgl-plot": "^0.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
   }
 }
