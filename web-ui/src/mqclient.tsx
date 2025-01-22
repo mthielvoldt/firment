@@ -1,5 +1,5 @@
 import mqtt, { MqttClient, MqttProtocol } from "mqtt"; // import namespace "mqtt"
-import * as pb from "./generated/mcu_1.es6.js";
+import * as pb from "./generated/messages.js";
 import { Reader } from "protobufjs/minimal.js";
 
 let client: MqttClient;
