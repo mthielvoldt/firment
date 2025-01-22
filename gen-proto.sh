@@ -19,15 +19,15 @@ if [ ! -e "$PROTO_FILE" ]; then
   exit 2
 fi
 
-if [ -d "../protocol/gen-venv" ]; then
-  source ../protocol/gen-venv/bin/activate
+if [ -d "$SCRIPT_DIR/protocol/gen-venv" ]; then
+  source $SCRIPT_DIR/protocol/gen-venv/bin/activate
 fi
 
 mkdir -p $FW_OUT_DIR
 mkdir -p $UI_OUT_DIR
 
-echo "Generating nanopb into $(pwd)/firmware/generated"
-$NANOPB_DIR/protoc -I$SCRIPT_DIR \
+echo "Generating nanopb into $FW_OUT_DIR"
+$NANOPB_DIR/protoc -I$(pwd) \
   --nanopb_out=$FW_OUT_DIR \
   $PROTO_FILE
 
@@ -55,4 +55,4 @@ echo "Generating TS types for above JS into $UI_OUT_DIR/messages.d.ts"
 web-ui/node_modules/protobufjs-cli/bin/pbts \
   --no-comments \
   -o $UI_OUT_DIR/messages.d.ts \
-  web-ui/src/generated/messages.js
+  $UI_OUT_DIR/messages.js

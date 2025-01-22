@@ -38,9 +38,9 @@ add_executable(${EXECUTABLE}
   spi_example.c
   project_comms.c
   control.c
-  generated/mcu_1.pb.c
-  generated/fmt_rx.pb.c
   gpio_common.c
+  ../../firmware/generated/messages.pb.c
+  ../../firmware/generated/fmt_rx.pb.c
   ../../firmware/fmt_spi.c
   ../../firmware/queue.c
   ../../firmware/port/XMC4/fmt_periodic_xmc.c
