@@ -2,17 +2,20 @@
 
 # Check if a file name is provided as an argument
 if [ $# -ne 1 ]; then
-  echo "Usage: $0 <file_name>"
+  echo "Usage: $0 <file_name.proto>"
   exit 1
 fi
 
-FILE=$(pwd)/$1
+PROTO_FILE=$(pwd)/$1
 SCRIPT_DIR=$( cd $(dirname $0) && pwd )
-PROTOC=$SCRIPT_DIR/protocol/nanopb/generator/protoc
+NANOPB_DIR=$SCRIPT_DIR/protocol/nanopb/generator
+PLUGIN_DIR=$SCRIPT_DIR/protocol/pb-plugins
+FW_OUT_DIR=$SCRIPT_DIR/firmware/generated
+UI_OUT_DIR=$SCRIPT_DIR/web-ui/src/generated
 
-# Check if the file exists
-if [ ! -e "$FILE" ]; then
-  echo "Error: File '$FILE' does not exist."
+# Check if the .proto file exists
+if [ ! -e "$PROTO_FILE" ]; then
+  echo "Error: File '$PROTO_FILE' does not exist."
   exit 2
 fi
 
@@ -20,22 +23,36 @@ if [ -d "../protocol/gen-venv" ]; then
   source ../protocol/gen-venv/bin/activate
 fi
 
-mkdir -p firmware/generated
-mkdir -p web-ui/src/generated
+mkdir -p $FW_OUT_DIR
+mkdir -p $UI_OUT_DIR
 
-echo "Running $PROTOC..."
-$PROTOC -I$SCRIPT_DIR \
-  --nanopb_out=firmware/generated \
-  --plugin=protoc-gen-firment=$SCRIPT_DIR/protocol/pb-plugins/gen-firment.py --firment_out=firmware/generated \
-  --plugin=protoc-gen-widgets=$SCRIPT_DIR/protocol/pb-plugins/gen-widgets.py --widgets_out=web-ui/src/generated \
-  $FILE
+echo "Generating nanopb into $(pwd)/firmware/generated"
+$NANOPB_DIR/protoc -I$SCRIPT_DIR \
+  --nanopb_out=$FW_OUT_DIR \
+  $PROTO_FILE
 
-echo "Running $(pwd)/web-ui/node_modules/protobufjs-cli/bin/pbjs..."
+echo "Generating firmware into $SCRIPT_DIR/firmware/generated"
+$NANOPB_DIR/protoc -I$SCRIPT_DIR \
+  --plugin=protoc-gen-firment=$PLUGIN_DIR/gen-firment.py \
+  --firment_out=$FW_OUT_DIR \
+  $PROTO_FILE
+
+echo "Generating ui widgets into $SCRIPT_DIR/web-ui/src/generated"
+$NANOPB_DIR/protoc -I$SCRIPT_DIR \
+  --plugin=protoc-gen-widgets=$PLUGIN_DIR/gen-widgets.py \
+  --widgets_out=$UI_OUT_DIR \
+  $PROTO_FILE
+
+echo "Generating (de)serializing JS into $UI_OUT_DIR/messages.js"
 web-ui/node_modules/protobufjs-cli/bin/pbjs \
-  -p ../protocol/nanopb/generator/proto \
-  -t static-module -w es6 -o web-ui/src/generated/messages.js $FILE
+  -p $NANOPB_DIR/proto \
+  -t static-module \
+  -w es6 \
+  -o $UI_OUT_DIR/messages.js \
+  $PROTO_FILE
 
-echo "Running $(pwd)/web-ui/node_modules/protobufjs-cli/bin/pbts..."
+echo "Generating TS types for above JS into $UI_OUT_DIR/messages.d.ts"
 web-ui/node_modules/protobufjs-cli/bin/pbts \
   --no-comments \
-  -o web-ui/src/generated/messages.d.ts web-ui/src/generated/messages.js
+  -o $UI_OUT_DIR/messages.d.ts \
+  web-ui/src/generated/messages.js

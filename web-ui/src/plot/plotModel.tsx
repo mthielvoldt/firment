@@ -2,7 +2,7 @@
  * 
 */
 
-import { TestPointId } from "../generated/mcu_1.es6";
+import { TestPointId } from "../generated/messages";
 
 type ProbeSignal = {  // candidate rename: ProbeSample
   id: number;

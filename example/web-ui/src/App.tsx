@@ -1,9 +1,9 @@
-import * as widgets from './generated/widgets.pb';
-import BrokerAddress from './BrokerAddress';
-import { Log } from './Log';
-import Plot from './plot/Plot';
-import './App.css'
-import Reset from './Reset';
+import * as widgets from './fmt-lib/generated/widgets.pb';
+import BrokerAddress from './fmt-lib/BrokerAddress';
+import { Log } from './fmt-lib/Log';
+import Plot from './fmt-lib/plot/Plot';
+import Reset from './fmt-lib/Reset';
+import './fmt-lib/App.css'
 
 function App() {
 
