@@ -15,6 +15,7 @@
 #include "control.h"
 #include "project_comms.h"
 #include "frequency.h"
+#include "build/version.h"
 
 int main(void)
 {
