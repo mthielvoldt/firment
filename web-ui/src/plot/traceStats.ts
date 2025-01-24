@@ -1,17 +1,20 @@
 
 export interface StatsText {
+  name: string;
   min: string;
   max: string;
   ave: string;
 };
 
 export class Stats {
+  name: string;
   min: number;
   max: number;
   count: number;
   private sum: number;
 
-  constructor(initialData?: number[]) {
+  constructor(name: string, initialData?: number[]) {
+    this.name = name;
     this.count = 0;
     this.sum = 0;
     this.min = this.max = NaN;
@@ -40,6 +43,7 @@ export class Stats {
 
   get text() {
     return {
+      name: this.name,
       min: toText(this.min),
       max: toText(this.max),
       ave: toText(this.ave)

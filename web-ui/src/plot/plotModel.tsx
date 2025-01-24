@@ -74,12 +74,6 @@ export function getRecord(record: number): Record {
   return { traces, traceLen }
 }
 
-export function getLegend(recordId: number): string[] {
-  return data[recordId] ?
-    data[recordId].map((trace) => trace.testPointName) :
-    [];
-}
-
 /** Returns true iff:
  * - recordId is last in the table, since new data only ever goes there.
  * - The record has at least one trace.
