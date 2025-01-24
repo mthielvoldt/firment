@@ -1,2 +1,2 @@
-cmake --toolchain toolchain-xmc.cmake -B build/xmc -S.
-cmake --build build/xmc
+cmake --toolchain toolchain-xmc.cmake -B build/xmc -S. && \
+  cmake --build build/xmc

@@ -1,7 +1,18 @@
 cmake_minimum_required(VERSION 3.22.1)
 
+# Read the version from an external file
+file(READ "${CMAKE_SOURCE_DIR}/../version.txt" VERSION_CONTENT)
+
+# Strip any trailing whitespace
+string(STRIP "${VERSION_CONTENT}" PROJECT_VERSION)
+
 # Disables CXX (C++)
-project(spi_example VERSION 0.1 LANGUAGES C ASM)
+project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
+
+message(STATUS "Project version: ${PROJECT_VERSION}")
+
+# Generate the version header for the firmware
+configure_file(../../firmware/fmt_version.h.in ../version.h)
 
 set(DEBUG_INFO_OPTIONS -g)
   # -g3
