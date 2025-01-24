@@ -27,7 +27,7 @@ let canvasWidthPx = 0, canvasHeightPx = 0;
 let canvasLeftDataPos = 0;
 let fpsCounter = 0;
 let wglp: (WebglPlot | null) = null;
-let recordStats: Stats[];
+let recordStats: Stats[]; // TODO: extract to its own component.
 
 function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>) {
   const { xGrid, xLabels } =
@@ -42,7 +42,7 @@ function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateA
 
 function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
   setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
-  setStats: React.Dispatch<React.SetStateAction<StatsText[]>>) {
+  setLegendText: React.Dispatch<React.SetStateAction<StatsText[]>>) {
 
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
@@ -59,13 +59,13 @@ function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
         trace.data.slice(-numPoints) :
         trace.data;
 
-      recordStats[i] = (new Stats(visibleData));
+      recordStats[i] = (new Stats(trace.testPointName, visibleData));
       line.replaceArrayY(numPoints < traceLen ?
         visibleData :
         Array(numPoints - trace.data.length).fill(0).concat(visibleData));
     }
     canvasLeftDataPos = traceLen - numPoints;
-    setStats(recordStats.map(traceStats => traceStats.text));
+    setLegendText(recordStats.map(traceStats => traceStats.text));
     updateGrid(numPoints, setLabels);
     wglp.update();
   }
@@ -74,7 +74,7 @@ function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
 let frameId = 0;
 function newFrame(numPoints: number, recordId: number,
   setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
-  setStats: React.Dispatch<React.SetStateAction<StatsText[]>>) {
+  setLegendText: React.Dispatch<React.SetStateAction<StatsText[]>>) {
 
   // Run this once every fpsDivider.
   if (wglp !== null) {
@@ -91,14 +91,14 @@ function newFrame(numPoints: number, recordId: number,
 
       wglp.gScaleY = scaleY;
       wglp.gScaleX = 1.0;
-      setStats(recordStats.map(traceStats => traceStats.text));
+      setLegendText(recordStats.map(traceStats => traceStats.text));
       updateGrid(numPoints, setLabels);
       wglp.update();
     }
     fpsCounter++;
     // Frame rate sets the frequency of polling the data model + update.
     frameId = requestAnimationFrame(
-      () => newFrame(numPoints, recordId, setLabels, setStats));
+      () => newFrame(numPoints, recordId, setLabels, setLegendText));
   }
 }
 
@@ -111,8 +111,7 @@ export default function Plot({ }) {
   let record = model.getRecord(recordId); // get the record right away.
   // console.log("rerender.  record.traces.length", record.traces.length);
 
-  const initStatsText: StatsText = { min: "", max: "", ave: "" };
-  const [statsText, setStatsText] = useState<StatsText[]>([]);
+  const [legendText, setLegendText] = useState<StatsText[]>([]);
   const [labels, setLabels] = useState<AxisLabel[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -144,15 +143,15 @@ export default function Plot({ }) {
   }, []);
 
   // Animation engine: updates frame when new data is available.
+  /* If numPoints or recordId changed, this function is re-called.  Full 
+  line-replacement is needed because each line stores numPoints as immutable. */
   useEffect(() => {
-    console.log("Setup animation.");
+    console.log("Setup animation.  recordId, record");
 
-    /* If numPoints or recordId changed, this function is re-called.  Full 
-    line-replacement is needed because each line stores numPoints as immutable. */
-    replaceLines(numPoints, record, setLabels, setStatsText);
+    replaceLines(numPoints, record, setLabels, setLegendText);
 
     frameId = requestAnimationFrame(
-      () => newFrame(numPoints, recordId, setLabels, setStatsText));
+      () => newFrame(numPoints, recordId, setLabels, setLegendText));
 
     return () => {
       console.log("Cleanup animation.")
@@ -169,29 +168,25 @@ export default function Plot({ }) {
     height: "70vh"
   };
 
-  const legend = model.getLegend(recordId).map((name, i) => {
+  function getLegendRow({name, min, max, ave}, i: number) {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
       <tr key={i}>
         <td> <span className="color-box" style={colorStyle}></span> </td>
         <td>{name}</td>
-        <td data-testid={name + "-min"}>{statsText[i].min}</td>
-        <td data-testid={name + "-max"}>{statsText[i].max}</td>
-        <td data-testid={name + "-ave"}>{statsText[i].ave}</td>
+        <td data-testid={name + "-min"}>{min}</td>
+        <td data-testid={name + "-max"}>{max}</td>
+        <td data-testid={name + "-ave"}>{ave}</td>
       </tr>
     );
-  });
+  };
+  const legend = legendText.map(getLegendRow);
 
   function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
     const newRecordId = Number.parseInt(e.currentTarget.value);
     setRecordId(newRecordId);
-
-    // resize statsText to match the number of traces in the new record.
-    // prevents attempting to access an undefined statsText item right after 
-    // changing the record to one with more traces than the previous.
     record = model.getRecord(newRecordId);
-    setStatsText(record.traces.map(() => initStatsText));
   }
 
   function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {
