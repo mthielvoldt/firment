@@ -40,13 +40,13 @@ function updateGrid(numPoints: number, setLabels: React.Dispatch<React.SetStateA
   wglp && wglp.addAuxLine(yGrid);
 }
 
-function replaceLines(numPoints: number, { traces, traceLen }: model.Record,
+function replaceLines(numPoints: number, recordId: number,
   setLabels: React.Dispatch<React.SetStateAction<AxisLabel[]>>,
   setLegendText: React.Dispatch<React.SetStateAction<StatsText[]>>) {
 
   if (wglp !== null) {
     console.log("replace lines.  numPoints: ", numPoints);
-
+    const { traces, traceLen } = model.readRecord(recordId);
     recordStats = Array<Stats>(traces.length);
 
     for (let i = 0; i < traces.length; i++) {
@@ -82,18 +82,23 @@ function newFrame(numPoints: number, recordId: number,
     // New data in the record we're currently plotting.
     if (fpsCounter >= fpsDivder && model.hasNewData(recordId)) {
       fpsCounter = 0;
-      const newData = model.getNewData(recordId);
-      canvasLeftDataPos += newData[0].length;
-      wglp.linesData.forEach((line, i) => {
-        (line as WebglLine).shiftAdd(newData[i]);
-        recordStats[i].update(newData[i]);
-      });
 
-      wglp.gScaleY = scaleY;
-      wglp.gScaleX = 1.0;
-      setLegendText(recordStats.map(traceStats => traceStats.text));
-      updateGrid(numPoints, setLabels);
-      wglp.update();
+      if (model.recordNewlyDefined(recordId)) {
+        replaceLines(numPoints, recordId, setLabels, setLegendText);
+      } else {
+        const newData = model.getNewData(recordId);
+        canvasLeftDataPos += newData[0].length;
+        wglp.linesData.forEach((line, i) => {
+          (line as WebglLine).shiftAdd(newData[i]);
+          recordStats[i].update(newData[i]);
+        });
+
+        wglp.gScaleY = scaleY;
+        wglp.gScaleX = 1.0;
+        setLegendText(recordStats.map(traceStats => traceStats.text));
+        updateGrid(numPoints, setLabels);
+        wglp.update();
+      }
     }
     fpsCounter++;
     // Frame rate sets the frequency of polling the data model + update.
@@ -106,11 +111,6 @@ function newFrame(numPoints: number, recordId: number,
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
-
-  // not expensive.  Reasonable to do whenever any state, eg labels, changes.
-  let record = model.getRecord(recordId); // get the record right away.
-  // console.log("rerender.  record.traces.length", record.traces.length);
-
   const [legendText, setLegendText] = useState<StatsText[]>([]);
   const [labels, setLabels] = useState<AxisLabel[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -148,7 +148,7 @@ export default function Plot({ }) {
   useEffect(() => {
     console.log("Setup animation.  recordId, record");
 
-    replaceLines(numPoints, record, setLabels, setLegendText);
+    replaceLines(numPoints, recordId, setLabels, setLegendText);
 
     frameId = requestAnimationFrame(
       () => newFrame(numPoints, recordId, setLabels, setLegendText));
@@ -168,7 +168,7 @@ export default function Plot({ }) {
     height: "70vh"
   };
 
-  function getLegendRow({name, min, max, ave}, i: number) {
+  function getLegendRow({ name, min, max, ave }, i: number) {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
@@ -186,7 +186,6 @@ export default function Plot({ }) {
   function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
     const newRecordId = Number.parseInt(e.currentTarget.value);
     setRecordId(newRecordId);
-    record = model.getRecord(newRecordId);
   }
 
   function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {

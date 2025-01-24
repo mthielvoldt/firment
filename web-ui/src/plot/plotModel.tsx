@@ -59,7 +59,7 @@ export function handleProbeSignals(signals: ProbeSignals) {
 }
 
 
-export function getRecord(record: number): Record {
+export function readRecord(record: number): Record {
   let traces: Trace[] = [];
   let traceLen = 0;
   if (record < data.length) {
@@ -84,6 +84,14 @@ export function hasNewData(recordId: number): boolean {
     recordId === (data.length - 1) && 
     data[recordId].length > 0 && 
     data[recordId][0].data.length > firstUnreadIndex
+  );
+}
+
+export function recordNewlyDefined(recordId: number): boolean {
+  return (
+    recordId === (data.length - 1) &&
+    data[recordId].length > 0 &&
+    firstUnreadIndex === 0
   );
 }
 
