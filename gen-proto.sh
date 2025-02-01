@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This file is intended to be executed with the working directory set to the
+# location of the file.
+
 # Check if a file name is provided as an argument
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <file_name.proto>"

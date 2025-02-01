@@ -1,18 +1,15 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 # Read the version from an external file
-file(READ "${CMAKE_SOURCE_DIR}/../version.txt" VERSION_CONTENT)
-
+file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
 # Strip any trailing whitespace
 string(STRIP "${VERSION_CONTENT}" PROJECT_VERSION)
+message(STATUS "Project version: ${PROJECT_VERSION}")
 
 # Disables CXX (C++)
 project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
 
-message(STATUS "Project version: ${PROJECT_VERSION}")
 
-# Generate the version header for the firmware
-configure_file(../../firmware/fmt_version.h.in ../version.h)
 
 set(DEBUG_INFO_OPTIONS -g)
   # -g3
@@ -26,69 +23,50 @@ add_compile_options(
   -Wall
 )
 
-# target_sources()
-# set_property(SOURCE ${XMC_STARTUP_FILE} PROPERTY LANGUAGE ASM)
-# set_property(SOURCE
-#   lib/XMC-for-Arduino/cores/xmc_lib/XMCLib/src/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/xmc_common_gcc.S
-#   PROPERTY LANGUAGE ASM
-# )
-
 add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections)
 if(DEFINED XMC_LINKER_FILE)
   add_link_options(-T${XMC_LINKER_FILE})
 endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
-set(XMC_LIB "lib/XMC4000_DFP/Device/XMClib/src")
-set(NANOPB "../../protocol/nanopb")
+
+
+# Add firment, set where (in the binary dir) to place firment output files.
+add_subdirectory(.. firment)
+add_subdirectory(../firmware/port/XMC4 XMC4)
+set(CPU_VARIANT "4800_F144")
 
 link_libraries("-lm")
 # link_libraries("-lc -lm -lnosys")
 
 add_executable(${EXECUTABLE}
-  spi_example.c
-  project_comms.c
-  control.c
-  gpio_common.c
-  ../../firmware/generated/messages.pb.c
-  ../../firmware/generated/fmt_rx.pb.c
-  ../../firmware/fmt_spi.c
-  ../../firmware/queue.c
-  ../../firmware/port/XMC4/fmt_periodic_xmc.c
-  ../../firmware/port/XMC4/fmt_crc_xmc4.c
-  ../../firmware/port/XMC4/fmt_ioc_xmc4.c
-  ../../firmware/port/XMC4/fmt_gpio_xmc.c
-  ../../firmware/fmt_hardfault.c
-  ../../firmware/fmt_waveform.c
-  ../../firmware/fmt_log.c
-  ../../firmware/ghostProbe.c
-  ${XMC_SYSTEM_FILE}
-  ${XMC_STARTUP_FILE}
-  lib/XMC4000_DFP/RTE_Driver/SPI.c
-  ${XMC_LIB}/xmc4_gpio.c
-  ${XMC_LIB}/xmc_spi.c
-  ${XMC_LIB}/xmc_usic.c
-  ${XMC_LIB}/xmc_ccu4.c
-  ${XMC_LIB}/xmc4_scu.c
-  ${XMC_LIB}/xmc_fce.c
-  ${XMC_LIB}/xmc_eru.c
-  ${XMC_LIB}/xmc4_eru.c
-  ${NANOPB}/pb_encode.c
-  ${NANOPB}/pb_decode.c
-  ${NANOPB}/pb_common.c
+  firmware/spi_example.c
+  firmware/project_comms.c
+  firmware/control.c
+  firmware/gpio_common.c
+  firmware/${XMC_SYSTEM_FILE}
+  firmware/${XMC_STARTUP_FILE}
+
 )
+
+target_link_libraries(${EXECUTABLE} FirmentFW)
 
 target_include_directories(${EXECUTABLE} PRIVATE
   lib/XMC4000_DFP/Device/XMClib/inc
   lib/XMC4000_DFP/Device/XMC4700_series/Include
   lib/XMC4000_DFP/RTE_Driver
   lib/XMC4000_DFP/CMSIS/RTOS/RTX/INC
-  lib/CMSIS-6.1.0/Core/Include
-  lib/CMSIS-6.1.0/Driver/Include
-  ${NANOPB}
+  lib/CMSIS-6.1.0/Core/Include  # TODO: Remove.  Relocated CMSIS to FMT. 
+  .
+  PUBLIC
+    
+)
+
+# PUBLIC separates this from above.
+target_include_directories(${EXECUTABLE} PUBLIC
+  ${PROJECT_BINARY_DIR}/firment
   ../../firmware
   ../../firmware/port/XMC4/4800_F144
-  .
 )
 
 
