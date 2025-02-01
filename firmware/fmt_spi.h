@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ISR_Config.h>
-#include <generated/messages.pb.h>
+#include <messages.pb.h>
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
 #include "RTE_Device.h"  // Interrupt-on-change pins.  includes RTE_Device.
