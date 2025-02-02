@@ -23,22 +23,12 @@ add_compile_options(
   -Wall
 )
 
-add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections)
-
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 
 # Add firment, set where (in the binary dir) to place firment output files.
-set(MCU_VARIANT "XMC4700") # Must be BEFORE add_subdirectory calls. 
-set(XMC_LINKER_FILE  "${PROJECT_SOURCE_DIR}/../firmware/port/XMC4/XMC4000_DFP/Device/${MCU_VARIANT}_series/Source/GCC/${MCU_VARIANT}x${XMC_MEM_VARIANT}.ld")
 add_subdirectory(.. firment)
-add_subdirectory(../firmware/port/XMC4 XMC4800_F144) # provides `MCUPort` lib.
-
-message("Startup file: ${XMC_STARTUP_FILE}")
-if(CMAKE_CROSSCOMPILING)
-  message(STATUS Cross-Compiling)
-  add_link_options(-T${XMC_LINKER_FILE})
-endif()
+add_subdirectory(../firmware/port/XMC4 XMC4700_F144) # provides `MCUPort` lib.
 
 
 add_executable(${EXECUTABLE}
@@ -48,11 +38,19 @@ add_executable(${EXECUTABLE}
   firmware/gpio_common.c
 )
 
-target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
-
 target_include_directories(${EXECUTABLE} PRIVATE
   firmware
 )
+
+
+target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
+
+target_link_options(${EXECUTABLE} PRIVATE
+    "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections"
+)
+## Uncomment to see full linker command.
+# target_link_options(${EXECUTABLE} PRIVATE "-v")
+
 
 # PUBLIC separates this from above.
 target_include_directories(${EXECUTABLE} PUBLIC

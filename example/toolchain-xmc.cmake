@@ -16,11 +16,12 @@ set(CMAKE_C_OBJCOPY arm-none-eabi-objcopy)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
 
-set(XMC_VARIANT "XMC4700")
-set(XMC_SPEED_VARIANT "F144")
-set(XMC_MEM_VARIANT "2048")
-add_compile_definitions(${XMC_VARIANT}_${XMC_SPEED_VARIANT}x${XMC_MEM_VARIANT})
+set(MCU_VARIANT "XMC4700")
+set(MCU_SPEED_VARIANT "F144")
+set(MCU_MEM_VARIANT "2048")
+
 # add_compile_definitions(XMC4400_F100x512)
+add_compile_definitions(${MCU_VARIANT}_${MCU_SPEED_VARIANT}x${MCU_MEM_VARIANT})
 
 
 # Path to pass to the compiler in the --sysroot flag.
