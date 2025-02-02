@@ -24,42 +24,34 @@ add_compile_options(
 )
 
 add_link_options(-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections)
-if(DEFINED XMC_LINKER_FILE)
-  add_link_options(-T${XMC_LINKER_FILE})
-endif()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 
 # Add firment, set where (in the binary dir) to place firment output files.
+set(MCU_VARIANT "XMC4700") # Must be BEFORE add_subdirectory calls. 
+set(XMC_LINKER_FILE  "${PROJECT_SOURCE_DIR}/../firmware/port/XMC4/XMC4000_DFP/Device/${MCU_VARIANT}_series/Source/GCC/${MCU_VARIANT}x${XMC_MEM_VARIANT}.ld")
 add_subdirectory(.. firment)
-add_subdirectory(../firmware/port/XMC4 XMC4)
-set(CPU_VARIANT "4800_F144")
+add_subdirectory(../firmware/port/XMC4 XMC4800_F144) # provides `MCUPort` lib.
 
-link_libraries("-lm")
-# link_libraries("-lc -lm -lnosys")
+message("Startup file: ${XMC_STARTUP_FILE}")
+if(CMAKE_CROSSCOMPILING)
+  message(STATUS Cross-Compiling)
+  add_link_options(-T${XMC_LINKER_FILE})
+endif()
+
 
 add_executable(${EXECUTABLE}
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
   firmware/gpio_common.c
-  firmware/${XMC_SYSTEM_FILE}
-  firmware/${XMC_STARTUP_FILE}
-
 )
 
-target_link_libraries(${EXECUTABLE} FirmentFW)
+target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
 
 target_include_directories(${EXECUTABLE} PRIVATE
-  lib/XMC4000_DFP/Device/XMClib/inc
-  lib/XMC4000_DFP/Device/XMC4700_series/Include
-  lib/XMC4000_DFP/RTE_Driver
-  lib/XMC4000_DFP/CMSIS/RTOS/RTX/INC
-  lib/CMSIS-6.1.0/Core/Include  # TODO: Remove.  Relocated CMSIS to FMT. 
-  .
-  PUBLIC
-    
+  firmware
 )
 
 # PUBLIC separates this from above.

@@ -22,11 +22,6 @@ set(XMC_MEM_VARIANT "2048")
 add_compile_definitions(${XMC_VARIANT}_${XMC_SPEED_VARIANT}x${XMC_MEM_VARIANT})
 # add_compile_definitions(XMC4400_F100x512)
 
-set(XMC_DIR "lib/XMC4000_DFP/Device/${XMC_VARIANT}_series")
-set(XMC_STARTUP_FILE "${XMC_DIR}/Source/GCC/startup_${XMC_VARIANT}.S")
-set(XMC_SYSTEM_FILE  "${XMC_DIR}/Source/system_${XMC_VARIANT}.c")
-set(XMC_LINKER_FILE  "${PROJECT_SOURCE_DIR}/${XMC_DIR}/Source/GCC/${XMC_VARIANT}x${XMC_MEM_VARIANT}.ld")
-
 
 # Path to pass to the compiler in the --sysroot flag.
 # FROM https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html

@@ -2,7 +2,7 @@
 
 #include <gp_config.h>
 // TODO: rename mcu_1 to something like projectMessages.proto
-#include <generated/messages.pb.h>
+#include <messages.pb.h>
 
 #include <stdint.h>
 #include <stddef.h>
