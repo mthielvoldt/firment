@@ -16,6 +16,7 @@ set(CMAKE_C_OBJCOPY arm-none-eabi-objcopy)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
 
+set(MCU_FAMILY "XMC4")
 set(MCU_VARIANT "XMC4700")
 set(MCU_SPEED_VARIANT "F144")
 set(MCU_MEM_VARIANT "2048")
