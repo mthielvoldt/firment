@@ -10,18 +10,13 @@ message(STATUS "Project version: ${PROJECT_VERSION}")
 project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
 
 
-
-set(DEBUG_INFO_OPTIONS -g)
+# Project-wide compiler flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")  # debug symbols
   # -g3
   # -gdwarf-2
-
-set(OPTIMIZATION_OPTIONS -O0)
-
-add_compile_options(
-  ${DEBUG_INFO_OPTIONS}
-  ${OPTIMIZATION_OPTIONS}
-  -Wall
-)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0") # Optimizations off
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall") # Warnings: all
+message(STATUS "C flags: ${CMAKE_C_FLAGS}")
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 
