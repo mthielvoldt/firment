@@ -28,6 +28,8 @@ integer_fields = (
   FieldDescriptor.TYPE_SFIXED64
 )
 
+enums = {}
+
 def get_message_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProto]):
   if message.name.endswith("Ctl"):
     return get_ctl_widget(message, enums)
@@ -155,7 +157,6 @@ export function {message_name}({{}}) {{
   
 def digest_proto(proto: FileDescriptorProto):
   ret = ""
-  enums = { enum.name: enum for enum in proto.enum_type }
 
   for message in proto.message_type:
     widget_str = get_message_widget(message, enums)
@@ -172,7 +173,11 @@ def digest_proto(proto: FileDescriptorProto):
 
 def generate_widgets(request: CodeGeneratorRequest) -> str:
   body = "\n\n"
-  
+
+  # Find all the enums in all files (whether generated or not)
+  for file in request.proto_file:
+    enums.update({ enum.name: enum for enum in file.enum_type })
+
   for file_name in request.file_to_generate:
     proto = next(file for file in request.proto_file if file.name == file_name)
     body += digest_proto(proto)
