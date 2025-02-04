@@ -25,6 +25,11 @@ configure_file(firmware/fmt_version.h.in version.h)
 
 # Generate firment.proto with field size/length values filled in from 
 # firment_config.json (in the project directory)
+# Alert:  using configure_file means you need to re-run cmake -B <build-dir>
+# when either of the following change: 
+# - firment_msg_config.json  (project file)
+# - firment_msg.in.proto     (firment file)
+# TODO: make this generation a custom command instead so build step handles it.
 file(READ "${PROJECT_SOURCE_DIR}/firment_msg_config.json" PROTO_CONFIG_JSON)
 string(JSON LOG_TEXT_MAX_SIZE      GET ${PROTO_CONFIG_JSON} log-text-max-size)
 string(JSON PROBE_SIGNAL_MAX_COUNT GET ${PROTO_CONFIG_JSON} probe-signal-max-count)
@@ -33,14 +38,18 @@ configure_file(protocol/firment_msg.in.proto firment_msg.proto)
 
 # This generates messages from "messages.proto" in project root directory.
 # TODO: make a target that creates the gen-venv. 
-# TODO: move widgets out of 
+# TODO: move widgets to a more UI-oriented output location
+# Note: in the command's last line, where the .proto files are listed, 
+#   firment_msg.proto must *NOT* be prefixed with absolute path, or protoc won't 
+#   recognize that it's the same file included by messages.proto, and everything 
+#   defined in firment_msg.proto will appear to protoc as defined twice. 
 add_custom_command(
   OUTPUT  messages.pb.c firment_msg.pb.c fmt_rx.pb.c
   COMMAND 
     . ${CMAKE_CURRENT_SOURCE_DIR}/protocol/gen-venv/bin/activate && 
     ${PROTOC}
-      -I ${PROJECT_SOURCE_DIR}
-      -I ${CMAKE_CURRENT_BINARY_DIR}
+      -I ${PROJECT_SOURCE_DIR}  # messages.proto, probes.proto
+      -I ${CMAKE_CURRENT_BINARY_DIR} # firment_msg.proto
       --plugin=protoc-gen-firment=${PLUGIN_DIR}/gen-firment.py
       --plugin=protoc-gen-widgets=${PLUGIN_DIR}/gen-widgets.py
       --firment_out=${CMAKE_CURRENT_BINARY_DIR}
