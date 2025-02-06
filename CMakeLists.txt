@@ -60,7 +60,7 @@ add_custom_command(
       --nanopb_out=${CMAKE_CURRENT_BINARY_DIR}
       ${PROJECT_PROTO} firment_msg.proto ${PROBES_PROTO} 
   DEPENDS
-    install_python_dependencies
+    ${VIRTUAL_ENV_DIR}
     ${PROBES_PROTO}
     ${PROJECT_PROTO}
     ${CMAKE_CURRENT_BINARY_DIR}/firment_msg.proto
