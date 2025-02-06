@@ -1,3 +1,6 @@
+
+include(protocol/nanopb_py_env.cmake)
+
 # TODO: this should probably be passed in from project somehow. 
 set(PROJECT_PROTO ${PROJECT_SOURCE_DIR}/messages.proto)
 set(PROBES_PROTO ${PROJECT_SOURCE_DIR}/probes.proto)
@@ -25,7 +28,7 @@ configure_file(firmware/fmt_version.h.in version.h)
 
 # Generate firment.proto with field size/length values filled in from 
 # firment_config.json (in the project directory)
-# Alert:  using configure_file means you need to re-run cmake -B <build-dir>
+# ALERT:  using configure_file means you need to re-run cmake -B <build-dir>
 # when either of the following change: 
 # - firment_msg_config.json  (project file)
 # - firment_msg.in.proto     (firment file)
@@ -46,7 +49,7 @@ configure_file(protocol/firment_msg.in.proto firment_msg.proto)
 add_custom_command(
   OUTPUT  messages.pb.c firment_msg.pb.c fmt_rx.pb.c
   COMMAND 
-    . ${CMAKE_CURRENT_SOURCE_DIR}/protocol/gen-venv/bin/activate && 
+    . ${CMAKE_CURRENT_BINARY_DIR}/venv/bin/activate && 
     ${PROTOC}
       -I ${PROJECT_SOURCE_DIR}  # messages.proto, probes.proto
       -I ${CMAKE_CURRENT_BINARY_DIR} # firment_msg.proto
@@ -57,6 +60,7 @@ add_custom_command(
       --nanopb_out=${CMAKE_CURRENT_BINARY_DIR}
       ${PROJECT_PROTO} firment_msg.proto ${PROBES_PROTO} 
   DEPENDS
+    install_python_dependencies
     ${PROBES_PROTO}
     ${PROJECT_PROTO}
     ${CMAKE_CURRENT_BINARY_DIR}/firment_msg.proto
