@@ -39,6 +39,13 @@ string(JSON PROBE_SIGNAL_MAX_COUNT GET ${PROTO_CONFIG_JSON} probe-signal-max-cou
 message(STATUS "Log text max size: ${LOG_TEXT_MAX_SIZE}")
 configure_file(protocol/firment_msg.in.proto firment_msg.proto)
 
+
+# Note that the UI code puts compiled/generated files much closer to the source.
+set(UI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web-ui)
+set(UI_DIST_DIR      ${UI_DIR}/dist)
+set(UI_SRC_DIR       ${UI_DIR}/src)
+set(UI_GENERATED_DIR ${UI_DIR}/src/generated)
+
 # This generates messages from "messages.proto" in project root directory.
 # TODO: make a target that creates the gen-venv. 
 # TODO: move widgets to a more UI-oriented output location
@@ -56,7 +63,7 @@ add_custom_command(
       --plugin=protoc-gen-firment=${PLUGIN_DIR}/gen-firment.py
       --plugin=protoc-gen-widgets=${PLUGIN_DIR}/gen-widgets.py
       --firment_out=${CMAKE_CURRENT_BINARY_DIR}
-      --widgets_out=${CMAKE_CURRENT_BINARY_DIR}
+      --widgets_out=${UI_GENERATED_DIR}
       --nanopb_out=${CMAKE_CURRENT_BINARY_DIR}
       ${PROJECT_PROTO} firment_msg.proto ${PROBES_PROTO} 
   DEPENDS
@@ -81,4 +88,70 @@ target_include_directories(FirmentFW
     firmware # fmt_rx.h used by fmt_rx.pb.c
   INTERFACE     # Consuming targets need these headers, but this library doesn't
     ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+
+### From here down in the file is the firment web-UI "library"
+# TODO: custom_targets always build make this not always buil
+add_library(FirmentUI INTERFACE 
+  ${UI_DIST_DIR}/generated/messages.js  # go farther upstream?
+  ${UI_DIST_DIR}/src/Reset.js
+)
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/web-ui/node_modules
+  WORKING_DIRECTORY ${UI_DIR}
+  COMMAND npm install --no-audit
+  DEPENDS ${UI_DIR}/package.json
+)
+
+add_custom_command(
+  OUTPUT ${UI_DIST_DIR}/src/Reset.js
+  WORKING_DIRECTORY ${UI_DIR}
+  COMMAND npm run build
+  DEPENDS
+    ${UI_SRC_DIR}/App.css
+    ${UI_SRC_DIR}/BrokerAddress.tsx 
+    ${UI_SRC_DIR}/index.ts
+    ${UI_SRC_DIR}/Log.tsx
+    ${UI_SRC_DIR}/mockSignal.tsx
+    ${UI_SRC_DIR}/mqclient.tsx # Should be .ts
+    ${UI_SRC_DIR}/Reset.tsx
+)
+
+add_custom_command(
+  OUTPUT ${UI_SRC_DIR}/generated/messages.js
+  COMMAND 
+    ${UI_DIR}/node_modules/protobufjs-cli/bin/pbjs
+      -p ${NANOPB_DIR}/generator/proto
+      -p ${CMAKE_CURRENT_BINARY_DIR}
+      -p ${PROJECT_SOURCE_DIR}
+      -t static-module
+      -w es6
+      -o ${UI_SRC_DIR}/generated/messages.js
+      ${PROJECT_PROTO}
+  DEPENDS
+    ${PROBES_PROTO}
+    ${PROJECT_PROTO}
+    ${CMAKE_CURRENT_BINARY_DIR}/firment_msg.proto
+    ${UI_DIR}/node_modules/ # Does this re-run when any package inside changes?
+)
+
+add_custom_command(
+  OUTPUT ${UI_SRC_DIR}/generated/messages.d.ts
+  COMMAND
+    ${UI_DIR}/node_modules/protobufjs-cli/bin/pbts
+    -o ${UI_SRC_DIR}/generated/messages.d.ts
+    ${UI_SRC_DIR}/generated/messages.js
+  DEPENDS
+    ${UI_SRC_DIR}/generated/messages.js
+    ${UI_DIR}/node_modules/
+)
+
+add_custom_command(
+  OUTPUT ${UI_DIST_DIR}/generated/messages.js
+  WORKING_DIRECTORY ${UI_DIR}
+  COMMAND cp -r src/generated dist/
+  DEPENDS 
+    ${UI_SRC_DIR}/generated/messages.d.ts
 )
