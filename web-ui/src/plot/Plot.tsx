@@ -168,7 +168,7 @@ export default function Plot({ }) {
     height: "70vh"
   };
 
-  function getLegendRow({ name, min, max, ave }, i: number) {
+  function getLegendRow({ name, min, max, ave }: StatsText, i: number) {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
