@@ -1,9 +1,7 @@
-import * as widgets from './fmt-lib/generated/widgets.pb';
-import BrokerAddress from './fmt-lib/BrokerAddress';
-import { Log } from './fmt-lib/Log';
-import Plot from './fmt-lib/plot/Plot';
-import Reset from './fmt-lib/Reset';
-import './fmt-lib/App.css'
+
+import {widgets, BrokerAddress, Log, Plot, Reset} from 'firment-ui'
+import 'firment-ui/src/App.css'
+import 'firment-ui/src/plot/Plot.css'
 
 function App() {
 

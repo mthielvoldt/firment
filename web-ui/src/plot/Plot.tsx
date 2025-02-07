@@ -13,7 +13,6 @@ import { calculateXGrid, AxisLabel, calculateYGrid } from "./axisTools";
 import { Stats, StatsText } from "./traceStats";
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
-import './Plot.css'
 // import { profile } from "../profiler";
 
 import { setMessageHandler } from "../mqclient";

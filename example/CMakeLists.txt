@@ -22,6 +22,8 @@ message(STATUS "Project version: ${PROJECT_VERSION}")
 # Disables CXX (C++)
 project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
 
+## ****** This is the only line firment needs you to edit *****
+set(FIRMENT_DIR ..)
 
 # Project-wide compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")  # debug symbols
@@ -35,11 +37,11 @@ set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 
 # Add firment, and set where (in the binary dir) to place firment output files.
-add_subdirectory(.. firment)
+add_subdirectory(${FIRMENT_DIR} firment)
 
 # Select which MCU port library ('MCUPort' target) build project against.
 # Note: MCU_FAMILY specified in the toolchain file. 
-add_subdirectory(../firmware/port/${MCU_FAMILY} ${MCU_FAMILY})
+add_subdirectory(${FIRMENT_DIR}/firmware/port/${MCU_FAMILY} ${MCU_FAMILY})
 
 # Specify the project's source files.
 add_executable(${EXECUTABLE}
@@ -69,6 +71,19 @@ target_link_options(${EXECUTABLE} PRIVATE
 add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS ${EXECUTABLE})
 add_custom_command(TARGET ${PROJECT_NAME}.hex
     COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex ${EXECUTABLE} ${PROJECT_NAME}.hex)
+
+add_custom_target(web-ui ALL
+  DEPENDS
+    web-ui/node_modules/firment-ui
+    FirmentUI
+)
+
+# No DEPENDS - if firment-ui exists in web-ui/node_modules/, it's up-to-date. 
+add_custom_command(
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/web-ui
+  OUTPUT node_modules/firment-ui
+  COMMAND npm install ${FIRMENT_DIR}/web-ui 
+)
 
 # # Uncomment if a binary file is also required.
 # add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
