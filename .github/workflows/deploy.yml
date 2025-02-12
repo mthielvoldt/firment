@@ -1,10 +1,15 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Build. On push-to-main, Deploy to Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ['main']
+    branches: 
+      - 'main'
+  
+  pull_request:
+    branches:
+      - 'main'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -22,19 +27,18 @@ concurrency:
 
 jobs:
   # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: ./example/web-ui
+        working-directory: ./example
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: 'true'
+      - name: Cmake Build
+        run: . build-xmc.sh
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -42,15 +46,28 @@ jobs:
           cache: 'npm'
           cache-dependency-path: example/web-ui/package-lock.json
       - name: Install node dependencies
-        run: npm ci
-      - name: Install python dependencies
-        run: pip3 install --upgrade -r ../../protocol/nanopb/requirements.txt
+        run: cd web-ui && npm ci
+      # - name: Install python dependencies
+      #   run: pip3 install --upgrade -r ../../protocol/nanopb/requirements.txt
       # - name: Install protobuf
       #   run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
-      - name: Build protobuf messages
-        run: cd .. && source gen-proto.sh
+      # - name: Build protobuf messages
+      #   run: cd .. && source gen-proto.sh
       - name: Build
         run: npm run build
+  
+  deploy:
+    # Only run on pushes and manual triggers targeting the main branch. 
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-22.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: ./example/web-ui
+    steps:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
