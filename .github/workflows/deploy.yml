@@ -68,6 +68,13 @@ jobs:
           cache-dependency-path: example/web-ui/package-lock.json
       - name: Build UI
         run: cd web-ui && npm run build
+      - name: Upload artifact
+        # only upload artifacts if this job is triggered by a push to main. 
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload dist folder
+          path: './example/web-ui/dist'
   
   deploy:
     # Only run on pushes and manual triggers targeting the main branch. 
@@ -83,11 +90,6 @@ jobs:
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload dist folder
-          path: './example/web-ui/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

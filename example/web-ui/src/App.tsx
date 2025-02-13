@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <div className='row-container'>
-        <h1>Your Embedded UI</h1>
+        <h1>Firment Function Generator Example</h1>
         <BrokerAddress />
       </div>
       <div className="row-container">
