@@ -74,14 +74,14 @@ add_custom_command(TARGET ${PROJECT_NAME}.hex
 
 add_custom_target(web-ui ALL
   DEPENDS
-    web-ui/node_modules/firment-ui
+    ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
     FirmentUI
 )
 
 # No DEPENDS - if firment-ui exists in web-ui/node_modules/, it's up-to-date. 
 add_custom_command(
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/web-ui
-  OUTPUT node_modules/firment-ui
+  OUTPUT ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
   COMMAND npm install ${FIRMENT_DIR}/web-ui 
 )
 
