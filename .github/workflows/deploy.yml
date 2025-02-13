@@ -37,6 +37,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'true'
+
+      - name: Cache ARM Toolchain
+        id: cache-arm-toolchain
+        uses: actions/cache@v3
+        with:
+          path: /opt/arm-none-eabi
+          # re-install toolchain if the runner os or this file changes.
+          key: arm-toolchain-${{ runner.os }}-${{ hashFiles('.github/workflows/deploy.yml') }}
+
+      - name: Install ARM Toolchain
+        if: steps.cache-arm-toolchain.outputs.cache-hit != 'true'
+        run: |
+          wget -q https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+          sudo tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
+          sudo mv /opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi /opt/arm-none-eabi
+          rm arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+      - name: Add to Path
+        run: echo "/opt/arm-none-eabi/bin" >> $GITHUB_PATH
+      - name: Verify Installation
+        run: arm-none-eabi-gcc --version
+
       - name: Cmake Build
         run: . build-xmc.sh
       - name: Set up Node
