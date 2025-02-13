@@ -74,8 +74,8 @@ jobs:
       #   run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
       # - name: Build protobuf messages
       #   run: cd .. && source gen-proto.sh
-      - name: Build
-        run: npm run build
+      - name: Build UI
+        run: cd web-ui && npm run build
   
   deploy:
     # Only run on pushes and manual triggers targeting the main branch. 
