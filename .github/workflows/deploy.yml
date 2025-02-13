@@ -38,21 +38,28 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Cache ARM Toolchain
-        id: cache-arm-toolchain
-        uses: actions/cache@v3
+      - name: Restore ARM Toolchain from Cache
+        id: cache-restore-arm-toolchain
+        uses: actions/cache/restore@v4
         with:
           path: /opt/arm-none-eabi
-          # re-install toolchain if the runner os or this file changes.
-          key: arm-toolchain-${{ runner.os }}-${{ hashFiles('.github/workflows/deploy.yml') }}
-
+          key: arm-toolchain-${{ runner.os }}-13.3.rel1-x86_64
+      
       - name: Install ARM Toolchain
-        if: steps.cache-arm-toolchain.outputs.cache-hit != 'true'
+        if: steps.cache-restore-arm-toolchain.outputs.cache-hit != 'true'
         run: |
           wget -q https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
           sudo tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
           sudo mv /opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi /opt/arm-none-eabi
           rm arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+
+      - name: Save ARM Toolchain to Cache
+        if: steps.cache-restore-arm-toolchain.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /opt/arm-none-eabi
+          key: arm-toolchain-${{ runner.os }}-13.3.rel1-x86_64
+
       - name: Add to Path
         run: echo "/opt/arm-none-eabi/bin" >> $GITHUB_PATH
       - name: Verify Installation
