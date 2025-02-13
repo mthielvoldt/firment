@@ -54,9 +54,10 @@ set(UI_GENERATED_DIR ${UI_DIR}/src/generated)
 #   recognize that it's the same file included by messages.proto, and everything 
 #   defined in firment_msg.proto will appear to protoc as defined twice. 
 add_custom_command(
-  OUTPUT  messages.pb.c firment_msg.pb.c fmt_rx.pb.c
+  OUTPUT  messages.pb.c firment_msg.pb.c fmt_rx.pb.c ${UI_GENERATED_DIR}/widgets.pb.tsx
   COMMAND 
-    . ${CMAKE_CURRENT_BINARY_DIR}/venv/bin/activate && 
+    . ${CMAKE_CURRENT_BINARY_DIR}/venv/bin/activate &&
+    mkdir -p ${UI_GENERATED_DIR} &&
     ${PROTOC}
       -I ${PROJECT_SOURCE_DIR}  # messages.proto, probes.proto
       -I ${CMAKE_CURRENT_BINARY_DIR} # firment_msg.proto
