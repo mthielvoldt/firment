@@ -150,9 +150,12 @@ add_custom_command(
 )
 
 add_custom_command(
-  OUTPUT ${UI_DIST_DIR}/generated/messages.js
+  COMMENT "Copy generated messages.(js/d.ts) to dist/generated."
+  OUTPUT ${UI_DIST_DIR}/generated/messages.js ${UI_DIST_DIR}/generated/messages.d.ts
   WORKING_DIRECTORY ${UI_DIR}
-  COMMAND cp -r src/generated dist/
+  COMMAND 
+    mkdir -p ${UI_DIST_DIR}/generated &&
+    cp src/generated/messages.* dist/generated/
   DEPENDS 
     ${UI_SRC_DIR}/generated/messages.d.ts
 )

@@ -66,14 +66,6 @@ jobs:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: example/web-ui/package-lock.json
-      - name: Install node dependencies
-        run: cd web-ui && npm ci
-      # - name: Install python dependencies
-      #   run: pip3 install --upgrade -r ../../protocol/nanopb/requirements.txt
-      # - name: Install protobuf
-      #   run: sudo apt update && sudo apt install -y python3-protobuf protobuf-compiler && protoc --version
-      # - name: Build protobuf messages
-      #   run: cd .. && source gen-proto.sh
       - name: Build UI
         run: cd web-ui && npm run build
   
