@@ -14,7 +14,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_C_OBJCOPY arm-none-eabi-objcopy)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mcpu=cortex-m4 -mthumb -ffreestanding -fdata-sections -ffunction-sections")
 
 # "-Wa," must preceed each option passed to the assembler.
 set(ASSEMBLER_FLAGS "-Wa,-mcpu=cortex-m4")
