@@ -44,6 +44,7 @@ add_subdirectory(${FIRMENT_DIR} firment)
 add_subdirectory(${FIRMENT_DIR}/firmware/port/${MCU_FAMILY} ${MCU_FAMILY})
 
 # Specify the project's source files.
+# TODO: make this so it re-builds when linker script changes. 
 add_executable(${EXECUTABLE}
   firmware/spi_example.c
   firmware/project_comms.c
