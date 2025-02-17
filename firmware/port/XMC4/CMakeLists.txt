@@ -1,8 +1,8 @@
 
-set(XMC_LIB "XMC4000_DFP/Device/XMClib")
-set(XMC_SERIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/XMC4000_DFP/Device/${MCU_VARIANT}_series")
-set(STARTUP_FILE "${XMC_SERIES_DIR}/Source/GCC/startup_${MCU_VARIANT}.S")
-set(LINKER_FILE  "${XMC_SERIES_DIR}/Source/GCC/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld")
+set(XMC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/XMCLib")
+set(XMC_SERIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700")
+set(STARTUP_FILE "${XMC_SERIES_DIR}/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
+set(LINKER_FILE  "${XMC_SERIES_DIR}/Source/TOOLCHAIN_GCC_ARM/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld")
 set(SYSTEM_FILE  "${XMC_SERIES_DIR}/Source/system_${MCU_VARIANT}.c")
 if(MCU_VARIANT STREQUAL "XMC4700" OR MCU_VARIANT STREQUAL "XMC4800")
   set(RTE_DEVICE_DIR "4800_F144")
@@ -40,6 +40,9 @@ target_include_directories(MCUPort
     ${XMC_LIB}/inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
     ${XMC_SERIES_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
 )
+
+# Tells the assembler what architecture the toolchain file specifies. 
+target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
 
 # This gets propagated up to the project (consuming targets).
 target_link_options(MCUPort INTERFACE "-T${LINKER_FILE}")
