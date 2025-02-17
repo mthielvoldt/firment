@@ -105,7 +105,7 @@ The steps are as follows:
       "interface": "swd",
       "device": "XMC4700_F144x2048",
       "preLaunchTask": "",
-      "svdFile": "",
+      "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
       "showDevDebugOutput": "raw"
     },
     [...]

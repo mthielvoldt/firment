@@ -10,7 +10,7 @@
       "interface": "swd",
       "device": "XMC4700-2048",
       "preLaunchTask": "cmake build xmc",
-      "svdFile": "",
+      "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
       "showDevDebugOutput": "raw",
       // "runToEntryPoint": "main"
     },
