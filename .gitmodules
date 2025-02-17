@@ -1,3 +1,6 @@
 [submodule "protocol/nanopb"]
 	path = protocol/nanopb
 	url = https://github.com/nanopb/nanopb.git
+[submodule "firmware/port/XMC4/mtb-xmclib-cat3"]
+	path = firmware/port/XMC4/mtb-xmclib-cat3
+	url = https://github.com/Infineon/mtb-xmclib-cat3.git
