@@ -41,6 +41,7 @@ message Top {
     ProbeSignals ProbeSignals = 4;
     RunScanCtl RunScanCtl = 5;
     ImageData ImageData = 6;
+    PageStatus PageStatus = 7;
     WaveformCtl WaveformCtl = 8;
     WaveformTlm WaveformTlm = 9;
     Reset Reset = 10;
