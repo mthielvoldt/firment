@@ -1,4 +1,5 @@
 import { useState } from "react";
+import flashPageSize from "./generated/flashPage"
 
 export default function Image({}) {
   // const [progressState, setProgressState] = useState("");
@@ -7,7 +8,14 @@ export default function Image({}) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     console.log(image);
-    
+
+    // flashPageSize comes from a #define in a .h file in the firmware port,
+    // through cmake 'flash_page_size' property on the MCUPort target.   
+    const numChunks = image.length / flashPageSize;
+    for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+
+    }
+
   }
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement> ) {
     e.preventDefault();
