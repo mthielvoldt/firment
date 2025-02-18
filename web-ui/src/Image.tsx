@@ -20,7 +20,7 @@ function sendPage(data: ArrayBuffer, pageIndex: number, pageCount: number) {
       chunkIndex,
       chunkCountInPage: chunkCount,
       payload,
-    })
+    }, false)
   }
 }
 

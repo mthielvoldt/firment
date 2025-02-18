@@ -95,9 +95,10 @@ export function setMessageHandler(messageName: string, callback: MessageHandler)
   return () => { delete messageHandlers[messageName]; }
 }
 
-export function sendMessage(message_name: string, state_obj: object) {
+export function sendMessage(message_name: string, state_obj: object, verbose=true) {
   let message = { [message_name]: state_obj }
   const packet: Uint8Array = pb.Top.encodeDelimited(message).finish();
   client.publish("edge-bound", packet as Buffer);
-  console.log(JSON.stringify(message), "packet: ", packet);
+  if (verbose)
+    console.log(JSON.stringify(message), "packet: ", packet);
 }
