@@ -60,3 +60,11 @@ message Log {
   string text = 2 [(nanopb).max_size = @LOG_TEXT_MAX_SIZE@ ]; 
   float value = 3;
 }
+
+message ImageData {
+  uint32 pageIndex = 1;
+  uint32 totalPages = 2;
+  uint32 chunkIndex = 3;
+  uint32 chunkCountInPage = 4;
+  string payload = 5 [(nanopb).max_size = @IMAGE_PART_MAX_SIZE@ ];
+}
