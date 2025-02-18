@@ -79,6 +79,12 @@ target_link_libraries(FirmentFW
     MCUPort
 )
 
+get_target_property(FLASH_PAGE_SIZE MCUPort flash_page_size)
+message(STATUS "Flash page size: ${FLASH_PAGE_SIZE}")
+
+configure_file(web-ui/src/flashPage.ts.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/web-ui/src/generated/flashPage.ts)
+
 target_include_directories(FirmentFW 
   PRIVATE
     ${PROJECT_SOURCE_DIR}/firmware # ISR_Config.h used by fmt_spi

@@ -36,12 +36,13 @@ message(STATUS "C flags: ${CMAKE_C_FLAGS}")
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 
-# Add firment, and set where (in the binary dir) to place firment output files.
-add_subdirectory(${FIRMENT_DIR} firment)
-
 # Select which MCU port library ('MCUPort' target) build project against.
 # Note: MCU_FAMILY specified in the toolchain file. 
 add_subdirectory(${FIRMENT_DIR}/firmware/port/${MCU_FAMILY} ${MCU_FAMILY})
+
+# Add firment, and set where (in the binary dir) to place firment output files.
+# Must come after add_subdirectory() for port or it won't find MCUPort target.
+add_subdirectory(${FIRMENT_DIR} firment)
 
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
