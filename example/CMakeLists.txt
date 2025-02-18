@@ -74,6 +74,11 @@ add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS ${EXECUTABLE})
 add_custom_command(TARGET ${PROJECT_NAME}.hex
     COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex ${EXECUTABLE} ${PROJECT_NAME}.hex)
 
+# Build a binary.
+add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
+add_custom_command(TARGET ${PROJECT_NAME}.bin
+  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary ${EXECUTABLE} ${PROJECT_NAME}.bin)
+
 add_custom_target(web-ui ALL
   DEPENDS
     ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
@@ -86,8 +91,3 @@ add_custom_command(
   OUTPUT ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
   COMMAND npm install ${FIRMENT_DIR}/web-ui 
 )
-
-# # Uncomment if a binary file is also required.
-# add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
-# add_custom_command(TARGET ${PROJECT_NAME}.bin
-#   COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary ${EXECUTABLE} ${PROJECT_NAME}.bin)
