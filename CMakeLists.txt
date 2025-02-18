@@ -1,4 +1,5 @@
 
+# Creates a virtual environment (venv) for protobuf generation if not present. 
 include(protocol/nanopb_py_env.cmake)
 
 # TODO: this should probably be passed in from project somehow. 
@@ -57,7 +58,7 @@ set(UI_GENERATED_DIR ${UI_DIR}/src/generated)
 add_custom_command(
   OUTPUT  messages.pb.c firment_msg.pb.c fmt_rx.pb.c ${UI_GENERATED_DIR}/widgets.pb.tsx
   COMMAND 
-    . ${CMAKE_CURRENT_BINARY_DIR}/venv/bin/activate &&
+    ${VENV_ACTIVATE} &&
     mkdir -p ${UI_GENERATED_DIR} &&
     ${PROTOC}
       -I ${PROJECT_SOURCE_DIR}  # messages.proto, probes.proto
@@ -69,7 +70,7 @@ add_custom_command(
       --nanopb_out=${CMAKE_CURRENT_BINARY_DIR}
       ${PROJECT_PROTO} firment_msg.proto ${PROBES_PROTO} 
   DEPENDS
-    ${VIRTUAL_ENV_DIR}
+    ${VENV_DIR}
     ${PROBES_PROTO}
     ${PROJECT_PROTO}
     ${CMAKE_CURRENT_BINARY_DIR}/firment_msg.proto
