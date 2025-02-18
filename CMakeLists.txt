@@ -35,6 +35,7 @@ configure_file(firmware/fmt_version.h.in version.h)
 # TODO: make this generation a custom command instead so build step handles it.
 file(READ "${PROJECT_SOURCE_DIR}/firment_msg_config.json" PROTO_CONFIG_JSON)
 string(JSON LOG_TEXT_MAX_SIZE      GET ${PROTO_CONFIG_JSON} log-text-max-size)
+string(JSON IMAGE_PART_MAX_SIZE GET ${PROTO_CONFIG_JSON} image-part-max-size)
 string(JSON PROBE_SIGNAL_MAX_COUNT GET ${PROTO_CONFIG_JSON} probe-signal-max-count)
 message(STATUS "Log text max size: ${LOG_TEXT_MAX_SIZE}")
 configure_file(protocol/firment_msg.in.proto firment_msg.proto)
@@ -118,7 +119,8 @@ add_custom_command(
   COMMAND npm run build
   DEPENDS
     ${UI_SRC_DIR}/App.css
-    ${UI_SRC_DIR}/BrokerAddress.tsx 
+    ${UI_SRC_DIR}/BrokerAddress.tsx
+    ${UI_SRC_DIR}/Image.tsx 
     ${UI_SRC_DIR}/index.ts
     ${UI_SRC_DIR}/Log.tsx
     ${UI_SRC_DIR}/mockSignal.tsx
