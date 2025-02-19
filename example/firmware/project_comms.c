@@ -93,6 +93,13 @@ void handleReset(Reset msg)
   NVIC_SystemReset();
 }
 
+// filter chunksPending so only as many bits as chunks expected can be 1.
+#define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
+static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
+static uint32_t activePage = 0;
+static uint8_t pageBuffer[FLASH_PAGE_SIZE];
+static uint8_t *writeAdrs = pageBuffer;
+
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
 {
   fmt_sendMsg((const Top){
@@ -103,49 +110,92 @@ static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
               .status = status}}});
 }
 
+/** imageDataMsgValid enforces the following policy on ImageData messages:
+ * only accept a new page if there are no unprocessed chunks on the active page.
+ */
+static bool imageDataMsgValid(ImageData *msg)
+{
+  // TODO: consider adding a policy akin to pageIndex that chunkCountInPage 
+  // can't change once one chunk has been received for the active page.
+
+  // (chunkIndexOk && dataSizeOk) implies no buffer overflow.
+  bool chunkIndexOk = msg->chunkIndex < CHUNKS_PER_PAGE_MAX;
+
+  bool chunkIsLast = msg->chunkIndex == (CHUNKS_PER_PAGE_MAX - 1);
+  bool dataSizeExactlyMax = msg->payload.size == IMAGE_CHUNK_MAX_SIZE;
+
+  // Only the last chunk is allowed to be shorter than the max size.
+  bool dataSizeOk =
+      msg->payload.size <= IMAGE_CHUNK_MAX_SIZE &&
+      (dataSizeExactlyMax || chunkIsLast);
+
+  // all messages must have the same pageIndex until all chunks are processed.
+  bool pageIndexOk =
+      (msg->pageIndex == activePage || chunksPending == NO_CHUNKS_PROCESSED) &&
+      (msg->pageIndex < PAGES_PER_SECTOR_MAX);
+
+  return chunkIndexOk && dataSizeOk && pageIndexOk;
+}
+
+static inline bool allChunksProcessed(void)
+{
+  return !chunksPending;
+}
+
+static void prepForNewPage(PageStatusEnum thisPageStatus)
+{
+  writeAdrs = pageBuffer;
+  chunksPending = NO_CHUNKS_PROCESSED;  // signals a page-change is allowed.
+  // should be last; ungates new messages being sent.
+  sendPageStatus(activePage, thisPageStatus);
+}
+
+static void processChunk(ImageData *msg)
+{
+  // Note: pageIndex != activePage only when no chunks have been processed yet.
+  activePage = msg->pageIndex;
+
+  // Each bit in chunksPending tracks the status of a chunk with a given index.
+  // Signal this chunk has been processed by clearing the bit corresponding to
+  // its chunkIndex.
+  chunksPending ^= (1 << msg->chunkIndex);
+
+  // Clear all bits with position greater than the count of chunks expected.
+  chunksPending &= ((1 << msg->chunkCountInPage) - 1);
+
+  memcpy(
+      pageBuffer + msg->chunkIndex * 32,
+      msg->payload.bytes,
+      msg->payload.size);
+
+  writeAdrs += msg->payload.size;
+}
+
+static void processPage(void)
+{
+  if (activePage == 0)
+  {
+    // hal_flash_erase(IMAGE_RX_ADDRESS, IMAGE_RX_SECTOR_SIZE);
+  }
+  hal_flash_write(
+      IMAGE_RX_ADDRESS + activePage * FLASH_PAGE_SIZE,
+      pageBuffer,
+      FLASH_PAGE_SIZE);
+}
+
 void handleImageData(ImageData msg)
 {
-  static uint32_t chunkRxCount = 0;
-  static uint32_t activePage = 0;
-  static uint8_t pageBuffer[FLASH_PAGE_SIZE];
-  static uint8_t *writeAdrs = pageBuffer;
-
-  bool bufferOverflow =
-    (writeAdrs + msg.payload.size) > (pageBuffer + FLASH_PAGE_SIZE);
-  bool wrongPage = msg.pageIndex != activePage;
-  bool badPageCount = 
-    msg.pageCount > (IMAGE_RX_SECTOR_SIZE / FLASH_PAGE_SIZE) || !msg.pageCount;
-
-  // Error: check for pageIndex getting out-of-sync with active page.
-  if (bufferOverflow || wrongPage || badPageCount)
+  if (imageDataMsgValid(&msg))
   {
-    sendPageStatus(activePage, PageStatusEnum_WRITE_FAIL);
-    activePage = 0;
-    writeAdrs = pageBuffer;
-    chunkRxCount = 0;
-    return;
+    processChunk(&msg);
+    if (allChunksProcessed())
+    {
+      processPage();
+      prepForNewPage(PageStatusEnum_WRITE_SUCCESS);
+    }
   }
-
-  memcpy(writeAdrs, msg.payload.bytes, msg.payload.size);
-  writeAdrs += msg.payload.size;
-
-  if (++chunkRxCount == msg.chunkCountInPage)
+  else
   {
-    // If we're ready to write the first page, erase the sector. 
-    if (activePage == 0)
-    {
-      hal_flash_erase(IMAGE_RX_ADDRESS, IMAGE_RX_SECTOR_SIZE);
-    }
-    hal_flash_write(
-        IMAGE_RX_ADDRESS + activePage * FLASH_PAGE_SIZE,
-        pageBuffer,
-        FLASH_PAGE_SIZE);
-    writeAdrs = pageBuffer;
-    chunkRxCount = 0;
-    if (++activePage == msg.pageCount)
-    {
-      activePage = 0;
-    }
-    sendPageStatus(activePage, PageStatusEnum_WRITE_SUCCESS);
+    prepForNewPage(PageStatusEnum_WRITE_FAIL);
   }
 }
