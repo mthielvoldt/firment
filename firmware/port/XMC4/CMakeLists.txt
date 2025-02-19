@@ -12,14 +12,15 @@ add_library(MCUPort
   ${SYSTEM_FILE}
   ${STARTUP_FILE}
   XMC4000_DFP/RTE_Driver/SPI.c
-  ${XMC_LIB}/src/xmc4_gpio.c
+  ${XMC_LIB}/src/xmc_ccu4.c
+  ${XMC_LIB}/src/xmc_eru.c
+  ${XMC_LIB}/src/xmc_fce.c
   ${XMC_LIB}/src/xmc_spi.c
   ${XMC_LIB}/src/xmc_usic.c
-  ${XMC_LIB}/src/xmc_ccu4.c
-  ${XMC_LIB}/src/xmc4_scu.c
-  ${XMC_LIB}/src/xmc_fce.c
-  ${XMC_LIB}/src/xmc_eru.c
   ${XMC_LIB}/src/xmc4_eru.c
+  ${XMC_LIB}/src/xmc4_flash.c
+  ${XMC_LIB}/src/xmc4_gpio.c
+  ${XMC_LIB}/src/xmc4_scu.c
   fmt_crc_xmc4.c
   fmt_flash_xmc4.c
   fmt_gpio_xmc.c
