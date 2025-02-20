@@ -171,7 +171,7 @@ static void processPage(void)
 {
   if (activePage == 0)
   {
-    // hal_flash_erase(IMAGE_RX_ADDRESS, IMAGE_RX_SECTOR_SIZE);
+    hal_flash_erase(IMAGE_RX_ADDRESS, IMAGE_RX_SECTOR_SIZE);
   }
   hal_flash_write(
       IMAGE_RX_ADDRESS + activePage * FLASH_PAGE_SIZE,
