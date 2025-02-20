@@ -32,13 +32,15 @@ function getPageStatus(pageIndex: number): Promise<string> {
         Number(message.pageIndex) === pageIndex) {
         resolve("write-success")
       }
-      else {
+      else if (message.status === PageStatusEnum.WRITE_SUCCESS) {
+        reject(`Page Mismatch. Status: ${message.pageIndex} Sent: ${pageIndex}`)
+      } else {
         reject("Page Write Failure")
       }
     });
     setTimeout(() => {
       reject("page write timeout")
-    }, 1000);
+    }, 30000);
   });
 }
 
@@ -57,7 +59,7 @@ export default function Image({ }) {
     const pageCount = Math.ceil(image.byteLength / flashPageSize);
     setProgress(`Upload progres: 0/${pageCount}`);
 
-    for (let pageIdx = 0; pageIdx < 1; pageIdx++) {
+    for (let pageIdx = 0; pageIdx < pageCount; pageIdx++) {
       const pageStartIdx = pageIdx * flashPageSize;
       // slice won't extend past iterable's length, regardless of param: end. 
       const pageData = image.slice(pageStartIdx, pageStartIdx + flashPageSize);
@@ -69,13 +71,13 @@ export default function Image({ }) {
         await pageStatusPromise;
         setProgress(`Upload progres: ${pageIdx}/${pageCount}`);
       } catch (e) {
-        setProgress(`Upload Failed at page ${pageIdx}`);
+        setProgress(`Failed at page ${pageIdx}. ${e}`);
         return;
       }
     }
     setProgress("Upload complete.");
   }
-  
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
     if (e.currentTarget.files) {
