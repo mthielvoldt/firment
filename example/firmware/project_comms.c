@@ -98,7 +98,6 @@ void handleReset(Reset msg)
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
 static uint8_t pageBuffer[FLASH_PAGE_SIZE];
-static uint8_t *writeAdrs = pageBuffer;
 
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
 {
@@ -121,7 +120,7 @@ static bool imageDataMsgValid(ImageData *msg)
   // (chunkIndexOk && dataSizeOk) implies no buffer overflow.
   bool chunkIndexOk = msg->chunkIndex < CHUNKS_PER_PAGE_MAX;
 
-  bool chunkIsLast = msg->chunkIndex == (CHUNKS_PER_PAGE_MAX - 1);
+  bool chunkIsLast = msg->chunkIndex == (msg->chunkCountInPage - 1);
   bool dataSizeExactlyMax = msg->payload.size == IMAGE_CHUNK_MAX_SIZE;
 
   // Only the last chunk is allowed to be shorter than the max size.
@@ -144,7 +143,6 @@ static inline bool allChunksProcessed(void)
 
 static void prepForNewPage(PageStatusEnum thisPageStatus)
 {
-  writeAdrs = pageBuffer;
   chunksPending = NO_CHUNKS_PROCESSED;  // signals a page-change is allowed.
   // should be last; ungates new messages being sent.
   sendPageStatus(activePage, thisPageStatus);
@@ -164,11 +162,9 @@ static void processChunk(ImageData *msg)
   chunksPending &= ((1 << msg->chunkCountInPage) - 1);
 
   memcpy(
-      pageBuffer + msg->chunkIndex * 32,
+      pageBuffer + msg->chunkIndex * IMAGE_CHUNK_MAX_SIZE,
       msg->payload.bytes,
       msg->payload.size);
-
-  writeAdrs += msg->payload.size;
 }
 
 static void processPage(void)
