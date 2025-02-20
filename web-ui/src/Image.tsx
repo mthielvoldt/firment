@@ -1,7 +1,7 @@
 import { useState } from "react";
 import flashPageSize from "./generated/flashPage"
-import { sendMessage, setMessageHandler } from "./mqclient";
-import { PageStatus, PageStatusEnum } from "./generated/messages";
+import { sendPacked, setMessageHandler } from "./mqclient";
+import { PageStatus, PageStatusEnum, Top } from "./generated/messages";
 
 function sendPage(data: ArrayBuffer, pageIndex: number, pageCount: number) {
   // TODO: get max payload size from firment_msg_config.json: image-part-max-size
@@ -9,20 +9,22 @@ function sendPage(data: ArrayBuffer, pageIndex: number, pageCount: number) {
 
   const chunkCount = Math.ceil(data.byteLength / imagePartMaxSize);
   let dataIdx = 0;
+  let messages: Uint8Array[] = [];
   for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
     dataIdx = chunkIndex * imagePartMaxSize;
     const payload = new Uint8Array(data.slice(dataIdx, dataIdx + imagePartMaxSize));
-    console.log("payload", payload);
-
-
-    sendMessage("ImageData", {
-      pageIndex,
-      pageCount,
-      chunkIndex,
-      chunkCountInPage: chunkCount,
-      payload,
-    }, false)
+    const msg = {
+      ImageData: {
+        pageIndex,
+        pageCount,
+        chunkIndex,
+        chunkCountInPage: chunkCount,
+        payload,
+      }
+    }
+    messages[chunkIndex] = Top.encodeDelimited(msg).finish();
   }
+  sendPacked(messages);
 }
 
 function getPageStatus(pageIndex: number): Promise<string> {
