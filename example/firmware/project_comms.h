@@ -14,6 +14,9 @@ void handleWaveformCtl(WaveformCtl msg);
 #define USE_Reset
 void handleReset(Reset msg);
 
+#define USE_ImageData
+void handleImageData(ImageData msg);
+
 /** Comms Periodic
  * To be called periodically either by making this a timer-driven ISR,
  * or called within a periodic RTOS task.

@@ -23,9 +23,9 @@
     {
       "label": "cmake build xmc",
       "type": "shell",
-      "command": "cmake --build .",
+      "command": "cmake --build . --target=spi_example.elf",
       "options": {
-        "cwd": "${workspaceFolder}/example/firmware/build/xmc"
+        "cwd": "${workspaceFolder}/example/build/xmc"
       },
       "detail": "XMC preLaunchTask: 'cmake build xmc'"
     }, 

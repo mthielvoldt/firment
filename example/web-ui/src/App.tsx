@@ -1,5 +1,5 @@
 
-import {widgets, BrokerAddress, Log, Plot, Reset} from 'firment-ui'
+import {widgets, BrokerAddress, Image, Log, Plot, Reset} from 'firment-ui'
 import 'firment-ui/src/App.css'
 import 'firment-ui/src/plot/Plot.css'
 
@@ -16,6 +16,7 @@ function App() {
           <h2>Commands</h2>
           <widgets.WaveformCtl />
           <widgets.RunScanCtl />
+          <Image />
           <Reset />
         </div>
         <div className='widget-column'>

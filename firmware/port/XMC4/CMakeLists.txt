@@ -12,15 +12,17 @@ add_library(MCUPort
   ${SYSTEM_FILE}
   ${STARTUP_FILE}
   XMC4000_DFP/RTE_Driver/SPI.c
-  ${XMC_LIB}/src/xmc4_gpio.c
+  ${XMC_LIB}/src/xmc_ccu4.c
+  ${XMC_LIB}/src/xmc_eru.c
+  ${XMC_LIB}/src/xmc_fce.c
   ${XMC_LIB}/src/xmc_spi.c
   ${XMC_LIB}/src/xmc_usic.c
-  ${XMC_LIB}/src/xmc_ccu4.c
-  ${XMC_LIB}/src/xmc4_scu.c
-  ${XMC_LIB}/src/xmc_fce.c
-  ${XMC_LIB}/src/xmc_eru.c
   ${XMC_LIB}/src/xmc4_eru.c
+  ${XMC_LIB}/src/xmc4_flash.c
+  ${XMC_LIB}/src/xmc4_gpio.c
+  ${XMC_LIB}/src/xmc4_scu.c
   fmt_crc_xmc4.c
+  fmt_flash_xmc4.c
   fmt_gpio_xmc.c
   fmt_ioc_xmc4.c
   fmt_periodic_xmc.c
@@ -46,3 +48,13 @@ target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
 
 # This gets propagated up to the project (consuming targets).
 target_link_options(MCUPort INTERFACE "-T${LINKER_FILE}")
+
+# Contains the page size for the flash write operations. This propagates up so 
+# web-ui can break FW-image sends into page-size chunks, waiting in between.
+file(READ ${XMC_LIB}/inc/xmc4_flash.h FLASH_HEADER_CONTENTS)
+string(REGEX MATCH "#define XMC_FLASH_BYTES_PER_PAGE[ \t]+.?[0-9]+"
+  MATCHED_DEFINE_LINE ${FLASH_HEADER_CONTENTS}
+)
+string(REGEX MATCH "[0-9]+" FLASH_PAGE_SIZE ${MATCHED_DEFINE_LINE})
+
+set_target_properties(MCUPort PROPERTIES flash_page_size ${FLASH_PAGE_SIZE})

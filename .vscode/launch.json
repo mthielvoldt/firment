@@ -6,7 +6,7 @@
       "servertype": "jlink",
       "request": "launch",
       "serverpath": "JLinkGDBServerCLExe",
-      "executable": "example/firmware/build/xmc/spi_example.elf",
+      "executable": "example/build/xmc/spi_example.elf",
       "interface": "swd",
       "device": "XMC4700-2048",
       "preLaunchTask": "cmake build xmc",

@@ -195,7 +195,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     break;
   case MQTT_EVENT_DATA:
     print_data(event);
-    sendMessage((uint8_t *)event->data);
+    unpackAndSendSPI((uint8_t *)event->data, event->data_len);
     break;
   case MQTT_EVENT_ERROR:
     ESP_LOGI(TAG, "MQTT_EVENT_ERROR, return code %d", event->error_handle->connect_return_code);
