@@ -102,3 +102,21 @@ export function sendMessage(message_name: string, state_obj: object, verbose=tru
   if (verbose)
     console.log(JSON.stringify(message), "packet: ", packet);
 }
+
+function packMessages(messages: Uint8Array[]) {
+  const totalLength = messages.reduce(
+    (accum, message) => accum + message.length, 0);
+
+  let packedMessages = new Uint8Array(totalLength);
+  let bytesWritten = 0;
+  messages.forEach((message) => {
+    packedMessages.set(message, bytesWritten);
+    bytesWritten += message.length;
+  })
+  return packedMessages;
+}
+
+export function sendPacked(messageArray: Uint8Array[]){
+  const packedMqttMessage = packMessages(messageArray);
+  client.publish("edge-bound", packedMqttMessage as Buffer)
+}

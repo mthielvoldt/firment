@@ -26,6 +26,7 @@
 #endif
 
 static int lastRealMessagePosition = 0;
+static unsigned int droppedSpiTxCount = 0;  // TODO: look into adding Rx dropped count.
 
 // Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
 void my_post_setup_cb(spi_slave_transaction_t *trans)
@@ -152,6 +153,7 @@ esp_err_t initSpi(void)
   return ret;
 }
 
+// TODO: unit test this.  In particular, cover garbage data. 
 bool sendMessage(uint8_t *toSend)
 {
   bool success = false;
@@ -166,6 +168,7 @@ bool sendMessage(uint8_t *toSend)
       writeIdx -= NUM_TX_BUFFERS;
 
     *(uint16_t *)(&txBufs[writeIdx].data[crcPosition]) = crc;
+    // why is this not copying to &txBufs[writeIdx].data?  
     memcpy(&txBufs[writeIdx], toSend, crcPosition);
     txPreQ.numWaiting++;
 
@@ -173,6 +176,26 @@ bool sendMessage(uint8_t *toSend)
     gpio_set_level(GPIO_MESSAGE_WAITING, 1);
 
     success = true;
+  }
+  else 
+  {
+    droppedSpiTxCount++;
+    ESP_LOGE("spi_app", "SPI tx drop count: %u", droppedSpiTxCount);
+  }
+  return success;
+}
+
+bool unpackAndSendSPI(uint8_t *packed, int len) {
+  bool success = true;
+  // needs revision if max message length set > 255.
+  int pbMsgPos = 0;
+  while ( 
+    pbMsgPos + packed[pbMsgPos] < len &&  // prevent reading past buffer. 
+    packed[pbMsgPos] != 0 &&              // quit if we encounter 0-length msg.
+    success )                             // quit if send buffer fills up. 
+  {
+    success = sendMessage(packed + pbMsgPos);
+    pbMsgPos += (packed[pbMsgPos] + PREFIX_SIZE_BYTES);
   }
   return success;
 }
