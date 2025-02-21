@@ -2,10 +2,14 @@
 set(XMC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/XMCLib")
 set(XMC_SERIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700")
 set(STARTUP_FILE "${XMC_SERIES_DIR}/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
-set(LINKER_FILE  "${CMAKE_CURRENT_SOURCE_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld")
 set(SYSTEM_FILE  "${XMC_SERIES_DIR}/Source/system_${MCU_VARIANT}.c")
 if(MCU_VARIANT STREQUAL "XMC4700" OR MCU_VARIANT STREQUAL "XMC4800")
-  set(RTE_DEVICE_DIR "4800_F144")
+set(RTE_DEVICE_DIR "4800_F144")
+endif()
+
+# Allow project to provide a linker file.  Useful for App/Bootloader combos.
+if (NOT LINKER_FILE)
+  set(LINKER_FILE  "${CMAKE_CURRENT_SOURCE_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld")
 endif()
 
 add_library(MCUPort
