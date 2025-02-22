@@ -7,11 +7,6 @@ if(MCU_VARIANT STREQUAL "XMC4700" OR MCU_VARIANT STREQUAL "XMC4800")
 set(RTE_DEVICE_DIR "4800_F144")
 endif()
 
-# Allow project to provide a linker file.  Useful for App/Bootloader combos.
-if (NOT LINKER_FILE)
-  set(LINKER_FILE  "${CMAKE_CURRENT_SOURCE_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld")
-endif()
-
 add_library(MCUPort
   ${SYSTEM_FILE}
   ${STARTUP_FILE}
@@ -49,9 +44,6 @@ target_include_directories(MCUPort
 
 # Tells the assembler what architecture the toolchain file specifies. 
 target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
-
-# This gets propagated up to the project (consuming targets).
-target_link_options(MCUPort INTERFACE "-T${LINKER_FILE}")
 
 # Contains the page size for the flash write operations. This propagates up so 
 # web-ui can break FW-image sends into page-size chunks, waiting in between.
