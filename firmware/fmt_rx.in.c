@@ -33,7 +33,7 @@ void fmt_handleRx(void)
 }
 
 // Stub handler so consuming project can opt out of building ghostProbe.c
-__attribute__((weak)) void handleRunScanCtl(RunScanCtl msg) {}
+// __attribute__((weak)) void handleRunScanCtl(RunScanCtl msg) {} TODO: fix weak handler for opt-in.
 
 // Stub handler so consuming project can opt out of building fmt_update.c
-__attribute__((weak)) void handleImageData(ImageData msg) {}
+// __attribute__((weak)) void handleImageData(ImageData msg) {}
