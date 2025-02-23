@@ -32,5 +32,8 @@ void fmt_handleRx(void)
   }
 }
 
-// Provide stub runScanCtl handler so user can choose to not build GhostProbe.
-__attribute__((weak)) void handleRunScanCtl(RunScanCtl scanCtl) {}
+// Stub handler so consuming project can opt out of building ghostProbe.c
+__attribute__((weak)) void handleRunScanCtl(RunScanCtl msg) {}
+
+// Stub handler so consuming project can opt out of building fmt_update.c
+__attribute__((weak)) void handleImageData(ImageData msg) {}

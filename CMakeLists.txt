@@ -75,6 +75,7 @@ add_custom_command(
   DEPENDS
     ${VENV_DIR}
     ${PLUGIN_DIR}/gen-firment.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/firmware/fmt_rx.in.c
     ${PLUGIN_DIR}/gen-widgets.py
     ${PROBES_PROTO}
     ${PROJECT_PROTO}
