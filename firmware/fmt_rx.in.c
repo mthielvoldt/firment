@@ -3,10 +3,10 @@
  * Provides first-level handling of received messages.
  * */
 #include <fmt_rx.h>
-#include <fmt_spi.h>    // fmt_getMsg()
-#include <fmt_log.h>    // fmt_sendLog()
-#include <ghostProbe.h> // handleRunScanCtl()
-#include <project_comms.h>  // all project-specific handlers
+#include <fmt_spi.h>       // fmt_getMsg()
+#include <fmt_log.h>       // fmt_sendLog()
+#include <ghostProbe.h>    // handleRunScanCtl()
+#include <project_comms.h> // all project-specific handlers
 
 void fmt_handleRx(void)
 {
@@ -20,7 +20,7 @@ void fmt_handleRx(void)
       Ack subMsg = incomingMessage.sub.Ack;
       break;
     }
-/*--GENERATED CONTENT MARKER--*/
+      /*--GENERATED CONTENT MARKER--*/
     default:
     }
   }
@@ -30,3 +30,6 @@ void fmt_handleRx(void)
     // fmt_sendLog(LOG_ERROR, "decode error", 0.0F);
   }
 }
+
+// Provide stub runScanCtl handler so user can choose to not build GhostProbe.
+__attribute__((weak)) void handleRunScanCtl(RunScanCtl scanCtl) {}
