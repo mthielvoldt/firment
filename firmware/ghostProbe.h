@@ -31,7 +31,7 @@ void gp_init(uint32_t periodicCallFrequencyHz);
 void gp_initTestPoint(TestPointId id, void *src, srcType_t type);
 
 /** Called by generated fmt_rx.pb.c 
- * See 
+ * See fmt_rx.in.c 
 */
 #define USE_RunScanCtl
 void handleRunScanCtl(RunScanCtl scanCtl);
