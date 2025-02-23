@@ -27,6 +27,9 @@ add_library(FirmentFW
 # Generate the version header for the firmware
 configure_file(firmware/fmt_version.h.in version.h)
 
+# Generate fmt_update.h containing memory region info shared with bootloader.
+configure_file(firmware/fmt_update.in.h fmt_update.h)
+
 # Generate firment.proto with field size/length values filled in from 
 # firment_config.json (in the project directory)
 # ALERT:  using configure_file means you need to re-run cmake -B <build-dir>
