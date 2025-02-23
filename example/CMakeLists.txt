@@ -22,8 +22,7 @@ message(STATUS "Project version: ${PROJECT_VERSION}")
 # Disables CXX (C++)
 project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
 
-## ****** This is the only line firment needs you to edit *****
-set(FIRMENT_DIR ${PROJECT_SOURCE_DIR}/..)
+include(firmentConfig.cmake)
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
 

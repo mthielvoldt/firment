@@ -11,7 +11,7 @@
 #include <fmt_spi.h>
 #include <fmt_rx.h>
 #include <ghostProbe.h>
-#include <port/XMC4/fmt_periodic_xmc.h>
+#include <fmt_periodic_port.h>
 #include "control.h"
 #include "project_comms.h"
 #include "frequency.h"

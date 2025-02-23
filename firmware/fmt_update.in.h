@@ -1,29 +1,18 @@
 /**
- * fw_update.h
+ * fw_update.h -- Generated file.  See fw_update.in.h
  * Provides address where new images should be written (so BL will see them).
- *   This comes from CMake, as it is also needed by bootloader.
+ *   This comes from CMake, as it is shared understanding with the bootloader.
  */
 
 #include "messages.pb.h"
 #include <stdint.h>
- 
-// This needs to be gotten from project-level cmake (shared with bootloader). 
-// XMC_FLASH_SECTOR_(0-8): Bootloader, 256kB total. 
-// XMC_FLASH_SECTOR_9:     Active App, 256kB
-// XMC_FLASH_SECTOR_10:    App download, 256kB  <-- This file only uses this.
-// XMC_FLASH_SECTOR_11:    Swap space, 256kB
-#define IMAGE_RX_ADDRESS     (0x0C000000U + 0x80000U)
-#define IMAGE_RX_SECTOR_SIZE (0x40000UL)
 
-#ifndef FLASH_PAGE_SIZE
-#define FLASH_PAGE_SIZE 256
-#endif
+// Source: project-level .cmake (these values shared with bootloader).
+#define FMT_IMAGE_DOWNLOAD_ADDRESS @FMT_IMAGE_DOWNLOAD_ADDRESS@
+#define FMT_IMAGE_DOWNLOAD_SECTOR_SIZE @FMT_IMAGE_DOWNLOAD_SECTOR_SIZE@
 
-// Must be a factor of FLASH_PAGE_SIZE.
-#define IMAGE_CHUNK_MAX_SIZE 32
-
-#define CHUNKS_PER_PAGE_MAX  (FLASH_PAGE_SIZE / IMAGE_CHUNK_MAX_SIZE)
-#define PAGES_PER_SECTOR_MAX (IMAGE_RX_SECTOR_SIZE / FLASH_PAGE_SIZE)
+// Source: firment_msg_config.json  "image-part-max-size"
+#define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
 
 #define USE_ImageData
 void handleImageData(ImageData msg);

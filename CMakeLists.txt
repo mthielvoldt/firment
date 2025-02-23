@@ -16,6 +16,7 @@ add_library(FirmentFW
   firmware/fmt_hardfault.c
   firmware/fmt_log.c
   firmware/fmt_spi.c
+  firmware/fmt_update.c
   firmware/fmt_waveform.c
   firmware/ghostProbe.c
   firmware/queue.c
@@ -26,9 +27,6 @@ add_library(FirmentFW
 
 # Generate the version header for the firmware
 configure_file(firmware/fmt_version.h.in version.h)
-
-# Generate fmt_update.h containing memory region info shared with bootloader.
-configure_file(firmware/fmt_update.in.h fmt_update.h)
 
 # Generate firment.proto with field size/length values filled in from 
 # firment_config.json (in the project directory)
@@ -43,6 +41,9 @@ string(JSON IMAGE_PART_MAX_SIZE GET ${PROTO_CONFIG_JSON} image-part-max-size)
 string(JSON PROBE_SIGNAL_MAX_COUNT GET ${PROTO_CONFIG_JSON} probe-signal-max-count)
 message(STATUS "Log text max size: ${LOG_TEXT_MAX_SIZE}")
 configure_file(protocol/firment_msg.in.proto firment_msg.proto)
+
+# Generate fmt_update.h containing memory region info shared with bootloader.
+configure_file(firmware/fmt_update.in.h fmt_update.h)
 
 
 # Note that the UI code puts compiled/generated files much closer to the source.

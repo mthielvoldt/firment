@@ -34,6 +34,7 @@
             "../esp-idf/components/xtensa/include",
             "../esp-idf/examples/common_components/protocol_examples_common/include",
             "firmware",
+            "firmware/port/XMC4",
             "firmware/port/XMC4/4800_F144",
             "firmware/port/XMC4/mtb-xmclib-cat3/XMCLib/inc",
             "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700/Include",

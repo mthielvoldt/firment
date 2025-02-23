@@ -21,16 +21,17 @@ add_library(MCUPort
   ${XMC_LIB}/src/xmc4_gpio.c
   ${XMC_LIB}/src/xmc4_scu.c
   fmt_crc_xmc4.c
-  fmt_flash_xmc4.c
+  fmt_flash_port.c
   fmt_gpio_xmc.c
   fmt_ioc_xmc4.c
-  fmt_periodic_xmc.c
+  fmt_periodic_port.c
 )
 
 target_include_directories(MCUPort
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
-    .       # fmt_periodic_xmc.h
-    ../..   # fmt headers.
+    ../..   # fmt headers.  TODO: this seems wrong.
     XMC4000_DFP/RTE_Driver
     XMC4000_DFP/CMSIS/RTOS/RTX/INC
     ../../lib/CMSIS-6.1.0/Driver/Include
