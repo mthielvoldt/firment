@@ -1,4 +1,6 @@
 
+#include <stdint.h>
+
 /** hal_flash_write
  * @param address Either an offset from the program memory base address, or an
  * absolute address.  Un-aligned addresses are permitted.
