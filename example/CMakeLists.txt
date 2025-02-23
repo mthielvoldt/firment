@@ -23,7 +23,9 @@ message(STATUS "Project version: ${PROJECT_VERSION}")
 project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
 
 ## ****** This is the only line firment needs you to edit *****
-set(FIRMENT_DIR ..)
+set(FIRMENT_DIR ${PROJECT_SOURCE_DIR}/..)
+
+set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
 
 # Project-wide compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")  # debug symbols
@@ -37,8 +39,8 @@ set(EXECUTABLE ${PROJECT_NAME}.elf)
 
 
 # Select which MCU port library ('MCUPort' target) build project against.
-# Note: MCU_FAMILY specified in the toolchain file. 
-add_subdirectory(${FIRMENT_DIR}/firmware/port/${MCU_FAMILY} ${MCU_FAMILY})
+# Note: MCU_FAMILY specified in the toolchain file. TODO: move into fmt. CML.
+add_subdirectory(${PORT_DIR} ${MCU_FAMILY})
 
 # Add firment, and set where (in the binary dir) to place firment output files.
 # Must come after add_subdirectory() for port or it won't find MCUPort target.
@@ -63,8 +65,10 @@ target_include_directories(${EXECUTABLE} PRIVATE
 # Note: -lm links the standard math library (math.h).
 target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
 
+
+set(LINKER_FILE ${PORT_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld)
 target_link_options(${EXECUTABLE} PRIVATE
-    "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections"
+    "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections,-T${LINKER_FILE}"
 )
 ## Uncomment to see full linker command.
 # target_link_options(${EXECUTABLE} PRIVATE "-v")
