@@ -1,10 +1,10 @@
-/** fmt_flash_xmc4.c
+/** fmt_flash_port.c for Infineon XMC4000 series. 
  * 
  */
 
 #include <stdint.h>
 #include <xmc4_flash.h>
-#include <fmt_flash.h>
+#include "fmt_flash_port.h"
 
 
 #ifndef ARCH_FLASH_OFFSET
@@ -16,8 +16,6 @@
 // #define DMB() asm volatile ("dmb")
 
 /*** FLASH ***/
-#define PAGE_SIZE_BYTES     256U
-
 #define FLASH_TOP      (XMC_FLASH_UNCACHED_BASE + 0x0200000UL)
 
 #define FLASH_SECTOR_COUNT 16
@@ -70,7 +68,7 @@ void hal_flash_lock(void) { }
 
 int hal_flash_write(uint32_t address, const uint8_t *data, int len)
 {
-  uint8_t page_buffer[PAGE_SIZE_BYTES] __attribute__((aligned(4)));
+  uint8_t page_buffer[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
   
   /* adjust for flash base to allow for both offsets and absolute addresses. */
   if (address < ARCH_FLASH_OFFSET) {
@@ -83,10 +81,10 @@ int hal_flash_write(uint32_t address, const uint8_t *data, int len)
   uint32_t write_end_adr, write_start_adr, bytes_written = 0;
 
   while (last_address_to_write > page_adr) {
-    memset(page_buffer, 0, PAGE_SIZE_BYTES);
+    memset(page_buffer, 0, FLASH_PAGE_SIZE);
     write_start_adr = address + bytes_written;
-    write_end_adr = (page_adr + PAGE_SIZE_BYTES < last_address_to_write) ? 
-      page_adr + PAGE_SIZE_BYTES : last_address_to_write;
+    write_end_adr = (page_adr + FLASH_PAGE_SIZE < last_address_to_write) ? 
+      page_adr + FLASH_PAGE_SIZE : last_address_to_write;
     
     //  WRITE FIRST PAGE
     //      _______buffer______ 
@@ -108,7 +106,7 @@ int hal_flash_write(uint32_t address, const uint8_t *data, int len)
 
     // Prepare for next page.
     bytes_written += write_end_adr - write_start_adr;
-    page_adr += PAGE_SIZE_BYTES;
+    page_adr += FLASH_PAGE_SIZE;
   }
   return 0;
 }
@@ -141,7 +139,7 @@ int hal_flash_erase(uint32_t start_address, int len)
  */
 static uint32_t getPreceedingPageBoundary(uint32_t address)
 {
-  return (address / PAGE_SIZE_BYTES) * PAGE_SIZE_BYTES;
+  return (address / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE;
 }
 
 /**

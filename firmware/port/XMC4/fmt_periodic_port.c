@@ -1,5 +1,5 @@
 
-#include "fmt_periodic_xmc.h"
+#include "fmt_periodic_port.h"
 #include "core_cm4.h" // NVIC
 
 void initPeriodicISR(

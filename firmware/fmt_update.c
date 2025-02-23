@@ -1,9 +1,13 @@
 
-#include <fmt_update.h>
+#include <fmt_update.h> // in build binary dir
+#include "fmt_flash.h"
+#include "fmt_flash_port.h"
 #include <stdbool.h>
 
-// filter chunksPending so only as many bits as chunks expected can be 1.
+#define CHUNKS_PER_PAGE_MAX  (FLASH_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
+#define PAGES_PER_SECTOR_MAX (FMT_IMAGE_DOWNLOAD_SECTOR_SIZE / FLASH_PAGE_SIZE)
 #define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
+
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
 static uint8_t pageBuffer[FLASH_PAGE_SIZE];
@@ -55,11 +59,11 @@ static bool imageDataMsgValid(ImageData *msg)
   bool chunkIndexOk = msg->chunkIndex < CHUNKS_PER_PAGE_MAX;
 
   bool chunkIsLast = msg->chunkIndex == (msg->chunkCountInPage - 1);
-  bool dataSizeExactlyMax = msg->payload.size == IMAGE_CHUNK_MAX_SIZE;
+  bool dataSizeExactlyMax = msg->payload.size == IMAGE_PART_MAX_SIZE;
 
   // Only the last chunk is allowed to be shorter than the max size.
   bool dataSizeOk =
-      msg->payload.size <= IMAGE_CHUNK_MAX_SIZE &&
+      msg->payload.size <= IMAGE_PART_MAX_SIZE &&
       (dataSizeExactlyMax || chunkIsLast);
 
   // all messages must have the same pageIndex until all chunks are processed.
@@ -96,7 +100,7 @@ static void processChunk(ImageData *msg)
   chunksPending &= ((1 << msg->chunkCountInPage) - 1);
 
   memcpy(
-      pageBuffer + msg->chunkIndex * IMAGE_CHUNK_MAX_SIZE,
+      pageBuffer + msg->chunkIndex * IMAGE_PART_MAX_SIZE,
       msg->payload.bytes,
       msg->payload.size);
 }
@@ -105,11 +109,10 @@ static void processPage(void)
 {
   if (activePage == 0)
   {
-    hal_flash_erase(IMAGE_RX_ADDRESS, IMAGE_RX_SECTOR_SIZE);
+    hal_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }
   hal_flash_write(
-      IMAGE_RX_ADDRESS + activePage * FLASH_PAGE_SIZE,
+      FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * FLASH_PAGE_SIZE,
       pageBuffer,
       FLASH_PAGE_SIZE);
 }
-
