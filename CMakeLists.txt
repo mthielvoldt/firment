@@ -71,6 +71,8 @@ add_custom_command(
       ${PROJECT_PROTO} firment_msg.proto ${PROBES_PROTO} 
   DEPENDS
     ${VENV_DIR}
+    ${PLUGIN_DIR}/gen-firment.py
+    ${PLUGIN_DIR}/gen-widgets.py
     ${PROBES_PROTO}
     ${PROJECT_PROTO}
     ${CMAKE_CURRENT_BINARY_DIR}/firment_msg.proto
