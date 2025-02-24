@@ -4,7 +4,7 @@
 #include "fmt_flash_port.h"
 #include <stdbool.h>
 
-#define CHUNKS_PER_PAGE_MAX  (FLASH_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
+#define CHUNKS_PER_PAGE_MAX (FLASH_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
 #define PAGES_PER_SECTOR_MAX (FMT_IMAGE_DOWNLOAD_SECTOR_SIZE / FLASH_PAGE_SIZE)
 #define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
 
@@ -15,7 +15,7 @@ static uint8_t pageBuffer[FLASH_PAGE_SIZE];
 // Static function prototypes.
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status);
 static bool imageDataMsgValid(ImageData *msg);
-static inline bool allChunksProcessed(void);
+static bool allChunksProcessed(void);
 static void prepForNewPage(PageStatusEnum thisPageStatus);
 static void processChunk(ImageData *msg);
 static void processPage(void);
@@ -52,11 +52,14 @@ static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
  */
 static bool imageDataMsgValid(ImageData *msg)
 {
-  // TODO: consider adding a policy akin to pageIndex that chunkCountInPage 
+  // TODO: consider adding a policy akin to pageIndex that chunkCountInPage
   // can't change once one chunk has been received for the active page.
 
   // (chunkIndexOk && dataSizeOk) implies no buffer overflow.
-  bool chunkIndexOk = msg->chunkIndex < CHUNKS_PER_PAGE_MAX;
+  // This chunk must be still pending (no repeats).
+  bool chunkIndexOk =
+      msg->chunkIndex < CHUNKS_PER_PAGE_MAX &&
+      chunksPending & (1 << msg->chunkIndex);
 
   bool chunkIsLast = msg->chunkIndex == (msg->chunkCountInPage - 1);
   bool dataSizeExactlyMax = msg->payload.size == IMAGE_PART_MAX_SIZE;
@@ -74,14 +77,14 @@ static bool imageDataMsgValid(ImageData *msg)
   return chunkIndexOk && dataSizeOk && pageIndexOk;
 }
 
-static inline bool allChunksProcessed(void)
+static bool allChunksProcessed(void)
 {
   return !chunksPending;
 }
 
 static void prepForNewPage(PageStatusEnum thisPageStatus)
 {
-  chunksPending = NO_CHUNKS_PROCESSED;  // signals a page-change is allowed.
+  chunksPending = NO_CHUNKS_PROCESSED; // signals a page-change is allowed.
   // should be last; ungates new messages being sent.
   sendPageStatus(activePage, thisPageStatus);
 }
