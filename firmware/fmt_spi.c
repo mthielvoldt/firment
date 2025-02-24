@@ -31,6 +31,7 @@ ARM_SPI_SignalEvent_t callback;
 /* Declarations of private functions */
 static void SendNextPacket(void);
 static void spiEventHandlerISR(uint32_t event);
+static uint32_t getCRCPosition(uint8_t *lengthPrefixedBuffer);
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 
 /* Public function definitions */
@@ -207,6 +208,19 @@ void subClearToSendISR(void)
 }
 
 /* PRIVATE (static) functions */
+
+/** Get the position of the CRC in bytes from the first element of the packet.
+ * CRC position must be 16-bit aligned (even number) for hardware CRC engines.
+ * so if the length of the buffer (including length prefix,) is odd, there
+ * will be a byte of padding, between the buffer and the CRC.
+ * The value of the padding byte (if present) will be checked by the CRC, but it
+ * has no effect on the decoded message.
+ */
+static uint32_t getCRCPosition(uint8_t *lengthPrefixedBuffer)
+{
+  return ((lengthPrefixedBuffer[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
+}
+
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
 {
   uint32_t crcPosition = getCRCPosition(packet);
