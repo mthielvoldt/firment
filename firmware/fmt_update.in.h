@@ -14,5 +14,11 @@
 // Source: firment_msg_config.json  "image-part-max-size"
 #define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
 
+/**
+ * Set a callback that executes once a new image is successfully fully saved.
+ * Commonly used to trigger a bootloader action, and/or reset the CPU.
+ */
+void fmt_initUpdate(void(*onDownloadComplete)(void));
+
 #define USE_ImageData
 void handleImageData(ImageData msg);

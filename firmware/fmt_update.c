@@ -11,6 +11,7 @@
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
 static uint8_t pageBuffer[FLASH_PAGE_SIZE];
+static void(*downloadCompleteCallback)(void);
 
 // Static function prototypes.
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status);
@@ -19,6 +20,11 @@ static bool allChunksProcessed(void);
 static void prepForNewPage(PageStatusEnum thisPageStatus);
 static void processChunk(ImageData *msg);
 static void processPage(void);
+
+void fmt_initUpdate(void(*onDownloadComplete)(void))
+{
+  downloadCompleteCallback = onDownloadComplete;
+}
 
 void handleImageData(ImageData msg)
 {
@@ -29,6 +35,10 @@ void handleImageData(ImageData msg)
     {
       processPage();
       prepForNewPage(PageStatusEnum_WRITE_SUCCESS);
+      if (msg.pageIndex == (msg.pageCount - 1))
+      {
+        downloadCompleteCallback();
+      }
     }
   }
   else
