@@ -14,6 +14,8 @@
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
+static uint32_t txDropCount = 0;
+static uint32_t rxDropCount = 0;
 
 static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t rxQueue;
@@ -97,6 +99,7 @@ bool fmt_sendMsg(Top message)
     bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
     if (!enqueueSuccess)
     {
+      txDropCount++;
       __BKPT(4);
     }
 
@@ -225,8 +228,7 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
 {
   uint32_t crcPosition = getCRCPosition(packet);
   uint16_t computedCRC;
-  int32_t result =
-      crc->ComputeCRC(packet, crcPosition, &computedCRC);
+  int32_t result = crc->ComputeCRC(packet, crcPosition, &computedCRC);
   *(uint16_t *)(&packet[crcPosition]) = computedCRC;
   if (result != ARM_DRIVER_OK)
   {
@@ -257,7 +259,12 @@ static void spiEventHandlerISR(uint32_t event)
       if (status == ARM_DRIVER_OK &&
           result == *(uint16_t *)(&rxPacket[crcPosition]))
       {
-        enqueueBack(&rxQueue, rxPacket);
+        bool success = enqueueBack(&rxQueue, rxPacket);
+        if (!success)
+        {
+          rxDropCount++;
+          __BKPT(6);
+        }
       }
     }
     /* This will trigger a Send as soon as CTS pin has a rising edge.
