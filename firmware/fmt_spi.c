@@ -17,7 +17,7 @@ static queue_t sendQueue;
 static uint32_t txDropCount = 0;
 static uint32_t rxDropCount = 0;
 
-static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
+static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * RX_QUEUE_LENGTH];
 static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
@@ -78,7 +78,7 @@ bool fmt_initSpi(spiCfg_t cfg)
       MAX_SENDER_PRIORITY);
   initQueue(
       MAX_PACKET_SIZE_BYTES,
-      SEND_QUEUE_LENGTH,
+      RX_QUEUE_LENGTH,
       &rxQueue,
       rxQueueStore,
       MAX_SENDER_PRIORITY);
