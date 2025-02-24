@@ -116,7 +116,9 @@ function packMessages(messages: Uint8Array[]) {
   return packedMessages;
 }
 
-export function sendPacked(messageArray: Uint8Array[]){
+export function sendPacked(messageArray: Uint8Array[], verbose=true){
   const packedMqttMessage = packMessages(messageArray);
   client.publish("edge-bound", packedMqttMessage as Buffer)
+  if (verbose)
+    console.log(`Sent ${messageArray.length} in ${packedMqttMessage.length} bytes`);
 }
