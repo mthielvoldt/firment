@@ -11,7 +11,8 @@
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
 static uint8_t pageBuffer[FLASH_PAGE_SIZE];
-static void(*downloadCompleteCallback)(void);
+static void(*downloadStartCb)(void);
+static void(*downloadCompleteCb)(void);
 
 // Static function prototypes.
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status);
@@ -21,9 +22,10 @@ static void prepForNewPage(PageStatusEnum thisPageStatus);
 static void processChunk(ImageData *msg);
 static void processPage(void);
 
-void fmt_initUpdate(void(*onDownloadComplete)(void))
+void fmt_initUpdate(void(*onDownloadStart)(void), void(*onDownloadComplete)(void))
 {
-  downloadCompleteCallback = onDownloadComplete;
+  downloadCompleteCb = onDownloadComplete;
+  downloadStartCb = onDownloadStart;
 }
 
 void handleImageData(ImageData msg)
@@ -37,7 +39,7 @@ void handleImageData(ImageData msg)
       prepForNewPage(PageStatusEnum_WRITE_SUCCESS);
       if (msg.pageIndex == (msg.pageCount - 1))
       {
-        downloadCompleteCallback();
+        downloadCompleteCb();
       }
     }
   }
@@ -122,7 +124,10 @@ static void processPage(void)
 {
   if (activePage == 0)
   {
-    hal_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
+    // This might erase one or more sectors in this partition, so preceeds write.
+    downloadStartCb();
+    // TODO: erase the other sectors to support multi-sector partitions.
+    // hal_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }
   hal_flash_write(
       FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * FLASH_PAGE_SIZE,

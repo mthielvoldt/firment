@@ -18,7 +18,7 @@
  * Set a callback that executes once a new image is successfully fully saved.
  * Commonly used to trigger a bootloader action, and/or reset the CPU.
  */
-void fmt_initUpdate(void(*onDownloadComplete)(void));
+void fmt_initUpdate(void(*onDownloadStart)(void), void(*onDownloadComplete)(void));
 
 #define USE_ImageData
 void handleImageData(ImageData msg);
