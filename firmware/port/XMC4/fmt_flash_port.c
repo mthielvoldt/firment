@@ -77,35 +77,37 @@ int hal_flash_write(uint32_t address, const uint8_t *data, int len)
   
   /* Find the closest page-aligned address preceeding first address to write*/
   uint32_t page_adr = getPreceedingPageBoundary(address);
-  uint32_t last_address_to_write = address + len;
-  uint32_t write_end_adr, write_start_adr, bytes_written = 0;
+  uint32_t final_write_end_adr = address + len;
+  uint32_t page_write_end_adr;   // One past the last address to be written.
+  uint32_t page_write_start_adr; // The first address to be written. 
+  uint32_t bytes_written = 0;    // count of bytes written in previous pages.
 
-  while (last_address_to_write > page_adr) {
+  while (page_adr < final_write_end_adr) {
     memset(page_buffer, 0, FLASH_PAGE_SIZE);
-    write_start_adr = address + bytes_written;
-    write_end_adr = (page_adr + FLASH_PAGE_SIZE < last_address_to_write) ? 
-      page_adr + FLASH_PAGE_SIZE : last_address_to_write;
+    page_write_start_adr = address + bytes_written;
+    page_write_end_adr = (page_adr + FLASH_PAGE_SIZE < final_write_end_adr) ? 
+      page_adr + FLASH_PAGE_SIZE : final_write_end_adr;
     
     //  WRITE FIRST PAGE
     //      _______buffer______ 
-    //     |.......+===========|=======+............|
-    //     ^       ^           ^
-    //  page_adr  wr_start   wr_end
+    //     |........===========|========............|
+    //      ^       ^           ^
+    //  page_adr  wr_start    wr_end
     //
     //  WRITE SECOND PAGE
     //                          _______buffer_______
-    //     |.......+===========|=======+............|
-    //                         ^       ^
-    //                     page_adr  wr_end
-    //                     wr_start
-    memcpy(page_buffer + (write_start_adr - page_adr),
+    //     |........===========|========............|
+    //                          ^       ^
+    //                      page_adr  wr_end
+    //                      wr_start
+    memcpy(page_buffer + (page_write_start_adr - page_adr),
            data + bytes_written,
-           write_end_adr - write_start_adr
+           page_write_end_adr - page_write_start_adr
     );
     XMC_FLASH_ProgramPage((uint32_t*)page_adr, (uint32_t*)page_buffer);
 
     // Prepare for next page.
-    bytes_written += write_end_adr - write_start_adr;
+    bytes_written += page_write_end_adr - page_write_start_adr;
     page_adr += FLASH_PAGE_SIZE;
   }
   return 0;
