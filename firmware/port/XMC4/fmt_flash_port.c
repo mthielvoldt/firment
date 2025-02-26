@@ -113,6 +113,21 @@ int hal_flash_write(uint32_t address, const uint8_t *data, int len)
   return 0;
 }
 
+bool isSectorErased(int sector)
+{
+  uint32_t *address, *endAddress;
+  address = (uint32_t*)sector_base[sector];
+  endAddress = (uint32_t*)sector_base[sector + 1];
+
+  for (; address < endAddress; address++ ) {
+    if (*address != 0)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 int hal_flash_erase(uint32_t start_address, int len)
 {
   // Work with absolute addresses. 
@@ -132,7 +147,12 @@ int hal_flash_erase(uint32_t start_address, int len)
   }
 
   for (int sector = start_sector; sector <= end_sector; sector++)
-    XMC_FLASH_EraseSector((uint32_t*)sector_base[sector]);
+  {
+    if (!isSectorErased(sector))
+    {
+      XMC_FLASH_EraseSector((uint32_t*)sector_base[sector]);
+    }
+  }
   return 0;
 }
 
