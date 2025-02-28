@@ -16,6 +16,7 @@ typedef enum {
  */
 typedef struct
 {
+  uint8_t spiModuleNo;
   ARM_DRIVER_SPI *spiModule;
   RTE_IOC_t msgWaitingInput;  // HW signal: sub has a message for main.
   uint8_t msgWaitingOut;      // TODO: Out and IRQn might be HW-specific. Abstract.

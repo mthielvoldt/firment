@@ -7,6 +7,7 @@
 #include "fmt_crc.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_gpio.h"
+#include <fmt_spi_port.h> // getSpiEventIRQn()
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
@@ -42,9 +43,20 @@ bool fmt_initSpi(spiCfg_t cfg)
   spi = cfg.spiModule;
   clearToSendInput = cfg.clearToSendInput;
   msgWaitingInput = cfg.msgWaitingInput;
+  uint32_t spiEventIRQn = getSpiEventIRQn(cfg.spiModuleNo);
+  if (spiEventIRQn == 0)
+    return false;
 
   spi->Initialize(spiEventHandlerISR);
   spi->PowerControl(ARM_POWER_FULL);
+
+  /* The CMSIS SPI driver interface omits any control over the priority of the
+  data-ready ISR.  This should be project-specified. The above calls to 
+  Initialize and PowerControl sets a default priority, we'll re-set it now.*/
+
+  uint32_t encodedPrio =
+      NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.spiIrqPriority, 0U);
+  NVIC_SetPriority(spiEventIRQn, encodedPrio);
 
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
@@ -100,7 +112,7 @@ bool fmt_sendMsg(Top message)
     if (!enqueueSuccess)
     {
       txDropCount++;
-      __BKPT(4);
+      // __BKPT(4);
     }
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.

@@ -25,6 +25,7 @@ add_library(MCUPort
   fmt_gpio_xmc.c
   fmt_ioc_xmc4.c
   fmt_periodic_port.c
+  fmt_spi_port.c
 )
 
 target_include_directories(MCUPort
