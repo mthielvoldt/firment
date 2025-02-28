@@ -8,7 +8,7 @@
 /* in the next line, 14 breaks down as follows: 
 4: count, 4 value, 3 for the 3 log types, 2 for top types, 1 prefix.*/
 #define MAX_LOG_TEXT_SIZE (MAX_PACKET_SIZE_BYTES - 17)
-#define SEND_QUEUE_LENGTH 4U
+#define SEND_QUEUE_LENGTH 10U
 #define RX_QUEUE_LENGTH 9U
 #define MAX_SENDER_PRIORITY 16U
 
