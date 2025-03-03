@@ -12,11 +12,13 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
+// globals for debug
+uint32_t spiTxDropCount = 0;
+uint32_t spiRxDropCount = 0;
+
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
 static queue_t sendQueue;
-static uint32_t txDropCount = 0;
-static uint32_t rxDropCount = 0;
 
 static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * RX_QUEUE_LENGTH];
 static queue_t rxQueue;
@@ -111,7 +113,7 @@ bool fmt_sendMsg(Top message)
     bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
     if (!enqueueSuccess)
     {
-      txDropCount++;
+      spiTxDropCount++;
       // __BKPT(4);
     }
 
@@ -274,7 +276,7 @@ static void spiEventHandlerISR(uint32_t event)
         bool success = enqueueBack(&rxQueue, rxPacket);
         if (!success)
         {
-          rxDropCount++;
+          spiRxDropCount++;
           __BKPT(6);
         }
       }
