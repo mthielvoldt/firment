@@ -79,3 +79,9 @@ message PageStatus {
   uint32 pageIndex = 1;
   PageStatusEnum status = 2;
 }
+
+message Version {
+  uint32 major = 1;
+  uint32 minor = 2;
+  uint32 patch = 3;
+}
