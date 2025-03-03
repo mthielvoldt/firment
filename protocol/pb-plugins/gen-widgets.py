@@ -162,13 +162,15 @@ def digest_proto(proto: FileDescriptorProto):
     widget_str = get_message_widget(message, enums)
     ret += widget_str
 
-  ret += "/*"
-  ret += str(enums)
-  # ret += str(type(enums["WaveShape"]))
-  ret += str(proto)
-  # ret += str(type(proto))
-  # ret += str(type(proto.enum_type))
-  ret += "*/"
+  if False:  # Control appending contents of parsed data as a comment
+    ret += "/*"
+    ret += str(enums)
+    # ret += str(type(enums["WaveShape"]))
+    ret += str(proto)
+    # ret += str(type(proto))
+    # ret += str(type(proto.enum_type))
+    ret += "*/"
+
   return ret
 
 def generate_widgets(request: CodeGeneratorRequest) -> str:
