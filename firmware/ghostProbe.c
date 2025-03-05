@@ -1,5 +1,5 @@
 #include "ghostProbe.h"
-#include "fmt_spi.h"
+#include "fmt_comms.h"
 #include <cmsis_gcc.h> // __BKPT()
 
 // RunScanCtl has 4 bytes for isContinuous and freq, leaving the rest for the

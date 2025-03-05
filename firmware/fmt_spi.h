@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ISR_Config.h>
-#include <messages.pb.h>
+#include <ISR_Config.h> // re-defines ISRs as board-specific IRQHandler names.
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
 #include "RTE_Device.h"  // Interrupt-on-change pins.
@@ -34,14 +33,6 @@ typedef struct
  * passes project-specific pin and peripheral selections.
  */
 bool fmt_initSpi(spiCfg_t config);
-
-/** Send a SPI message
- * Queues a message for transmit.
- * Should only be called from a single context - not thread-safe.
- */
-bool fmt_sendMsg(Top message);
-
-bool fmt_getMsg(Top *message);
 
 /** port_getSpiEventIRQn
  * @param spiModuleNo should match the number of the Driver_SPIx that the IRQn

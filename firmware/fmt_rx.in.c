@@ -4,7 +4,7 @@
  * */
 #include <fmt_update.h>
 #include <fmt_rx.h>
-#include <fmt_spi.h>       // fmt_getMsg()
+#include <fmt_comms.h>       // fmt_getMsg()
 #include <fmt_log.h>       // fmt_sendLog()
 #include <ghostProbe.h>    // handleRunScanCtl()
 #include <project_comms.h> // all project-specific handlers
