@@ -66,4 +66,5 @@ uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo)
     return 0;
     #endif
   }
+  return 0;
 }
