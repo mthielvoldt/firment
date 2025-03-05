@@ -43,6 +43,28 @@ bool fmt_sendMsg(Top message);
 
 bool fmt_getMsg(Top *message);
 
+/** port_getSpiEventIRQn
+ * @param spiModuleNo should match the number of the Driver_SPIx that the IRQn
+ * is being requested for. 
+ * @returns the IRQn of the spi module indicated by spiModuleNo, provided that 
+ * module is configured.  If that module is not configured, returns 0. 
+ * 
+ * This file should be implemented in a platform-specific _port.c file.
+ * 
+ * Note: one of the following files must configure the 
+ * SPI resource to be available.
+ * RTE_DeviceConfig.h (firment way)
+ * RTE_Device.h (other CMSIS BSPs)
+ * 
+ * For example with the following lines in RTE_Device.h:
+ * #define RTE_SPI2 1 
+ * #define RTE_SPI5 1
+ * 
+ * Data structures for SPI modules 2 and 5 will be available, a call to
+ * port_getSpiEventIRQn(2) will return the IRQn for SPI2. 
+ */
+uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo);
+
 /** Sub Message Waiting ISR
  * @attention Requires #defining to the ISR that corresponds to msgWaitingInput
  * and msgWaitingOut in ISR_Config.h.  

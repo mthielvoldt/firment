@@ -1,5 +1,4 @@
 // This is a MFG-specific header file name. 
-#include "fmt_spi_port.h"
 #include <RTE_DeviceConfig.h>
 #include <SPI.h>
 
@@ -22,7 +21,7 @@ extern SPI_RESOURCES SPI4_Resources;
 extern SPI_RESOURCES SPI5_Resources;
 #endif
 
-uint32_t getSpiEventIRQn(uint8_t spiModuleNo)
+uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo)
 {
   switch (spiModuleNo) {
     case 0:

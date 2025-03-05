@@ -7,7 +7,6 @@
 #include "fmt_crc.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_gpio.h"
-#include <fmt_spi_port.h> // getSpiEventIRQn()
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
@@ -45,7 +44,7 @@ bool fmt_initSpi(spiCfg_t cfg)
   spi = cfg.spiModule;
   clearToSendInput = cfg.clearToSendInput;
   msgWaitingInput = cfg.msgWaitingInput;
-  uint32_t spiEventIRQn = getSpiEventIRQn(cfg.spiModuleNo);
+  uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiModuleNo);
   if (spiEventIRQn == 0)
     return false;
 
