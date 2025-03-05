@@ -3,7 +3,9 @@
 // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
 
 #include "fmt_spi.h"
+#include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
 #include <cmsis_gcc.h> // __BKPT()
+#include <core_cm4.h>  // NVIC_...()
 #include "fmt_crc.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_gpio.h"

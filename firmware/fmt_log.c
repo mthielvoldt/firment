@@ -1,7 +1,7 @@
 
 #include "fmt_log.h"
 #include "fmt_sizes.h"
-#include "fmt_spi.h"
+#include "fmt_comms.h"
 
 static logLevel_t activeLogLevel = LOG_VERBOSE;
 

@@ -1,5 +1,6 @@
 
 #include <fmt_update.h> // in build binary dir
+#include "fmt_comms.h"  // fmt_sendMsg
 #include "fmt_flash.h"
 #include "fmt_flash_port.h"
 #include <stdbool.h>
