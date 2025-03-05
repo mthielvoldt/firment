@@ -10,9 +10,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-build/
+*build/
 dist/
-*-venv/
+*venv/
 sdkconfig
 sdkconfig.old
 
