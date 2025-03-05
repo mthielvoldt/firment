@@ -76,10 +76,11 @@
         },
         {
           "name": "host-lin",
-          "compilerPath": "/usr/bin/gcc",
+          "compilerPath": "/usr/bin/g++",
           "compilerArgs": [],
           "intelliSenseMode": "linux-gcc-x64",
           "includePath": [
+            "test/cpputest/include"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
