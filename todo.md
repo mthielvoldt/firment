@@ -15,3 +15,6 @@ Outputs:
 
 ## Making HW-data test-settable
 2. fmt_flash_port.h defines -> something adjustable by tests.
+
+## Code smells
+3. RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h

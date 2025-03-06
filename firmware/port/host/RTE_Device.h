@@ -1,8 +1,10 @@
 /** RTE_Device.h for test environment */
 
+#pragma once
+
 #include <stdint.h>
 
-// TODO: feature envy.  Move to fmt_ioc.h
+// TODO: (3) feature envy.  Move to fmt_ioc.h
 // before above, it'll need some abstraction. 
 typedef struct _RTE_IOC {
   uint32_t *port; 
