@@ -17,4 +17,8 @@ Outputs:
 2. fmt_flash_port.h defines -> something adjustable by tests.
 
 ## Code smells
-3. RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
+3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
+
+# New Tests
+4. host/core_cm4.h spy on NVIC priority functions.
+  - Test valid use in consuming inits, eg. fmt_initSpi().
