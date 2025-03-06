@@ -20,6 +20,7 @@ Outputs:
 ## Making HW-data test-settable
 2. fmt_flash_port.h defines -> something adjustable by tests.
 8. firmentConfig.cmake sector size. 
+10. ISR_Config.h items. 
 
 ## Code smells
 3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
