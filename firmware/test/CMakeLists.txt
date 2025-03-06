@@ -1,7 +1,8 @@
 
 add_executable(testFirment
   testFirment.cpp
-  iocTest.cpp
+  logTest.cpp
+  stub_comms.c
   # gpioTest.cpp
 )
 
