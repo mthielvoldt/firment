@@ -22,3 +22,4 @@ Outputs:
 # New Tests
 4. host/core_cm4.h spy on NVIC priority functions.
   - Test valid use in consuming inits, eg. fmt_initSpi().
+5. host/cmsis_gcc.h exploding fake for __BKPT. 
