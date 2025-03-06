@@ -13,3 +13,5 @@ Outputs:
 
 1. flash_page_size: HW.h (parse) > {fmt_flash_port.h, web-ui config'd file}
 
+## Making HW-data test-settable
+2. fmt_flash_port.h defines -> something adjustable by tests.
