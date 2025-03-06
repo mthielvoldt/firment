@@ -1,4 +1,5 @@
 # Project structuring
+6. gpio_common.h (fix + move + test)
 
 ## Consolidating HW-data
 Consolidate HW-specifc values into a single choke-point in port/ Cmake files.
