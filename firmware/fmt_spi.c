@@ -8,7 +8,6 @@
 #include <core_cm4.h>  // NVIC_...()
 #include "fmt_crc.h"
 #include "fmt_ioc.h" // fmt_initIoc
-#include "fmt_gpio.h"
 #include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
