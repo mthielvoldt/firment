@@ -17,4 +17,6 @@ typedef enum _logLevel {
   LOG_SILENT,
 } logLevel_t;
 
-bool fmt_sendLog(logLevel_t level, char msg[], float number);
+bool fmt_sendLog(logLevel_t level, const char msg[], float number);
+
+void fmt_setLogLevel(logLevel_t level);
