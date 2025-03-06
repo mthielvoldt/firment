@@ -1,5 +1,5 @@
 #include "queue.h"
-#include "port/port_arm_cortex_m4.h"
+#include <crit_section_port.h>
 #include <memory.h>
 
 // Storage
