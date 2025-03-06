@@ -80,7 +80,8 @@
           "compilerArgs": [],
           "intelliSenseMode": "linux-gcc-x64",
           "includePath": [
-            "test/cpputest/include"
+            "test/cpputest/include",
+            "firmware"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
