@@ -4,7 +4,7 @@
 ## Consolidating HW-data
 Consolidate HW-specifc values into a single choke-point in port/ Cmake files.
 Inputs: 
-- config.cmake containing: set(VAR "")
+- config.cmake containing: set(VAR "") for project-discretion items.
 - MCU headers parsed in cmake - header *selection* in port CML only (not .h)
 - config.json parsed in cmake (for ui-shareables?)
 
@@ -13,9 +13,13 @@ Outputs:
 - Configured .ts (or .json?) for ui.
 
 1. flash_page_size: HW.h (parse) > {fmt_flash_port.h, web-ui config'd file}
+7. move SOT for all project-discretion build-time items to firmentConfig.cmake
+  - firment_msg_config.json, ghostProbe, waveform configs. 
+9. make waveform and ghost probe opt-in using firmentConfig.cmake
 
 ## Making HW-data test-settable
 2. fmt_flash_port.h defines -> something adjustable by tests.
+8. firmentConfig.cmake sector size. 
 
 ## Code smells
 3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
