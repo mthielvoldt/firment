@@ -1,5 +1,7 @@
 # Project structuring
 6. gpio_common.h (fix + move + test)
+12. break fmt_rx -> project_comms dependency. 
+13. move USE_xxx to firmentConfig
 
 ## Consolidating HW-data
 Consolidate HW-specifc values into a single choke-point in port/ Cmake files.
@@ -24,6 +26,7 @@ Outputs:
 
 ## Code smells
 3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
+14. gpio in project_comms.h = feature envy.
 
 # New Tests
 4. host/core_cm4.h spy on NVIC priority functions.
