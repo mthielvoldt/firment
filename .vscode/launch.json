@@ -15,30 +15,28 @@
       // "runToEntryPoint": "main"
     },
     {
-      "name": "cppdbg",
+      "name": "testFirment",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${fileDirname}/${fileBasenameNoExtension}",
+      "program": "${workspaceFolder}/test/build/test/testFirment",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/example/firmware",
+      "cwd": "${fileDirname}",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
       "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        },
-        {
-          "description": "Set Disassembly Flavor to Intel",
-          "text": "-gdb-set disassembly-flavor intel",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "arm-none-eabi-gcc active file",
-      "miDebuggerPath": "gdb"
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          },
+          {
+              "description": "Set Disassembly Flavor to Intel",
+              "text": "-gdb-set disassembly-flavor intel",
+              "ignoreFailures": true
+          }
+      ]
     },
     {
       "name": "esp32s3-contained",

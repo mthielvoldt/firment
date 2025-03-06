@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 
 project(firment_test CXX C)
 
+add_compile_options("-g")
+
 include(firmentConfig.cmake)
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
