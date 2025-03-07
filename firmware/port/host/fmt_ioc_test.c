@@ -10,6 +10,7 @@ bool fmt_initIoc(
     uint32_t priority,
     void (*callback)(void))
 {
+  return true;
 }
 
 void fmt_enableIoc(uint8_t iocId)
@@ -22,4 +23,5 @@ void fmt_disableIoc(uint8_t iocId)
 
 bool fmt_getIocPinState(uint8_t iocId)
 {
+  return false;
 }

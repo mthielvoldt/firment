@@ -7,20 +7,20 @@ extern "C"
 
 static int32_t Initialize(ARM_SPI_SignalEvent_t cb_event)
 {
-  return 0;
+  return ARM_DRIVER_OK;
 }
 static int32_t Uninitialize(void);
 static int32_t PowerControl(ARM_POWER_STATE state)
 {
-  return 0;
+  return ARM_DRIVER_OK;
 }
 static int32_t Transfer(const void *data_out, void *data_in, uint32_t num)
 {
-  return 0;
+  return ARM_DRIVER_OK;
 }
 static int32_t Control(uint32_t control, uint32_t arg)
 {
-  return 0;
+  return ARM_DRIVER_OK;
 }
 static ARM_SPI_STATUS GetStatus(void)
 {
