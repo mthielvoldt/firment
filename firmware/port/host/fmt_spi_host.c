@@ -3,5 +3,5 @@
 
 uint32_t port_getSpiEventIRQn(uint8_t spiModuleId)
 {
-  return 0;
+  return spiModuleId + 1;
 }
