@@ -1,8 +1,5 @@
 #include "stub_comms.h"
 
-extern bool (*fmt_sendMsg)(Top message);
-extern bool (*fmt_getMsg)(Top *message);
-
 static Top storedMsg = {0};
 static bool toReturnOnSend = true;
 
