@@ -1,5 +1,7 @@
 add_library(MCUPort
   fmt_ioc_test.c
+  fmt_spi_host.c
+  fmt_crc_host.c
 )
 
 target_include_directories(MCUPort
@@ -7,6 +9,7 @@ target_include_directories(MCUPort
     ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
     ../..
+    ../../lib/CMSIS-6.1.0/Driver/Include # Driver_Common.h
 )
 
 # TODO: (1) make this the SOT for page size in FW, configuring fmt_flash_port.h

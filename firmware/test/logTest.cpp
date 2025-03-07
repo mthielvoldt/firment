@@ -19,6 +19,8 @@ TEST_GROUP(fmt_log)
     numIn = 5000;
     textIn = "Hello, Firment.";
     fmt_setLogLevel(LOG_VERBOSE);
+    UT_PTR_SET(fmt_getMsg, fmt_getMsg_test);
+    UT_PTR_SET(fmt_sendMsg, fmt_sendMsg_test);
   }
 
   void teardown()
