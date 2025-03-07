@@ -3,7 +3,6 @@
 #include <ISR_Config.h> // re-defines ISRs as board-specific IRQHandler names.
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
-#include "RTE_Device.h"  // Interrupt-on-change pins.
 
 typedef enum {
   BUS_MODE_MAIN,
@@ -15,18 +14,16 @@ typedef enum {
  */
 typedef struct
 {
-  uint8_t spiModuleNo;
+  uint8_t spiModuleId;
   ARM_DRIVER_SPI *spiModule;
-  RTE_IOC_t msgWaitingInput;  // HW signal: sub has a message for main.
-  uint8_t msgWaitingOut;      // TODO: Out and IRQn might be HW-specific. Abstract.
-  uint8_t msgWaitingIRQn;
-  RTE_IOC_t clearToSendInput; // HW signal: sub ready for transaction.
-  uint8_t clearToSendOut;
-  uint8_t clearToSendIRQn;
+  uint8_t msgWaitingIocId;  // HW signal: sub has a message for main.
+  uint8_t msgWaitingIocOut;
+  uint8_t clearToSendIocId; // HW signal: sub ready for transaction.
+  uint8_t clearToSendIocOut;
   uint32_t baudHz;
   busMode_t busMode;
   bool ssActiveLow;
-  uint32_t spiIrqPriority;
+  uint32_t irqPriority;
 } spiCfg_t;
 
 /** Initializes firment spi driver
@@ -54,16 +51,16 @@ bool fmt_initSpi(spiCfg_t config);
  * Data structures for SPI modules 2 and 5 will be available, a call to
  * port_getSpiEventIRQn(2) will return the IRQn for SPI2. 
  */
-uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo);
+uint32_t port_getSpiEventIRQn(uint8_t spiModuleId);
 
 /** Sub Message Waiting ISR
- * @attention Requires #defining to the ISR that corresponds to msgWaitingInput
+ * @attention Requires #defining to the ISR that corresponds to msgWaitingIocId
  * and msgWaitingOut in ISR_Config.h.  
  * 
  * Example from an XMC4 project:
  * #define subMsgWaitingISR ERU0_3_IRQHandler  // in ISR_Config.h
  * In this line: 
- * - ERU0 is the Event Request Unit provided in msgWaitingInput.
+ * - ERU0 is the Event Request Unit provided in msgWaitingIocId.
  * - 3 matches msgWaitingSendOut (the selected ERU output channel). 
  * 
  * Runs when the ESP drives a rising edge on the Message Waiting GPIO.
@@ -74,7 +71,7 @@ uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo);
 void subMsgWaitingISR(void);
 
 /** Sub Clear To Send ISR
- * @attention Requires #defining to the ISR that corresponds to clearToSendInput
+ * @attention Requires #defining to the ISR that corresponds to clearToSendIocId
  * and clearToSendOut in ISR_Config.h.  
  * 
  * Example from an XMC4 project:

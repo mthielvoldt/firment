@@ -2,8 +2,7 @@
  * Provides a interface to configure gpio edge-driven interrupts.
  */
 #pragma once
-
-#include <RTE_Device.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef enum
@@ -14,13 +13,15 @@ typedef enum
   EDGE_TYPE_BOTH,
 } edgeType_t;
 
-void fmt_initIoc(
-    RTE_IOC_t inputConfig,
-    edgeType_t activeEdges,
+bool fmt_initIoc(
+    uint8_t iocId,
     uint8_t outputChannel,
-    uint8_t IRQn,
-    uint32_t priority);
+    edgeType_t activeEdges,
+    uint32_t priority,
+    void (*callback)(void));
 
-void fmt_enableIoc(RTE_IOC_t inputConfig);
+void fmt_enableIoc(uint8_t iocId);
 
-void fmt_disableIoc(RTE_IOC_t inputConfig);
+void fmt_disableIoc(uint8_t iocId);
+
+bool fmt_getIocPinState(uint8_t iocId);

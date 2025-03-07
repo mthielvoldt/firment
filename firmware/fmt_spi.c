@@ -4,8 +4,8 @@
 
 #include "fmt_spi.h"
 #include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
-#include <cmsis_gcc.h> // __BKPT()
-#include <core_cm4.h>  // NVIC_...()
+#include <core_port.h> // NVIC_...()  __BKPT()
+#include <cmsis_gcc.h>
 #include "fmt_crc.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "queue.h"
@@ -25,8 +25,8 @@ static queue_t rxQueue;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
 
 static ARM_DRIVER_SPI *spi;
-static RTE_IOC_t clearToSendInput; // An Interrupt-on-Change config.
-static RTE_IOC_t msgWaitingInput;
+static uint8_t clearToSendIocId; // An Interrupt-on-Change config.
+static uint8_t msgWaitingIocId;
 
 extern FMT_DRIVER_CRC Driver_CRC0;
 static FMT_DRIVER_CRC *crc = &Driver_CRC0;
@@ -43,9 +43,9 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
 bool fmt_initSpi(spiCfg_t cfg)
 {
   spi = cfg.spiModule;
-  clearToSendInput = cfg.clearToSendInput;
-  msgWaitingInput = cfg.msgWaitingInput;
-  uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiModuleNo);
+  clearToSendIocId = cfg.clearToSendIocId;
+  msgWaitingIocId = cfg.msgWaitingIocId;
+  uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiModuleId);
   if (spiEventIRQn == 0)
     return false;
 
@@ -53,21 +53,23 @@ bool fmt_initSpi(spiCfg_t cfg)
   spi->PowerControl(ARM_POWER_FULL);
 
   /* The CMSIS SPI driver interface omits any control over the priority of the
-  data-ready ISR.  This should be project-specified. The above calls to 
+  data-ready ISR.  This should be project-specified. The above calls to
   Initialize and PowerControl sets a default priority, we'll re-set it now.*/
 
   uint32_t encodedPrio =
-      NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.spiIrqPriority, 0U);
+      NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.irqPriority, 0U);
   NVIC_SetPriority(spiEventIRQn, encodedPrio);
 
   crc->Initialize();
   crc->PowerControl(ARM_POWER_FULL);
 
-  fmt_initIoc(cfg.clearToSendInput, EDGE_TYPE_RISING,
-              cfg.clearToSendOut, cfg.clearToSendIRQn, cfg.spiIrqPriority);
+  fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING, 
+    cfg.irqPriority, subClearToSendISR
+  );
 
-  fmt_initIoc(cfg.msgWaitingInput, EDGE_TYPE_RISING,
-              cfg.msgWaitingOut, cfg.msgWaitingIRQn, cfg.spiIrqPriority);
+  fmt_initIoc(cfg.msgWaitingIocId, cfg.msgWaitingIocOut, EDGE_TYPE_RISING,
+    cfg.irqPriority, subMsgWaitingISR
+  );
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -161,13 +163,12 @@ static void SendNextPacket(void)
   bool spiReady = !spi->GetStatus().busy;
   if (spiReady)
   {
-    bool clearToSend =
-        fmt_readPort(clearToSendInput.port) & (1U << clearToSendInput.pin);
+    bool clearToSend = fmt_getIocPinState(clearToSendIocId);
 
     if (clearToSend)
     {
       bool txWaiting = numItemsInQueue(&sendQueue);
-      bool rxWaiting = fmt_readPort(msgWaitingInput.port) & (1U << msgWaitingInput.pin);
+      bool rxWaiting = fmt_getIocPinState(msgWaitingIocId);
 
       if (txWaiting || rxWaiting)
       {
@@ -205,7 +206,7 @@ static void SendNextPacket(void)
     }
     else // not clear to send.  Enable cts ISR to restart when cts re-asserted.
     {
-      fmt_enableIoc(clearToSendInput);
+      fmt_enableIoc(clearToSendIocId);
     }
   }
 }
@@ -218,7 +219,7 @@ void subMsgWaitingISR(void)
 void subClearToSendISR(void)
 {
   // disable self (one-shot behavior)
-  fmt_disableIoc(clearToSendInput);
+  fmt_disableIoc(clearToSendIocId);
 
   // Re-start the transaction chain.
   SendNextPacket();
@@ -287,7 +288,7 @@ static void spiEventHandlerISR(uint32_t event)
     there too early, while CTS is still high, but the ESP isn't actually ready.
     One consequence is that we now depend on the CTS signal pulsing low between
     each transaction.*/
-    fmt_enableIoc(clearToSendInput);
+    fmt_enableIoc(clearToSendIocId);
     break;
   case ARM_SPI_EVENT_DATA_LOST:
     /*  Occurs in slave mode when data is requested/sent by master

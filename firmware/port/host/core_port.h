@@ -1,3 +1,5 @@
+
+
 #pragma once
 
 // TODO: (4) Make these spies.  Understand requirements for proper use.
@@ -7,7 +9,7 @@
 #define __NVIC_PRIO_BITS 6 /*!< Number of Bits used for Priority Levels                               */
 
 /**
- * An exact copy of CMSIS 6.1.0 implementation.
+ * An exact copy of CMSIS 6.1.0 implementation in core_cm4.h
  */
 static inline uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t PreemptPriority, uint32_t SubPriority)
 {
@@ -44,3 +46,4 @@ uint32_t NVIC_GetPriorityGrouping(void)
   \note    The priority cannot be set for every processor exception.
  */
 void NVIC_SetPriority(int32_t IRQn, uint32_t priority) {}
+
