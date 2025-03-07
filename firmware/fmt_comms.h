@@ -3,10 +3,10 @@
 /** fmt_sendMsg
  * Queues a message for transmit.
  * Should only be called from a single context - not thread-safe.
- * This function has implementations in: 
+ * These function pointers find implementations in: 
  * - fmt_spi.c
- * - (more to come)
+ * - stub_comms.c (test double)
  */
-bool fmt_sendMsg(Top message);
+extern bool (*fmt_sendMsg)(Top message);
 
-bool fmt_getMsg(Top *message);
+extern bool (*fmt_getMsg)(Top *message);
