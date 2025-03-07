@@ -101,7 +101,7 @@ bool fmt_initSpi(spiCfg_t cfg)
   return true;
 }
 
-bool fmt_sendMsg(Top message)
+static bool fmt_sendMsg_prod(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
   uint8_t *txMsg = txPacket + PREFIX_SIZE_BYTES;
@@ -129,8 +129,9 @@ bool fmt_sendMsg(Top message)
 
   return success;
 }
+bool (*fmt_sendMsg)(Top message) = fmt_sendMsg_prod;
 
-bool fmt_getMsg(Top *message)
+static bool fmt_getMsg_prod(Top *message)
 {
   bool success = false;
   if (numItemsInQueue(&rxQueue) > 0)
@@ -150,6 +151,7 @@ bool fmt_getMsg(Top *message)
   }
   return success;
 }
+bool (*fmt_getMsg)(Top *message) = fmt_getMsg_prod;
 
 static void SendNextPacket(void)
 {
