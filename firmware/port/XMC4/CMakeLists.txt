@@ -21,11 +21,11 @@ add_library(MCUPort
   ${XMC_LIB}/src/xmc4_gpio.c
   ${XMC_LIB}/src/xmc4_scu.c
   fmt_crc_xmc4.c
-  fmt_flash_port.c
+  fmt_flash_xmc4.c
   fmt_gpio_xmc.c
   fmt_ioc_xmc4.c
-  fmt_periodic_port.c
-  fmt_spi_port.c
+  fmt_periodic_xmc4.c
+  fmt_spi_xmc4.c
   gpio_common.c
 )
 
