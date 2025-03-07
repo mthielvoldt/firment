@@ -21,9 +21,9 @@ extern SPI_RESOURCES SPI4_Resources;
 extern SPI_RESOURCES SPI5_Resources;
 #endif
 
-uint32_t port_getSpiEventIRQn(uint8_t spiModuleNo)
+uint32_t port_getSpiEventIRQn(uint8_t spiModuleId)
 {
-  switch (spiModuleNo) {
+  switch (spiModuleId) {
     case 0:
     #if RTE_SPI0
     return SPI0_Resources.irq_rx_num;
