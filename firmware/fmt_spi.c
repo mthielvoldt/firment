@@ -12,6 +12,13 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 
+#define ASSERT_ARM_OK(x)  \
+  if (x != ARM_DRIVER_OK) \
+  return false
+#define ASSERT_SUCCESS(x) \
+  if (!x)                 \
+  return false
+
 // globals for debug
 uint32_t spiTxDropCount = 0;
 uint32_t spiRxDropCount = 0;
@@ -46,11 +53,10 @@ bool fmt_initSpi(spiCfg_t cfg)
   clearToSendIocId = cfg.clearToSendIocId;
   msgWaitingIocId = cfg.msgWaitingIocId;
   uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiModuleId);
-  if (spiEventIRQn == 0)
-    return false;
+  ASSERT_SUCCESS(spiEventIRQn);
 
-  spi->Initialize(spiEventHandlerISR);
-  spi->PowerControl(ARM_POWER_FULL);
+  ASSERT_ARM_OK(spi->Initialize(spiEventHandlerISR));
+  ASSERT_ARM_OK(spi->PowerControl(ARM_POWER_FULL));
 
   /* The CMSIS SPI driver interface omits any control over the priority of the
   data-ready ISR.  This should be project-specified. The above calls to
@@ -60,16 +66,16 @@ bool fmt_initSpi(spiCfg_t cfg)
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.irqPriority, 0U);
   NVIC_SetPriority(spiEventIRQn, encodedPrio);
 
-  crc->Initialize();
-  crc->PowerControl(ARM_POWER_FULL);
+  ASSERT_ARM_OK(crc->Initialize());
+  ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
 
-  fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING, 
-    cfg.irqPriority, subClearToSendISR
-  );
+  ASSERT_SUCCESS(
+      fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING,
+                  cfg.irqPriority, subClearToSendISR));
 
-  fmt_initIoc(cfg.msgWaitingIocId, cfg.msgWaitingIocOut, EDGE_TYPE_RISING,
-    cfg.irqPriority, subMsgWaitingISR
-  );
+  ASSERT_SUCCESS(
+      fmt_initIoc(cfg.msgWaitingIocId, cfg.msgWaitingIocOut, EDGE_TYPE_RISING,
+                  cfg.irqPriority, subMsgWaitingISR));
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -82,9 +88,9 @@ bool fmt_initSpi(spiCfg_t cfg)
       ARM_SPI_LSB_MSB |
       ARM_SPI_SS_MASTER_SW |
       ARM_SPI_DATA_BITS(8);
-  spi->Control(modeParams, cfg.baudHz);
+  ASSERT_ARM_OK(spi->Control(modeParams, cfg.baudHz));
 
-  spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
+  ASSERT_ARM_OK(spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE));
 
   initQueue(
       MAX_PACKET_SIZE_BYTES,
