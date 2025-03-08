@@ -30,7 +30,7 @@ TEST_GROUP(fmt_spi)
   void setup()
   {
     emptyMsg = (Top){0};
-    validMsg = (Top){
+    validMsg = (const Top){
         .which_sub = Top_Log_tag,
         .sub = {.Log = {.count = 1, .text = "Hey.", .value = 500}}};
     
@@ -73,20 +73,8 @@ TEST(fmt_spi, msgWaitingTriggersTransfer)
   LONGS_EQUAL(1, getCallCount(TRANSFER));
 }
 
-// TEST(fmt_spi, notClearToSendBlocksTransfer)
-// {
-
-// }
-
 TEST(fmt_spi, getMsgHappy)
 {
-  // get a message into the rxQueue.
-  // comes through the SPI driver we init.
-  // 1. place a message into the spi driver.
-  // 2. call the msgWaiting callback
-  // 3. check that the spi->Transfer was called.
-  // 4. call getMsg.
-
   // Stage this packet as incoming data
   spiTest_queueIncoming(validPacket);
 
@@ -112,6 +100,14 @@ TEST(fmt_spi, initClearsPendingMessages)
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
+TEST(fmt_spi, sendMsgHappy)
+{
+  CHECK_TRUE(fmt_sendMsg(validMsg));
+  const uint8_t *sentData = spiTest_getLastSent();
+  MEMCMP_EQUAL(validPacket, sentData, sizeof(validPacket));
+}
+
+/*
 TEST(fmt_spi, clearToSendBlocksMsgWaiting)
 {
   // If CTS is low, a rising edge on msg-waiting doesn't start a transfer.
@@ -120,17 +116,18 @@ TEST(fmt_spi, clearToSendBlocksMsgWaiting)
 TEST(fmt_spi, maintainedMsgWaitingStacksTransfers)
 {
   // If CTS and msgWaiting remain high, transfers should cascade indefinitely.
+  // This will require new feature in test-ioc for counting pin-reads. 
 }
-/*
+
+TEST(fmt_spi, notClearToSendBlocksTransfer)
+{
+
+}
+
 TEST(fmt_spi, crcErrorsCounted)
 {
   // send a message with a bad CRC
   // observe crc error count go up in status report.
-
-}
-
-TEST(fmt_spi, sendMsgHappy)
-{
 
 }
 
