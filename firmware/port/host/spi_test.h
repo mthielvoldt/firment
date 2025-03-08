@@ -3,6 +3,7 @@
  */
 
  #include <Driver_SPI.h>
+ #include <stdint.h>
 
 typedef enum fnType_e
 {
@@ -16,4 +17,5 @@ typedef enum fnType_e
 } fnType_t;
 
  int32_t getCallCount(fnType_t fnType);
- void resetCallCounts(void);
+ void spiTest_reset(void);
+ void spiTest_queueIncoming(const void *data, size_t size);
