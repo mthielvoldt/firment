@@ -17,9 +17,9 @@ void initQueue(
     size_t itemSize, uint32_t length, queue_t *queue, uint8_t *itemsStore, 
     uint32_t highestSenderPriority);
 
-bool enqueueBack(queue_t *queue, void *src);
+bool enqueueBack(queue_t *queue, const void *src);
 
-bool enqueueFront(queue_t *queue, void *src);
+bool enqueueFront(queue_t *queue, const void *src);
 
 bool peekFront(queue_t *queue, void *result);
 

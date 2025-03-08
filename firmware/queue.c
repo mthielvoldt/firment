@@ -19,7 +19,7 @@ void initQueue(
   queue->highestSenderPriority = highestSenderPriority;
 }
 
-bool enqueueBack(queue_t *queue, void *src)
+bool enqueueBack(queue_t *queue, const void *src)
 {
   bool success = false;
   int_fast16_t indexToWrite;
@@ -51,7 +51,7 @@ bool enqueueBack(queue_t *queue, void *src)
   return success;
 }
 
-bool enqueueFront(queue_t *queue, void *src)
+bool enqueueFront(queue_t *queue, const void *src)
 {
   bool success = false;
   return success;
