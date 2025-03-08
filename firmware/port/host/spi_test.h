@@ -1,0 +1,19 @@
+/**
+ * This is currently a spy on its way to a fake.
+ */
+
+ #include <Driver_SPI.h>
+
+typedef enum fnType_e
+{
+  TRANSFER = 0,
+  CONTROL,
+  INITIALIZE,
+  UNINITIALIZE,
+  POWER_CONTROL,
+  GET_STATUS,
+  FUNCTION_TYPE_COUNT
+} fnType_t;
+
+ int32_t getCallCount(fnType_t fnType);
+ void resetCallCounts(void);

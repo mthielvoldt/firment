@@ -2,6 +2,7 @@ add_library(MCUPort
   fmt_ioc_test.c
   fmt_spi_host.c
   fmt_crc_host.c
+  spi_test.c
 )
 
 target_include_directories(MCUPort
