@@ -11,12 +11,13 @@ void initQueue(
     uint8_t *itemsStorage, 
     uint32_t highestSenderPriority)
 {
-  queue->items = itemsStorage;
-  queue->itemSize = itemSize;
-  queue->maxNumItems = length;
-  queue->numSlotsClaimed = 0;
-  queue->front = 0;
-  queue->highestSenderPriority = highestSenderPriority;
+  // utilizes auto-zeroing of unspecified elements.
+  *queue = (queue_t){
+    .highestSenderPriority = highestSenderPriority,
+    .items = itemsStorage,
+    .itemSize = itemSize,
+    .maxNumItems = length,
+  };
 }
 
 bool enqueueBack(queue_t *queue, const void *src)
