@@ -19,9 +19,9 @@ void spiTest_reset(void)
   memset(fromTargetBuff, 0, sizeof(fromTargetBuff));
 }
 
-void spiTest_queueIncoming(const void *data, size_t size)
+void spiTest_queueIncoming(const void *data)
 {
-  memcpy(toTargetBuff, data, size);
+  memcpy(toTargetBuff, data, MAX_PACKET_SIZE_BYTES);
 }
 /** PRIVATE FUNCTIONS  */
 

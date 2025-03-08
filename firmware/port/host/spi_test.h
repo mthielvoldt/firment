@@ -18,4 +18,4 @@ typedef enum fnType_e
 
  int32_t getCallCount(fnType_t fnType);
  void spiTest_reset(void);
- void spiTest_queueIncoming(const void *data, size_t size);
+ void spiTest_queueIncoming(const void *data);

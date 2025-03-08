@@ -11,13 +11,14 @@ extern "C"
 }
 
 extern ARM_DRIVER_SPI Driver_SPI3;
-extern FMT_DRIVER_CRC Driver_CRC0;  // Need to worry about concurrent access?
+extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
 TEST_GROUP(fmt_spi)
 {
   bool initSuccess = false;
   uint8_t msgWaitingIocId = 2, clearToSendIocId = 0;
-  Top msg = {0};
-  spiCfg_t cfg = {
+  Top emptyMsg, validMsg;
+  uint8_t validPacket[MAX_PACKET_SIZE_BYTES];
+  const spiCfg_t cfg = {
       .spiModuleId = 3,
       .spiModule = &Driver_SPI3,
       .msgWaitingIocId = msgWaitingIocId,
@@ -28,34 +29,40 @@ TEST_GROUP(fmt_spi)
 
   void setup()
   {
+    emptyMsg = (Top){0};
+    validMsg = (Top){
+        .which_sub = Top_Log_tag,
+        .sub = {.Log = {.count = 1, .text = "Hey.", .value = 500}}};
+    
+    memset(validPacket, 0, sizeof(validPacket));
+    messageToValidPacket(validMsg, validPacket);
     spiTest_reset();
     test_iocSetPinState(clearToSendIocId, true);
     initSuccess = fmt_initSpi(cfg);
   }
   void teardown()
   {
-    msg = (Top){0};
   }
-  
+
   size_t messageToValidPacket(Top msg, uint8_t packet[])
   {
     // Pack buffer
-  pb_ostream_t ostream = pb_ostream_from_buffer(packet, MAX_MESSAGE_SIZE_BYTES);
-  bool success = pb_encode_delimited(&ostream, Top_fields, &msg);
+    pb_ostream_t ostream = pb_ostream_from_buffer(packet, MAX_MESSAGE_SIZE_BYTES);
+    bool success = pb_encode_delimited(&ostream, Top_fields, &msg);
 
-  // append CRC
-  uint32_t crcPosition = ((packet[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
-  uint16_t computedCRC;
-  int32_t result = Driver_CRC0.ComputeCRC(packet, crcPosition, &computedCRC);
-  *(uint16_t *)(&packet[crcPosition]) = computedCRC;
-  return crcPosition + CRC_SIZE_BYTES;
+    // append CRC
+    uint32_t crcPosition = ((packet[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
+    uint16_t computedCRC;
+    int32_t result = Driver_CRC0.ComputeCRC(packet, crcPosition, &computedCRC);
+    *(uint16_t *)(&packet[crcPosition]) = computedCRC;
+    return crcPosition + CRC_SIZE_BYTES;
   }
 };
 
 TEST(fmt_spi, init)
 {
   CHECK_TRUE(initSuccess);
-  CHECK_FALSE(fmt_getMsg(&msg));
+  CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
 TEST(fmt_spi, msgWaitingTriggersTransfer)
@@ -64,7 +71,6 @@ TEST(fmt_spi, msgWaitingTriggersTransfer)
   test_iocCallCallback(msgWaitingIocId);
   LONGS_EQUAL(1, getCallCount(INITIALIZE));
   LONGS_EQUAL(1, getCallCount(TRANSFER));
-  
 }
 
 // TEST(fmt_spi, notClearToSendBlocksTransfer)
@@ -81,29 +87,29 @@ TEST(fmt_spi, getMsgHappy)
   // 3. check that the spi->Transfer was called.
   // 4. call getMsg.
 
-  // Construct a message
-  msg = (Top){
-    .which_sub = Top_Log_tag, 
-    .sub = {.Log = {.count = 1, .text = "Hey."}}
-  };
-  uint8_t packet[MAX_PACKET_SIZE_BYTES] = {0};
-  size_t packetLength = messageToValidPacket(msg, packet);
-  
   // Stage this packet as incoming data
-  spiTest_queueIncoming(packet, packetLength);
+  spiTest_queueIncoming(validPacket);
 
   // Trigger msg-waiting
   test_iocSetPinState(msgWaitingIocId, true);
   test_iocCallCallback(msgWaitingIocId);
 
   // Exactly one message is pending
-  CHECK_TRUE(fmt_getMsg(&msg));
-  CHECK_FALSE(fmt_getMsg(&msg));
+  CHECK_TRUE(fmt_getMsg(&emptyMsg));
+  CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
 TEST(fmt_spi, initClearsPendingMessages)
 {
-  // 
+  spiTest_queueIncoming(validPacket);
+  // Trigger msg-waiting
+  test_iocSetPinState(msgWaitingIocId, true);
+  test_iocCallCallback(msgWaitingIocId);
+
+  initSuccess = fmt_initSpi(cfg);
+
+  CHECK_TRUE(initSuccess);
+  CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
 TEST(fmt_spi, clearToSendBlocksMsgWaiting)
