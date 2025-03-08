@@ -27,6 +27,10 @@ Outputs:
 ## Code smells
 3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
 14. gpio in project_comms.h = feature envy.
+15. fmt_spi implements too much. Break some of this out.
+  - CRC checks
+  - message serialization
+  - queue management (drop counters)
 
 # New Tests
 4. host/core_cm4.h spy on NVIC priority functions.
