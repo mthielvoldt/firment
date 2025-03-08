@@ -1,11 +1,12 @@
 #include <spi_test.h>
-#include <fmt_sizes.h>
 #include <string.h>
 
 static int32_t callCounts[FUNCTION_TYPE_COUNT] = {0};
 static uint8_t toTargetBuff[MAX_PACKET_SIZE_BYTES] = {0};
 static uint8_t fromTargetBuff[MAX_PACKET_SIZE_BYTES] = {0};
 static ARM_SPI_SignalEvent_t spiEventCallback = NULL;
+
+// static sendStatus_t sendStatus = {0};
 
 int32_t getCallCount(fnType_t fnType)
 {
@@ -22,6 +23,11 @@ void spiTest_reset(void)
 void spiTest_queueIncoming(const void *data)
 {
   memcpy(toTargetBuff, data, MAX_PACKET_SIZE_BYTES);
+}
+
+const uint8_t* spiTest_getLastSent(void)
+{
+  return fromTargetBuff;
 }
 /** PRIVATE FUNCTIONS  */
 
