@@ -33,11 +33,11 @@ TEST_GROUP(fmt_spi)
     validMsg = (const Top){
         .which_sub = Top_Log_tag,
         .sub = {.Log = {.count = 1, .text = "Hey.", .value = 500}}};
-    
+
     memset(validPacket, 0, sizeof(validPacket));
     messageToValidPacket(validMsg, validPacket);
     spiTest_reset();
-    test_iocSetPinState(clearToSendIocId, true);
+    iocTest_setPinState(clearToSendIocId, true);
     initSuccess = fmt_initSpi(cfg);
   }
   void teardown()
@@ -67,10 +67,10 @@ TEST(fmt_spi, init)
 
 TEST(fmt_spi, msgWaitingTriggersTransfer)
 {
-  test_iocSetPinState(msgWaitingIocId, true);
-  test_iocCallCallback(msgWaitingIocId);
-  LONGS_EQUAL(1, getCallCount(INITIALIZE));
-  LONGS_EQUAL(1, getCallCount(TRANSFER));
+  // Trigger msg-waiting
+  iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
+  CHECK_EQUAL(1, getCallCount(INITIALIZE));
+  CHECK_EQUAL(1, getCallCount(TRANSFER));
 }
 
 TEST(fmt_spi, getMsgHappy)
@@ -79,8 +79,7 @@ TEST(fmt_spi, getMsgHappy)
   spiTest_queueIncoming(validPacket);
 
   // Trigger msg-waiting
-  test_iocSetPinState(msgWaitingIocId, true);
-  test_iocCallCallback(msgWaitingIocId);
+  iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
   // Exactly one message is pending
   CHECK_TRUE(fmt_getMsg(&emptyMsg));
@@ -89,14 +88,15 @@ TEST(fmt_spi, getMsgHappy)
 
 TEST(fmt_spi, initClearsPendingMessages)
 {
+  // Thest two actions put a message in the rxQueue (see getMsgHappy)
   spiTest_queueIncoming(validPacket);
-  // Trigger msg-waiting
-  test_iocSetPinState(msgWaitingIocId, true);
-  test_iocCallCallback(msgWaitingIocId);
+  iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
+  // With a message in rxQueue, re-initialize spi.
   initSuccess = fmt_initSpi(cfg);
 
   CHECK_TRUE(initSuccess);
+  // No message should be there.
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
@@ -107,16 +107,27 @@ TEST(fmt_spi, sendMsgHappy)
   MEMCMP_EQUAL(validPacket, sentData, sizeof(validPacket));
 }
 
-/*
 TEST(fmt_spi, clearToSendBlocksMsgWaiting)
 {
   // If CTS is low, a rising edge on msg-waiting doesn't start a transfer.
+  iocTest_setPinState(clearToSendIocId, false);
+  iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
+  CHECK_EQUAL(1, getCallCount(INITIALIZE));
+  CHECK_EQUAL(0, getCallCount(TRANSFER));
 }
 
+TEST(fmt_spi, ctsBlocksSendMsg)
+{
+  iocTest_setPinState(clearToSendIocId, false);
+  CHECK_TRUE(fmt_sendMsg(validMsg));
+  CHECK_EQUAL(0, getCallCount(TRANSFER));
+}
+
+/*
 TEST(fmt_spi, maintainedMsgWaitingStacksTransfers)
 {
-  // If CTS and msgWaiting remain high, transfers should cascade indefinitely.
-  // This will require new feature in test-ioc for counting pin-reads. 
+// If CTS and msgWaiting remain high, transfers should cascade indefinitely.
+// This will require new feature in test-ioc for counting pin-reads.
 }
 
 TEST(fmt_spi, notClearToSendBlocksTransfer)
@@ -126,8 +137,8 @@ TEST(fmt_spi, notClearToSendBlocksTransfer)
 
 TEST(fmt_spi, crcErrorsCounted)
 {
-  // send a message with a bad CRC
-  // observe crc error count go up in status report.
+// send a message with a bad CRC
+// observe crc error count go up in status report.
 
 }
 
