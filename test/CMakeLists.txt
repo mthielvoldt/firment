@@ -18,9 +18,11 @@ add_executable(testFirment
   ../firmware/test/spiTest.cpp
   ../firmware/test/iocTestTest.cpp
   ../firmware/test/stub_comms.c
+  ${PROJECT_CONFIG_DIR}/spi_config.c
   # ../firmware/test/gpioTest.cpp
 )
 
+target_include_directories(testFirment PRIVATE ${PROJECT_CONFIG_DIR})
 
 target_link_libraries(testFirment 
   CppUTest 

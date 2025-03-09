@@ -37,7 +37,7 @@ target_include_directories(MCUPort
     XMC4000_DFP/RTE_Driver
     XMC4000_DFP/CMSIS/RTOS/RTX/INC
     ../../lib/CMSIS-6.1.0/Driver/Include
-    ${PROJECT_SOURCE_DIR}/firmware  # TODO: make this not assume project dir structure.
+    ${PROJECT_CONFIG_DIR}
     PUBLIC
     ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
     ${RTE_DEVICE_DIR}

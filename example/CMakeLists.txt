@@ -51,12 +51,13 @@ add_executable(${EXECUTABLE}
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
-  firmware/config/spi_config.c
+  ${PROJECT_CONFIG_DIR}/spi_config.c
 )
 
 # Specify the project's include directories. Libraries add their own. 
 target_include_directories(${EXECUTABLE} PRIVATE
   firmware
+  ${PROJECT_CONFIG_DIR}
 )
 
 # Specify which libraries the top-level target depends on directly. 

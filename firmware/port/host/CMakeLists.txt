@@ -11,6 +11,7 @@ target_include_directories(MCUPort
   PRIVATE
     ../..
     ../../lib/CMSIS-6.1.0/Driver/Include # Driver_Common.h
+    ${PROJECT_CONFIG_DIR}
 )
 
 # TODO: (1) make this the SOT for page size in FW, configuring fmt_flash_port.h
