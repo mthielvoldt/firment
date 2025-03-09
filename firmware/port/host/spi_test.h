@@ -1,5 +1,9 @@
 /**
- * This is currently a spy on its way to a fake.
+ * spi_test.c is a host-platform test-double for the CMSIS SPI implementation.
+ * fmt_spi consumes customer of the SPI implementation appropriate for the port.
+ * 
+ * This header covers the test-utility functions that the host-implementation, 
+ * spi_test.c implements that are beyond the prod implementations. 
  */
 
  #include <fmt_sizes.h>

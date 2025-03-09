@@ -10,6 +10,11 @@ extern "C"
 #include <pb_encode.h>
 }
 
+#define COUNT_SOME 5
+#define COUNT_MORE_THAN_SOME 15
+#define COUNT_ALOT 500
+#define COUNT_MORE_THAN_ALOT 1000
+
 extern ARM_DRIVER_SPI Driver_SPI3;
 extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
 TEST_GROUP(fmt_spi)
@@ -107,7 +112,7 @@ TEST(fmt_spi, sendMsgHappy)
   MEMCMP_EQUAL(validPacket, sentData, sizeof(validPacket));
 }
 
-TEST(fmt_spi, clearToSendBlocksMsgWaiting)
+TEST(fmt_spi, notClearToSendBlocksMsgWaiting)
 {
   // If CTS is low, a rising edge on msg-waiting doesn't start a transfer.
   iocTest_setPinState(clearToSendIocId, false);
@@ -116,24 +121,39 @@ TEST(fmt_spi, clearToSendBlocksMsgWaiting)
   CHECK_EQUAL(0, getCallCount(TRANSFER));
 }
 
-TEST(fmt_spi, ctsBlocksSendMsg)
+TEST(fmt_spi, notCTSBlocksSendMsg)
 {
   iocTest_setPinState(clearToSendIocId, false);
   CHECK_TRUE(fmt_sendMsg(validMsg));
   CHECK_EQUAL(0, getCallCount(TRANSFER));
 }
 
+TEST(fmt_spi, transfersContinueUntilMsgWaitingDrops)
+{
+  /** @note This is not ideal behavior.  Ideally, CTS pin would not need to
+   * pulse, and transfers would cascade as fast as module allows.
+   */
+  // If msgWaiting remain high, transfers should follow CTS triggers.
+  iocTest_sendPinPulse(msgWaitingIocId, true, COUNT_SOME);
+
+  // Pulse CTS pin plenty of times
+  for (int i=0; i < COUNT_MORE_THAN_SOME; i++)
+    iocTest_sendPinPulse(clearToSendIocId, true, MAINTAIN_INDEFINITELY);
+
+  CHECK_EQUAL(COUNT_SOME, getCallCount(TRANSFER));
+}
+TEST(fmt_spi, transfersContinueUntilCTSStopsPulsing)
+{
+  // If CTS and msgWaiting remain high, transfers should cascade indefinitely.
+  iocTest_sendPinPulse(msgWaitingIocId, true, COUNT_MORE_THAN_SOME);
+
+  // Pulse CTS pin plenty of times
+  for (int i=0; i < COUNT_SOME; i++)
+    iocTest_sendPinPulse(clearToSendIocId, true, MAINTAIN_INDEFINITELY);
+    
+  CHECK_EQUAL(COUNT_SOME + 1, getCallCount(TRANSFER));
+}
 /*
-TEST(fmt_spi, maintainedMsgWaitingStacksTransfers)
-{
-// If CTS and msgWaiting remain high, transfers should cascade indefinitely.
-// This will require new feature in test-ioc for counting pin-reads.
-}
-
-TEST(fmt_spi, notClearToSendBlocksTransfer)
-{
-
-}
 
 TEST(fmt_spi, crcErrorsCounted)
 {
