@@ -27,6 +27,7 @@ int main(void)
   extern ARM_DRIVER_SPI Driver_SPI4;
 
   spiCfg_t spiConfig = {
+      .spiModuleNo = 4,
       .spiModule = &Driver_SPI4,
       .msgWaitingInput = {RTE_IOC_P1_0_ERU0}, // ERU0.3
       .msgWaitingOut = 3, // must call msgWaitingISR from ERU0_3_IRQHandler
