@@ -11,5 +11,19 @@ set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
 add_subdirectory(cpputest ../cpputest_build)
 add_subdirectory(${PORT_DIR} port)
 add_subdirectory(${FIRMENT_DIR} firment)
-add_subdirectory(../firmware/test ${PROJECT_BINARY_DIR}/test)
 
+add_executable(testFirment
+  ../firmware/test/testFirment.cpp
+  ../firmware/test/logTest.cpp
+  ../firmware/test/spiTest.cpp
+  ../firmware/test/iocTestTest.cpp
+  ../firmware/test/stub_comms.c
+  # ../firmware/test/gpioTest.cpp
+)
+
+
+target_link_libraries(testFirment 
+  CppUTest 
+  FirmentFW
+  MCUPort   # RTE_Device.h
+)
