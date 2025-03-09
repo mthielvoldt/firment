@@ -8,7 +8,7 @@
 #endif
 
 #include "ISR_Config.h"
-#include <fmt_spi.h>
+#include "config/spi_config.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic_port.h>
@@ -19,26 +19,7 @@
 
 int main(void)
 {
-
-  /* fmt_initSpi selects which SPI module to use for fmt.
-  The selected module must be provided and configured in "RTE_DeviceConfig.h"
-  The 
-  */
-  extern ARM_DRIVER_SPI Driver_SPI4;
-
-  spiCfg_t spiConfig = {
-      .spiModuleNo = 4,
-      .spiModule = &Driver_SPI4,
-      .msgWaitingIocId = 14, // P0_1, ERU0  see Device_IOC.h
-      .msgWaitingIocOut = 3,
-      .clearToSendIocId = 4, // P0_4, ERU0  see Device_IOC.h
-      .clearToSendIocOut = 2,
-      .baudHz = 1000000,
-      .busMode = BUS_MODE_MAIN,
-      .ssActiveLow = true,
-      .irqPriority = spiTxBuf_priority, // TODO: check if this is used.
-  };
-  fmt_initSpi(spiConfig);
+  project_initSpi();
   
   comm_init((portPin_t){.port = XMC_GPIO_PORT5, .pin = 9U});
 
