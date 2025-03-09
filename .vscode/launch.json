@@ -21,7 +21,7 @@
       "program": "${workspaceFolder}/test/build/test/testFirment",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${fileDirname}",
+      "cwd": "${workspaceFolder}/test",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
@@ -36,7 +36,8 @@
               "text": "-gdb-set disassembly-flavor intel",
               "ignoreFailures": true
           }
-      ]
+      ],
+      "preLaunchTask": "build-tests"
     },
     {
       "name": "esp32s3-contained",
