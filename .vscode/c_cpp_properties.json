@@ -66,7 +66,17 @@
           ],
           "intelliSenseMode": "gcc-arm",          
           "includePath": [
-              
+            "example/firmware", 
+            "example/build/xmc/firment",
+            "firmware",
+            "firmware/port/XMC4",
+            "firmware/port/XMC4/4800_F144",
+            "firmware/port/XMC4/mtb-xmclib-cat3/XMCLib/inc",
+            "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700/Include",
+            "firmware/port/XMC4/XMC4000_DFP/RTE_Driver",
+            "firmware/lib/CMSIS-6.1.0/Core/Include",
+            "firmware/lib/CMSIS-6.1.0/Driver/Include",
+            "protocol/nanopb"
           ],
           "cStandard": "c11",
           "cppStandard": "c++11",
@@ -80,10 +90,13 @@
           "compilerArgs": [],
           "intelliSenseMode": "linux-gcc-x64",
           "includePath": [
-            "test/cpputest/include",
             "firmware",
+            "firmware/port/host",
+            "firmware/lib/CMSIS-6.1.0/Driver/Include",
+            "protocol/nanopb",
             "test/build/firment",  // messages.pb.h
-            "protocol/nanopb"
+            "test/cpputest/include",
+            "test/firmware"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
