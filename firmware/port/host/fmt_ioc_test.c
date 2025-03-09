@@ -1,5 +1,8 @@
 /** fmt_ioc_test.c
  * @file test stub for fmt_ioc.
+ * 
+ * @warning Despite accepting activeEdges, this implementation ONLY behaves as
+ * though EDGE_TYPE_RISING were set, regardless of what activeEdges is passed.
  */
 #include "fmt_ioc_test.h"
 
@@ -40,6 +43,18 @@ void fmt_disableIoc(uint8_t iocId)
   ioc[iocId].iocEnabled = false;
 }
 
+static void togglePinWithCallback(ioc_t *myIoc)
+{
+  myIoc->pinState ^= 1; // toggle
+  if (!myIoc->iocEnabled)
+    return;
+  
+  if (myIoc->pinState)  // currently supports only rising-edge trigger.
+  {
+    myIoc->callback();
+  }
+}
+
 bool fmt_getIocPinState(uint8_t iocId)
 {
   ioc_t *myIoc = &ioc[iocId];
@@ -48,7 +63,7 @@ bool fmt_getIocPinState(uint8_t iocId)
   {
     if (myIoc->readsUntilToggle == 0)
     {
-      myIoc->pinState ^= 1; // toggle
+      togglePinWithCallback(myIoc);
     }
     myIoc->readsUntilToggle--;
   }
@@ -80,7 +95,7 @@ void iocTest_sendPinPulse(uint8_t iocId, bool pulseState, int readCount)
   ioc_t *myIoc = &ioc[iocId];
   myIoc->readsUntilToggle = readCount;
   myIoc->pinState = pulseState;
-  if (myIoc->iocEnabled)
+  if (myIoc->iocEnabled && pulseState)  // supports only rising-edge trigger
   {
     myIoc->callback();
   }
