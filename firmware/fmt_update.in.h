@@ -14,11 +14,19 @@
 // Source: firment_msg_config.json  "image-part-max-size"
 #define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
 
+typedef void (*callback_t)(void);
+
+/**
+ * Set a callback to execute just before the first page-write to flash. 
+ * Commonly used to save a message for a bootloader. 
+ */
+void fmt_setFirstPageReceivedCallback(callback_t onDownloadStart);
+
 /**
  * Set a callback that executes once a new image is successfully fully saved.
  * Commonly used to trigger a bootloader action, and/or reset the CPU.
  */
-void fmt_initUpdate(void(*onDownloadStart)(void), void(*onDownloadComplete)(void));
+void fmt_setDownloadFinishCallback(callback_t onDownloadComplete);
 
 #define USE_ImageData
-void handleImageData(ImageData msg);
+bool handleImageData(ImageData msg);
