@@ -1,9 +1,10 @@
 #include <fmt_spi.h>
+#include "ISR_Config.h"
 
 extern ARM_DRIVER_SPI Driver_SPI4;
 
 spiCfg_t spiConfig = {
-  .spiModuleNo = 4,
+  .spiModuleId = 4,
   .spiModule = &Driver_SPI4,
   .msgWaitingIocId = 14, // P0_1, ERU0  see Device_IOC.h
   .msgWaitingIocOut = 3,
