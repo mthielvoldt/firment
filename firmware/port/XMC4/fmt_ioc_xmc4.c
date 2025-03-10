@@ -3,8 +3,6 @@
 #include <RTE_DeviceConfig.h>
 #include <xmc_gpio.h>
 
-#define IOC_CALLBACK_ID(eruId, output) (eruId * OUTPUT_COUNT_PER_ERU + output)
-
 const XMC_ERU_ETL_EDGE_DETECTION_t edgeMap[] = {
     [EDGE_TYPE_NONE] = XMC_ERU_ETL_EDGE_DETECTION_DISABLED,
     [EDGE_TYPE_FALLING] = XMC_ERU_ETL_EDGE_DETECTION_FALLING,
@@ -21,6 +19,10 @@ static bool iocIdValid(uint8_t iocId)
 {
   return iocId < (sizeof(iocConfigs) / sizeof(RTE_IOC_t));
 }
+static uint8_t getIsrId(uint8_t eruId, uint8_t output)
+{
+  return eruId * OUTPUT_COUNT_PER_ERU + output;
+}
 
 /** Init Interrupt-on-change ISR, linking to a specific GPIO.
  *
@@ -35,10 +37,10 @@ bool fmt_initIoc(
   if (!iocIdValid(iocId) || outputChannel >= OUTPUT_COUNT_PER_ERU)
     return false;
 
-  const RTE_IOC_t *ioc = iocConfigs[iocId];
+  const RTE_IOC_t *ioc = &iocConfigs[iocId];
   uint8_t irqNum = ioc->usableIrqNums[outputChannel];
 
-  callbacks[IOC_CALLBACK_ID(ioc->eruId, outputChannel)] = callback;
+  callbacks[getIsrId(ioc->eruId, outputChannel)] = callback;
 
   const XMC_GPIO_CONFIG_t gpio_config = {.mode = XMC_GPIO_MODE_INPUT_TRISTATE};
   XMC_GPIO_Init(ioc->port, ioc->pin, &gpio_config);
@@ -74,7 +76,7 @@ void fmt_enableIoc(uint8_t iocId)
 {
   if (!iocIdValid(iocId))
     return;
-  const RTE_IOC_t *ioc = iocConfigs[iocId];
+  const RTE_IOC_t *ioc = &iocConfigs[iocId];
   ioc->eru->EXICON_b[ioc->etlNum].PE = true;
 }
 
@@ -82,7 +84,7 @@ void fmt_disableIoc(uint8_t iocId)
 {
   if (!iocIdValid(iocId))
     return;
-  const RTE_IOC_t *ioc = iocConfigs[iocId];
+  const RTE_IOC_t *ioc = &iocConfigs[iocId];
   ioc->eru->EXICON_b[ioc->etlNum].PE = false;
 }
 
@@ -90,72 +92,72 @@ bool fmt_getIocPinState(uint8_t iocId)
 {
   if (!iocIdValid(iocId))
     return false;
-  const RTE_IOC_t *ioc = iocConfigs[iocId];
+  const RTE_IOC_t *ioc = &iocConfigs[iocId];
   return XMC_GPIO_GetInput(ioc->port, ioc->pin);
 }
 
 /******************* ISRs *******************/
 #if 1
-#ifdef USE_ERU0_0_for_IOC
+#if IOC_USE_ISR_0
 void ERU0_0_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(0,0)];
+  isrCallback_t cb = callbacks[0];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU0_1_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_1
+void ERU0_1_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(0,1)];
+  isrCallback_t cb = callbacks[1];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU0_2_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_2
+void ERU0_2_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(0,2)];
+  isrCallback_t cb = callbacks[2];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU0_3_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_3
+void ERU0_3_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(0,3)];
+  isrCallback_t cb = callbacks[3];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU1_0_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_4
+void ERU1_0_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(1,0)];
+  isrCallback_t cb = callbacks[4];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU1_1_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_5
+void ERU1_1_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(1,1)];
+  isrCallback_t cb = callbacks[5];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU1_2_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_6
+void ERU1_2_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(1,2)];
+  isrCallback_t cb = callbacks[6];
   if (cb)
     cb();
 }
 #endif
-#ifdef USE_ERU1_3_for_IOC
-void ERU0_0_IRQHandler(void)
+#if IOC_USE_ISR_7
+void ERU1_3_IRQHandler(void)
 {
-  callback_t cb = callbacks[IOC_CALLBACK_ID(1,3)];
+  isrCallback_t cb = callbacks[7];
   if (cb)
     cb();
 }
