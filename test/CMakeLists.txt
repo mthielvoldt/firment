@@ -17,6 +17,7 @@ add_executable(testFirment
   ../firmware/test/logTest.cpp
   ../firmware/test/spiTest.cpp
   ../firmware/test/iocTestTest.cpp
+  ../firmware/test/updateTest.cpp
   ../firmware/test/stub_comms.c
   ${PROJECT_CONFIG_DIR}/spi_config.c
   # ../firmware/test/gpioTest.cpp

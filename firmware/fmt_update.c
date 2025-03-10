@@ -12,8 +12,8 @@
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
 static uint8_t pageBuffer[FLASH_PAGE_SIZE];
-static void(*downloadStartCb)(void);
-static void(*downloadCompleteCb)(void);
+static callback_t downloadStartCb = NULL;
+static callback_t downloadCompleteCb = NULL;
 
 // Static function prototypes.
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status);
@@ -23,13 +23,16 @@ static void prepForNewPage(PageStatusEnum thisPageStatus);
 static void processChunk(ImageData *msg);
 static void processPage(void);
 
-void fmt_initUpdate(void(*onDownloadStart)(void), void(*onDownloadComplete)(void))
+void fmt_setFirstPageReceivedCallback(callback_t onDownloadStart)
 {
-  downloadCompleteCb = onDownloadComplete;
   downloadStartCb = onDownloadStart;
 }
+void fmt_setDownloadFinishCallback(callback_t onDownloadComplete)
+{
+  downloadCompleteCb = onDownloadComplete;
+}
 
-void handleImageData(ImageData msg)
+bool handleImageData(ImageData msg)
 {
   if (imageDataMsgValid(&msg))
   {
@@ -40,13 +43,16 @@ void handleImageData(ImageData msg)
       prepForNewPage(PageStatusEnum_WRITE_SUCCESS);
       if (msg.pageIndex == (msg.pageCount - 1))
       {
-        downloadCompleteCb();
+        if (downloadCompleteCb)
+          downloadCompleteCb();
       }
     }
+    return true;
   }
   else
   {
     prepForNewPage(PageStatusEnum_WRITE_FAIL);
+    return false;
   }
 }
 
@@ -126,7 +132,8 @@ static void processPage(void)
   if (activePage == 0)
   {
     // This might erase one or more sectors in this partition, so preceeds write.
-    downloadStartCb();
+    if (downloadStartCb)
+      downloadStartCb();
     // TODO: erase the other sectors to support multi-sector partitions.
     // hal_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }

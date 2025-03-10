@@ -1,4 +1,5 @@
 add_library(MCUPort
+  fmt_flash_mock.c
   fmt_ioc_test.c
   fmt_spi_host.c
   fmt_crc_host.c
