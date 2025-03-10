@@ -4,6 +4,7 @@ extern "C"
 {
 #include <fmt_comms.h>
 #include <fmt_spi.h>
+#include <spi_config.h>
 #include <fmt_crc.h>
 #include <fmt_ioc_test.h>
 #include <spi_test.h>
@@ -17,20 +18,21 @@ extern "C"
 
 extern ARM_DRIVER_SPI Driver_SPI3;
 extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
+
 TEST_GROUP(fmt_spi)
 {
   bool initSuccess = false;
-  uint8_t msgWaitingIocId = 2, clearToSendIocId = 0;
+  uint8_t msgWaitingIocId = 14, clearToSendIocId = 4; // TODO: remove specific mapping requirement. 
   Top emptyMsg, validMsg;
   uint8_t validPacket[MAX_PACKET_SIZE_BYTES];
-  const spiCfg_t cfg = {
-      .spiModuleId = 3,
-      .spiModule = &Driver_SPI3,
-      .msgWaitingIocId = msgWaitingIocId,
-      .clearToSendIocId = clearToSendIocId,
-      .baudHz = 1000000,
-      .ssActiveLow = false,
-      .irqPriority = 16};
+  // const spiCfg_t cfg = {
+  //     .spiModuleId = 3,
+  //     .spiModule = &Driver_SPI3,
+  //     .msgWaitingIocId = msgWaitingIocId,
+  //     .clearToSendIocId = clearToSendIocId,
+  //     .baudHz = 1000000,
+  //     .ssActiveLow = false,
+  //     .irqPriority = 16};
 
   void setup()
   {
@@ -43,7 +45,7 @@ TEST_GROUP(fmt_spi)
     messageToValidPacket(validMsg, validPacket);
     spiTest_reset();
     iocTest_setPinState(clearToSendIocId, true);
-    initSuccess = fmt_initSpi(cfg);
+    initSuccess = project_initSpi();
   }
   void teardown()
   {
@@ -68,6 +70,11 @@ TEST(fmt_spi, init)
 {
   CHECK_TRUE(initSuccess);
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
+}
+
+TEST(fmt_spi, project_init)
+{
+  CHECK_TRUE(project_initSpi());
 }
 
 TEST(fmt_spi, msgWaitingTriggersTransfer)
@@ -98,7 +105,7 @@ TEST(fmt_spi, initClearsPendingMessages)
   iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
   // With a message in rxQueue, re-initialize spi.
-  initSuccess = fmt_initSpi(cfg);
+  initSuccess = project_initSpi();
 
   CHECK_TRUE(initSuccess);
   // No message should be there.

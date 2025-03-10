@@ -12,8 +12,9 @@ void callback0(void)
 
 TEST_GROUP(fmt_ioc_test)
 {
-  const uint8_t pin0 = 0;
-  const uint8_t out0 = 2;
+  const uint8_t pin0 = 4;
+  const uint8_t out0 = 14;
+  
   const uint32_t prio0 = 33;
   bool initStatus;
   void setup()

@@ -71,10 +71,15 @@ static ARM_SPI_STATUS GetStatus(void)
   return (ARM_SPI_STATUS){.busy = 0, .data_lost = 0, .mode_fault = 0};
 }
 
-ARM_DRIVER_SPI Driver_SPI3 = {
+const ARM_DRIVER_SPI Driver_SPI0 = {
     .Initialize = Initialize,
     .PowerControl = PowerControl,
     .Transfer = Transfer,
     .Control = Control,
     .GetStatus = GetStatus,
 };
+const ARM_DRIVER_SPI Driver_SPI1 = Driver_SPI0;
+const ARM_DRIVER_SPI Driver_SPI2 = Driver_SPI0;
+const ARM_DRIVER_SPI Driver_SPI3 = Driver_SPI0;
+const ARM_DRIVER_SPI Driver_SPI4 = Driver_SPI0;
+const ARM_DRIVER_SPI Driver_SPI5 = Driver_SPI0;

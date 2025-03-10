@@ -5,6 +5,11 @@
  * parts of RTE_Device.h, leaving the written-in-silicon relationships in place.
  */
 
+ /* Interrupt-on-Change pins */
+#define USE_IOC4
+#define USE_IOC14
+
+
 #define RTE_CAN0 0
 #define RTE_CAN1 0
 #define RTE_CAN2 0
