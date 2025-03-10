@@ -1,3 +1,6 @@
+#ifndef Device_IOC_H
+#define Device_IOC_H
+
 #include "xmc4_gpio_map.h"
 #include "xmc_gpio.h"
 #include "xmc_eru.h"
@@ -54,3 +57,22 @@ typedef struct _RTE_IOC
 #define IOC_31  {0, P3_2,  ERU0_ETL0, XMC_ERU_ETL_SOURCE_A, 1U, ERU0_IRQNs} // ERU0.0A1
 #define IOC_32  {0, P3_5,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_B, 1U, ERU0_IRQNs} // ERU0.3B1
 #define IOC_33  {0, P3_6,  ERU0_ETL3, XMC_ERU_ETL_SOURCE_A, 1U, ERU0_IRQNs} // ERU0.3A1
+
+/* These indicate which IOCs can be routed to which ISRs (IRQHandlers)
+This is dependent on which ERU the IOC uses.*/
+#define IOC_3_to_ISR_4 4
+#define IOC_3_to_ISR_5 5
+#define IOC_3_to_ISR_6 6
+#define IOC_3_to_ISR_7 7
+
+#define IOC_4_to_ISR_0 0
+#define IOC_4_to_ISR_1 1
+#define IOC_4_to_ISR_2 2
+#define IOC_4_to_ISR_3 3
+
+#define IOC_14_to_ISR_0 0
+#define IOC_14_to_ISR_1 1
+#define IOC_14_to_ISR_2 2
+#define IOC_14_to_ISR_3 3
+
+#endif // Device_IOC_H

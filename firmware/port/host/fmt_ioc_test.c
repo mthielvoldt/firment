@@ -1,14 +1,16 @@
 /** fmt_ioc_test.c
  * @file test stub for fmt_ioc.
- * 
+ *
  * @warning Despite accepting activeEdges, this implementation ONLY behaves as
  * though EDGE_TYPE_RISING were set, regardless of what activeEdges is passed.
  */
 #include "fmt_ioc_test.h"
-#include "Device_IOC.h"
 #include <RTE_DeviceConfig.h>
 
 const uint8_t availableIocs[] = AVAILABLE_IOCs;
+const uint8_t enabledIsrCount =
+    IOC_USE_ISR_0 + IOC_USE_ISR_1 + IOC_USE_ISR_2 + IOC_USE_ISR_3 +
+    IOC_USE_ISR_4 + IOC_USE_ISR_5 + IOC_USE_ISR_6 + IOC_USE_ISR_7;
 
 #define NUM_PINS (UINT8_MAX + 1)
 
@@ -31,7 +33,7 @@ bool fmt_initIoc(
     uint32_t priority,
     void (*callback)(void))
 {
-  if (iocId >= sizeof(availableIocs))
+  if (iocId >= sizeof(availableIocs) || iocId >= enabledIsrCount)
     return false;
 
   ioc[iocId].readsUntilToggle = MAINTAIN_INDEFINITELY;
@@ -55,8 +57,8 @@ static void togglePinWithCallback(ioc_t *myIoc)
   myIoc->pinState ^= 1; // toggle
   if (!myIoc->iocEnabled)
     return;
-  
-  if (myIoc->pinState)  // currently supports only rising-edge trigger.
+
+  if (myIoc->pinState) // currently supports only rising-edge trigger.
   {
     myIoc->callback();
   }
@@ -102,7 +104,7 @@ void iocTest_sendPinPulse(uint8_t iocId, bool pulseState, int readCount)
   ioc_t *myIoc = &ioc[iocId];
   myIoc->readsUntilToggle = readCount;
   myIoc->pinState = pulseState;
-  if (myIoc->iocEnabled && pulseState)  // supports only rising-edge trigger
+  if (myIoc->iocEnabled && pulseState) // supports only rising-edge trigger
   {
     myIoc->callback();
   }

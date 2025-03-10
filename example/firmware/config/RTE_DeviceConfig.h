@@ -1,13 +1,43 @@
 /** Provides project-specific peripheral configuration.
- * These macros have been extracted from RTE_Device.h. 
+ * These macros have been extracted from RTE_Device.h.
  * Normally, parts of RTE_Device.h are edited by a GUI assistant (uVision etc.)
  * Rather than rely on such an assistant, I chose to extract the configurable
  * parts of RTE_Device.h, leaving the written-in-silicon relationships in place.
+ *
+ * Source-of-Truth for:
+ * - availability of HW resources consistent with PCB connections.
+ *
+ * Language level:
+ * - Project  num inbound
+ * - HAL      yes outbound
+ * - dev.fam  no
+ * - device   no
+ *
+ * Constraints:
+ * - Device choice (RTE_Device.h) determines which macros need defining
  */
 
- /* Interrupt-on-Change pins.  See Device_IOC.h for your target hardware.*/
-#define AVAILABLE_IOCs { IOC_4, IOC_14 }
+#ifndef RTE_DeviceConfig_H
+#define RTE_DeviceConfig_H
 
+#include <Device_IOC.h>
+
+/* Interrupt-on-Change pins.  See Device_IOC.h for your target hardware.*/
+/* Note: IOC_n_RTE_INDEX should match position of IOC_n in AVAILABLE_IOCs */
+#define AVAILABLE_IOCs {IOC_4, IOC_14}
+#define IOC_4_RTE_INDEX 0
+#define IOC_14_RTE_INDEX 1
+
+// clearToSend OUTPUT 2
+// msgWaiting OUTPUT 3
+#define IOC_USE_ISR_0 0
+#define IOC_USE_ISR_1 0
+#define IOC_USE_ISR_2 1
+#define IOC_USE_ISR_3 1
+#define IOC_USE_ISR_4 0
+#define IOC_USE_ISR_5 0
+#define IOC_USE_ISR_6 0
+#define IOC_USE_ISR_7 0
 
 #define RTE_CAN0 0
 #define RTE_CAN1 0
@@ -233,3 +263,5 @@
 
 #define RTE_ENET_MIIM_MDIO_PIN_ID 1 // (Management data I/O line) pin
 #define RTE_ENET_MIIM_MDC_PIN_ID 2  // (Management data clock line) pin
+
+#endif // RTE_DeviceConfig_H

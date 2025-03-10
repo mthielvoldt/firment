@@ -1,4 +1,12 @@
+/**
+ * Concerns: 
+ * - Knows which pin is routed on PCB to which purpose (CTS, msgWait).
+ * - Knows what role this chip plays on the spi bus (Main, sub).
+ * - Communicates this information to the spi driver.
+ */
 #include <fmt_spi.h>
+#include <RTE_DeviceConfig.h> // PCB interconnect information. 
+#include <Device_IOC.h> // Target MCU interconnect information.
 #include "ISR_Config.h"
 
 extern ARM_DRIVER_SPI Driver_SPI4;
@@ -6,10 +14,10 @@ extern ARM_DRIVER_SPI Driver_SPI4;
 spiCfg_t spiConfig = {
   .spiModuleId = 4,
   .spiModule = &Driver_SPI4,
-  .msgWaitingIocId = 1,  // IOC_14: P1_0 see Device_IOC.h and RTE_DeviceConfig.h
-  .msgWaitingIocOut = 3,
-  .clearToSendIocId = 0, // IOC_4:  P0_4 see Device_IOC.h and RTE_DeviceConfig.h
-  .clearToSendIocOut = 2,
+  .msgWaitingIocId = IOC_14_RTE_INDEX, // IOC_14: P1_0 in 4800_F144/Device_IOC.h
+  .msgWaitingIocOut = IOC_14_to_ISR_3,
+  .clearToSendIocId = IOC_4_RTE_INDEX, // IOC_4:  P0_4 in 4800_F144/Device_IOC.h
+  .clearToSendIocOut = IOC_4_to_ISR_2,
   .baudHz = 1000000,
   .busMode = BUS_MODE_MAIN,
   .ssActiveLow = true,
