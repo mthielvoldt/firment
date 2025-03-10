@@ -5,9 +5,8 @@
  * parts of RTE_Device.h, leaving the written-in-silicon relationships in place.
  */
 
- /* Interrupt-on-Change pins */
-#define USE_IOC4
-#define USE_IOC14
+ /* Interrupt-on-Change pins.  See Device_IOC.h for your target hardware.*/
+#define AVAILABLE_IOCs { IOC_4, IOC_14 }
 
 
 #define RTE_CAN0 0

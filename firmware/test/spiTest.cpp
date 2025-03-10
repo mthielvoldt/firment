@@ -22,17 +22,17 @@ extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
 TEST_GROUP(fmt_spi)
 {
   bool initSuccess = false;
-  uint8_t msgWaitingIocId = 14, clearToSendIocId = 4; // TODO: remove specific mapping requirement. 
+  uint8_t msgWaitingIocId = 0, clearToSendIocId = 1;
   Top emptyMsg, validMsg;
   uint8_t validPacket[MAX_PACKET_SIZE_BYTES];
-  // const spiCfg_t cfg = {
-  //     .spiModuleId = 3,
-  //     .spiModule = &Driver_SPI3,
-  //     .msgWaitingIocId = msgWaitingIocId,
-  //     .clearToSendIocId = clearToSendIocId,
-  //     .baudHz = 1000000,
-  //     .ssActiveLow = false,
-  //     .irqPriority = 16};
+  const spiCfg_t cfg = {
+      .spiModuleId = 3,
+      .spiModule = &Driver_SPI3,
+      .msgWaitingIocId = msgWaitingIocId,
+      .clearToSendIocId = clearToSendIocId,
+      .baudHz = 1000000,
+      .ssActiveLow = false,
+      .irqPriority = 16};
 
   void setup()
   {
@@ -45,7 +45,7 @@ TEST_GROUP(fmt_spi)
     messageToValidPacket(validMsg, validPacket);
     spiTest_reset();
     iocTest_setPinState(clearToSendIocId, true);
-    initSuccess = project_initSpi();
+    initSuccess = fmt_initSpi(cfg);
   }
   void teardown()
   {
@@ -74,6 +74,7 @@ TEST(fmt_spi, init)
 
 TEST(fmt_spi, project_init)
 {
+  // Tests that the example config's init function succeeds.
   CHECK_TRUE(project_initSpi());
 }
 
