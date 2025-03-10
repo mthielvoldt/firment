@@ -7,7 +7,8 @@
           "compilerArgs": [],
           "intelliSenseMode": "gcc-arm",
           "includePath": [
-            "example/firmware", 
+            "example/firmware",
+            "example/firmware/config",
             "example/build/xmc/firment",
             "esp/mqtt5/build/config",
             "../esp-idf/components/esp_common/include",
@@ -66,7 +67,8 @@
           ],
           "intelliSenseMode": "gcc-arm",          
           "includePath": [
-            "example/firmware", 
+            "example/firmware",
+            "example/firmware/config",
             "example/build/xmc/firment",
             "firmware",
             "firmware/port/XMC4",
@@ -90,6 +92,8 @@
           "compilerArgs": [],
           "intelliSenseMode": "linux-gcc-x64",
           "includePath": [
+            "example/firmware",
+            "example/firmware/config",
             "firmware",
             "firmware/port/host",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",

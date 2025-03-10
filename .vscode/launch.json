@@ -18,7 +18,7 @@
       "name": "testFirment",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/test/build/test/testFirment",
+      "program": "${workspaceFolder}/test/build/testFirment",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/test",
