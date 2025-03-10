@@ -8,112 +8,7 @@
 #include "Device_IOC.h"
 #include <RTE_DeviceConfig.h>
 
-// This table enforces the requirement that USE_IOCn must be defined in order
-// to init the ioc with iocId = n.
-const uint8_t usableIocs[RTE_IOC_COUNT] = {
-  #ifdef USE_IOC0
-    [0] = 1,
-  #endif
-  #ifdef USE_IOC1
-    [1] = 1,
-  #endif
-  #ifdef USE_IOC2
-    [2] = 1,
-  #endif
-  #ifdef USE_IOC3
-    [3] = 1,
-  #endif
-  #ifdef USE_IOC4
-    [4] = 1,
-  #endif
-  #ifdef USE_IOC5
-    [5] = 1,
-  #endif
-  #ifdef USE_IOC6
-    [6] = 1,
-  #endif
-  #ifdef USE_IOC7
-    [7] = 1,
-  #endif
-  #ifdef USE_IOC8
-    [8] = 1,
-  #endif
-  #ifdef USE_IOC9
-    [9] = 1,
-  #endif
-  #ifdef USE_IOC10
-   [10] = 1,
-  #endif
-  #ifdef USE_IOC11
-   [11] = 1,
-  #endif
-  #ifdef USE_IOC12
-   [12] = 1,
-  #endif
-  #ifdef USE_IOC13
-   [13] = 1,
-  #endif
-  #ifdef USE_IOC14
-   [14] = 1,
-  #endif
-  #ifdef USE_IOC15
-   [15] = 1,
-  #endif
-  #ifdef USE_IOC16
-   [16] = 1,
-  #endif
-  #ifdef USE_IOC17
-   [17] = 1,
-  #endif
-  #ifdef USE_IOC18
-   [18] = 1,
-  #endif
-  #ifdef USE_IOC19
-   [19] = 1,
-  #endif
-  #ifdef USE_IOC20
-   [20] = 1,
-  #endif
-  #ifdef USE_IOC21
-   [21] = 1,
-  #endif
-  #ifdef USE_IOC22
-   [22] = 1,
-  #endif
-  #ifdef USE_IOC23
-   [23] = 1,
-  #endif
-  #ifdef USE_IOC24
-   [24] = 1,
-  #endif
-  #ifdef USE_IOC25
-   [25] = 1,
-  #endif
-  #ifdef USE_IOC26
-   [26] = 1,
-  #endif
-  #ifdef USE_IOC27
-   [27] = 1,
-  #endif
-  #ifdef USE_IOC28
-   [28] = 1,
-  #endif
-  #ifdef USE_IOC29
-   [29] = 1,
-  #endif
-  #ifdef USE_IOC30
-   [30] = 1,
-  #endif
-  #ifdef USE_IOC31
-   [31] = 1,
-  #endif
-  #ifdef USE_IOC32
-   [32] = 1,
-  #endif
-  #ifdef USE_IOC33
-   [33] = 1,
-  #endif
-  };
+const uint8_t availableIocs[] = AVAILABLE_IOCs;
 
 #define NUM_PINS (UINT8_MAX + 1)
 
@@ -136,9 +31,9 @@ bool fmt_initIoc(
     uint32_t priority,
     void (*callback)(void))
 {
-  if (!usableIocs[iocId] != 0)
+  if (iocId >= sizeof(availableIocs))
     return false;
-    
+
   ioc[iocId].readsUntilToggle = MAINTAIN_INDEFINITELY;
   ioc[iocId].callback = callback;
   ioc[iocId].iocEnabled = true;
