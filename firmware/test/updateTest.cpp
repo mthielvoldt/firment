@@ -24,6 +24,7 @@ TEST_GROUP(fmt_update)
 {
   int onFirstPageCount, onLastPageCount;
   ImageData msg;
+  Top rxMsg;
   void setup()
   {
     onFirstPageCount = onLastPageCount = 0;
@@ -55,6 +56,14 @@ TEST_GROUP(fmt_update)
     onFirstPageCount++;
   }
 };
+
+TEST(fmt_update, invalidImageData_triggersStatusFail)
+{
+  CHECK_TRUE(fmt_getMsg(&rxMsg));
+  CHECK_EQUAL(Top_PageStatus_tag, rxMsg.which_sub);
+  CHECK_EQUAL(0, rxMsg.sub.PageStatus.pageIndex);
+  CHECK_EQUAL(PageStatusEnum_WRITE_FAIL, rxMsg.sub.PageStatus.status);
+}
 
 TEST(fmt_update, firstOfSeveralChunks_returnsOk)
 {
