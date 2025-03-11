@@ -18,17 +18,18 @@
 #include <fmt_log.h>
 #include <fmt_flash.h>
 #include <fmt_gpio.h>
+#include "config/gpio_pcb.h"
 #include <core_port.h>  // NVIC_SystemReset()
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
-// optimization: stop storing the config.
-static portPin_t led;
 
 bool comm_init(void)
 {
-  // led = ledPin; TODO: init a gpio for LED use. 
-  return true;
+  bool success = true;
+  success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
+  success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
+  return success;
 }
 
 void comm_handleTelemetry(void)
@@ -42,6 +43,8 @@ void comm_handleTelemetry(void)
   case 0:
   {
     rotations++;
+    fmt_setPin(LED_1_PIN_ID, OUTPUT_TOGGLE);
+
     telem_t telem = ctl_getTelem();
     fmt_sendMsg((const Top){
         .which_sub = Top_WaveformTlm_tag,
@@ -69,7 +72,7 @@ void handleWaveformCtl(WaveformCtl msg)
 {
   static float count = 0;
   count++;
-  // fmt_setPin(led, OUTPUT_TOGGLE); // TODO: Fix this call. 
+  fmt_setPin(LED_0_PIN_ID, OUTPUT_TOGGLE);
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
   const waveShape_t toControlShape[] = {

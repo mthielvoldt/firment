@@ -1,12 +1,4 @@
 
-#ifdef XMC4400_F100x512
-#include "XMC4400.h"
-#endif
-
-#ifdef XMC4700_F144x2048
-#include "XMC4700.h"
-#endif
-
 #include "ISR_Config.h"
 #include "config/spi_config.h"
 #include <fmt_rx.h>
@@ -21,7 +13,7 @@ int main(void)
 {
   project_initSpi();
   
-  comm_init((portPin_t){.port = XMC_GPIO_PORT5, .pin = 9U});
+  comm_init();
 
   // Set periodicA to 1kHz frequency.
   initPeriodicISR(
