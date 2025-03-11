@@ -13,14 +13,14 @@ add_subdirectory(${PORT_DIR} port)
 add_subdirectory(${FIRMENT_DIR} firment)
 
 add_executable(testFirment
-  ../firmware/test/testFirment.cpp
+  ../firmware/test/testFirment.cpp 
+  ../firmware/test/gpioTest.cpp
+  ../firmware/test/iocTestTest.cpp
   ../firmware/test/logTest.cpp
   ../firmware/test/spiTest.cpp
-  ../firmware/test/iocTestTest.cpp
-  ../firmware/test/updateTest.cpp
   ../firmware/test/stub_comms.c
+  ../firmware/test/updateTest.cpp
   ${PROJECT_CONFIG_DIR}/spi_config.c
-  # ../firmware/test/gpioTest.cpp
 )
 
 target_include_directories(testFirment PRIVATE ${PROJECT_CONFIG_DIR})

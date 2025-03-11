@@ -2,6 +2,7 @@
 
 extern "C" {
   #include <fmt_gpio.h>
+  #include <gpio_pcb.h>
 }
 
 TEST_GROUP(fmt_gpio)
@@ -16,7 +17,22 @@ TEST_GROUP(fmt_gpio)
   }
 };
 
-TEST(fmt_gpio, initInputPin)
+TEST(fmt_gpio, initGpioInPin)
 {
-  FAIL("Here1");
+  CHECK_TRUE(fmt_initGpioInPin(LED_0_PIN_ID, INPUT_MODE_TRISTATE));
+}
+
+TEST(fmt_gpio, initGpioInPin_pinIdUnavailable_fails)
+{
+  CHECK_FALSE(fmt_initGpioInPin(255, INPUT_MODE_TRISTATE));
+}
+
+TEST(fmt_gpio, initGpioOutPin)
+{
+  CHECK_TRUE(fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL));
+}
+
+TEST(fmt_gpio, initGpioOutPin_pinIdUnavailable_fails)
+{
+  CHECK_FALSE(fmt_initGpioOutPin(255, OUTPUT_MODE_PUSH_PULL));
 }

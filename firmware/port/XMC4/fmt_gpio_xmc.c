@@ -1,4 +1,4 @@
-#include "fmt_gpio.h"
+#include <fmt_gpio_port.h>
 #include "xmc_gpio.h"
 
 const XMC_GPIO_MODE_t xmcInputMode[] = {
@@ -18,7 +18,7 @@ const XMC_GPIO_OUTPUT_LEVEL_t xmcOutputLevel[] = {
   [OUTPUT_TOGGLE] = XMC_GPIO_OUTPUT_LEVEL_HIGH + XMC_GPIO_OUTPUT_LEVEL_LOW,
 };
 
-void fmt_initInputPin(void *const port, uint8_t pin, inputMode_t mode)
+void port_initInputPin(void *const port, uint8_t pin, inputMode_t mode)
 {
   XMC_GPIO_CONFIG_t config = {
     .mode = xmcInputMode[mode],
@@ -26,14 +26,14 @@ void fmt_initInputPin(void *const port, uint8_t pin, inputMode_t mode)
   XMC_GPIO_Init((XMC_GPIO_PORT_t *const)port, pin, &config);
 }
 
-void fmt_initOutputPin(void *const port, const uint8_t pin, outputMode_t mode) {
+void port_initOutputPin(void *const port, const uint8_t pin, outputMode_t mode) {
   XMC_GPIO_CONFIG_t config = {
     .mode = xmcOutputMode[mode],
   };
   XMC_GPIO_Init((XMC_GPIO_PORT_t *const)port, pin, &config);
 }
 
-uint32_t fmt_readPort(void *const port)
+uint32_t port_readPort(void *const port)
 {
   return ((XMC_GPIO_PORT_t *const)port)->IN;
 }
@@ -41,7 +41,7 @@ uint32_t fmt_readPort(void *const port)
 /** set pin
  * @note pin is a uint_fast8 because setting a pin should be performant.
  */
-void fmt_setPin(void *const port, uint_fast8_t pin, outLevel_t level)
+void port_setPin(void *const port, uint_fast8_t pin, outLevel_t level)
 {
   XMC_GPIO_SetOutputLevel(port, pin, xmcOutputLevel[level]);
 }
