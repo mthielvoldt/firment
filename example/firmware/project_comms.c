@@ -17,16 +17,18 @@
 #include "control.h"
 #include <fmt_log.h>
 #include <fmt_flash.h>
+#include <fmt_gpio.h>
+#include <core_port.h>  // NVIC_SystemReset()
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
 // optimization: stop storing the config.
 static portPin_t led;
 
-void comm_init(portPin_t ledPin)
+bool comm_init(void)
 {
-  led = ledPin;
-  XMC_GPIO_Init(led.port, led.pin, &gpOutPinConfig);
+  // led = ledPin; TODO: init a gpio for LED use. 
+  return true;
 }
 
 void comm_handleTelemetry(void)
@@ -67,7 +69,7 @@ void handleWaveformCtl(WaveformCtl msg)
 {
   static float count = 0;
   count++;
-  XMC_GPIO_ToggleOutput(led.port, led.pin);
+  // fmt_setPin(led, OUTPUT_TOGGLE); // TODO: Fix this call. 
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
   const waveShape_t toControlShape[] = {
