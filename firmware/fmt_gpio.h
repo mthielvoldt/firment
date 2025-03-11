@@ -9,16 +9,14 @@
  * Recommended use:
  * Init functions should be called from the modules that use these pins.
  * Configuring a new pin for GPIO use requres the following:
- * 1. in firment/firmware/port/<family>/<mcu>/mcu_gpio.h 
- *  1a. #define GPIO_n <PORT, PIN> in the MCU Mfg's language.
- *  1b. Add this GPIO_n to AVAILABLE_GPIOs
+ * 1. in project/config/gpio_pcb.h, Add this GPIO_n to AVAILABLE_GPIOs
  * 2. Verify this new gpio functions on the intended hardware.
- * 3. Repeat 1a, 1b in firment/firmware/port/mcu_gpio.h
+ * 3. Add #define for the macro added to AVAILABLE_GPIOs in step 1. to
+ *    firment/firmware/port/host/mcu_gpio.h - This signifies passing step 2.
  * 
  * Testing: 
- * This module has a mock here: firment/firmware/port/host/fmt_gpio_mock.c
- * This mock will complain if a pin is initialized that isn't #defined in 
- * host/mcu_gpio.h 
+ * The gpioTest.c will complain if step 3 above is not done.  It's a reminder
+ * to perform on-target tests for new circuit paths before merging. 
  * 
  */
 
