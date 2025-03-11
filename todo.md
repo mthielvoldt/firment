@@ -1,5 +1,6 @@
+# Doing 
+
 # Project structuring
-6. gpio_common.h (fix + move + test)
 12. break fmt_rx -> project_comms dependency. 
 13. move USE_xxx to firmentConfig
 
@@ -25,8 +26,7 @@ Outputs:
 10. ISR_Config.h items. 
 
 ## Code smells
-3. host/RTE_Device.h move RTE_IOC_t typedef to fmt_ioc.h
-14. gpio in project_comms.h = feature envy.
+
 15. fmt_spi implements too much. Break some of this out.
   - CRC checks
   - message serialization
