@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ISR_Config.h> // re-defines ISRs as board-specific IRQHandler names.
 #include <Driver_SPI.h>
 #include "fmt_sizes.h"
 
