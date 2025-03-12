@@ -1,6 +1,6 @@
 #include "fmt_ioc.h"
-#include <Device_IOC.h>
-#include <RTE_DeviceConfig.h>
+#include <ioc_mcuDetails.h>
+#include <ioc_pcbDetails.h>
 #include <xmc_gpio.h>
 
 const XMC_ERU_ETL_EDGE_DETECTION_t edgeMap[] = {

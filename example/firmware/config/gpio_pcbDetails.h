@@ -1,5 +1,5 @@
 
-#include <mcu_gpio.h>
+#include <gpio_mcuDetails.h>
 
 /**
  * To prepare a new GPIO for use: 

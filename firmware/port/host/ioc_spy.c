@@ -1,11 +1,11 @@
-/** fmt_ioc_test.c
+/** ioc_spy.c
  * @file test stub for fmt_ioc.
  *
  * @warning Despite accepting activeEdges, this implementation ONLY behaves as
  * though EDGE_TYPE_RISING were set, regardless of what activeEdges is passed.
  */
-#include "fmt_ioc_test.h"
-#include <RTE_DeviceConfig.h>
+#include "ioc_spy.h"
+#include <ioc_pcbDetails.h>
 
 const uint8_t availableIocs[] = AVAILABLE_IOCs;
 const uint8_t enabledIsrCount =

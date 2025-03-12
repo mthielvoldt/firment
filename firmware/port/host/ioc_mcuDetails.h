@@ -1,7 +1,6 @@
 /**
- * This MCU-specific file fulfills the requirements of fmt_ioc_test.c in the
- * manner that Device_IOC.h files for different targets fulfill the requirements
- * of the applicable fmt_ioc_<port>.c
+ * This MCU-specific file stands in for a real ioc_mcuDetails for an actual MCU.
+ * It must provide definitions for the macros that are used by ioc_pcbDetails.
  * 
  * These macros represent those configurations that have been tested working on
  * hardware.  Any config change in the example that uses an untested routing
@@ -12,8 +11,8 @@
  * each define indicating who performed the test, and when.  Un-initialed lines
  * should be considered provisional and not mergeable.
  */
-#ifndef Device_IOC_H
-#define Device_IOC_H
+#ifndef ioc_mcuDetails_H
+#define ioc_mcuDetails_H
 
 /* Which IOCs are enabled and HW-tested.*/
 // Next 2 tested on Firment devboard v0.1 MGT
@@ -25,4 +24,4 @@
 #define IOC_14_to_ISR_3 3
 #define IOC_4_to_ISR_2 2
 
-#endif // Device_IOC_H
+#endif // ioc_mcuDetails_H

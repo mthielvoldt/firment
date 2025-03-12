@@ -1,5 +1,5 @@
-#ifndef Device_IOC_H
-#define Device_IOC_H
+#ifndef ioc_mcuDetails_H
+#define ioc_mcuDetails_H
 
 #include "xmc4_gpio_map.h"
 #include "xmc_gpio.h"
@@ -75,4 +75,4 @@ This is dependent on which ERU the IOC uses.*/
 #define IOC_14_to_ISR_2 2
 #define IOC_14_to_ISR_3 3
 
-#endif // Device_IOC_H
+#endif // ioc_mcuDetails_H

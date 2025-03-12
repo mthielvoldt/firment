@@ -6,7 +6,7 @@ extern "C"
 #include <fmt_spi.h>
 #include <spi_config.h>
 #include <fmt_crc.h>
-#include <fmt_ioc_test.h>
+#include <ioc_spy.h>
 #include <spi_test.h>
 #include <pb_encode.h>
 }
