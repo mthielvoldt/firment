@@ -8,8 +8,8 @@
  * 
  * Recommended use:
  * Init functions should be called from the modules that use these pins.
- * Configuring a new pin for GPIO use requres the following:
- * 1. in project/config/gpio_pcb.h, Add this GPIO_n to AVAILABLE_GPIOs
+ * Configuring a new pin for GPIO use requires the following:
+ * 1. In project/config/gpio_pcb.h, follow the instructions to add a new GPIO. 
  * 2. Verify this new gpio functions on the intended hardware.
  * 3. Add #define for the macro added to AVAILABLE_GPIOs in step 1. to
  *    firment/firmware/port/host/mcu_gpio.h - This signifies passing step 2.
