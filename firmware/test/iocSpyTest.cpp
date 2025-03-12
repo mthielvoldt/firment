@@ -2,7 +2,7 @@
 
 extern "C"
 {
-#include <fmt_ioc_test.h>
+#include <ioc_spy.h>
 }
 
 void callback0(void)

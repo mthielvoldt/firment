@@ -1,7 +1,7 @@
 add_library(MCUPort
   fmt_flash_mock.c
-  fmt_gpio_stub.c
-  fmt_ioc_test.c
+  gpio_spy.c
+  ioc_spy.c
   fmt_spi_host.c
   fmt_crc_host.c
   spi_test.c

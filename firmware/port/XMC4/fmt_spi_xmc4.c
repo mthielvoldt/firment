@@ -1,5 +1,5 @@
 // This is a MFG-specific header file name. 
-#include <RTE_DeviceConfig.h>
+#include <spi_pcbDetails.h>
 #include <SPI.h>
 
 #if RTE_SPI0

@@ -40,8 +40,8 @@ bool fmt_initSpi(spiCfg_t config);
  * 
  * Note: one of the following files must configure the 
  * SPI resource to be available.
- * RTE_DeviceConfig.h (firment way)
- * RTE_Device.h (other CMSIS BSPs)
+ * spi_pcbDetails.h (this is where firment configures the options)
+ * RTE_Device.h (other CMSIS BSP desktop apps configure them here.)
  * 
  * For example with the following lines in RTE_Device.h:
  * #define RTE_SPI2 1 

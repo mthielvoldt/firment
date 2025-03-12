@@ -1,6 +1,6 @@
 #include "fmt_gpio.h"
 #include "fmt_gpio_port.h"
-#include <gpio_pcb.h>
+#include <gpio_pcbDetails.h>
 
 #define ASSERT_PIN_ID_VALID                                \
   if (pinId >= (sizeof(availableGpios) / sizeof(portPin_t))) \

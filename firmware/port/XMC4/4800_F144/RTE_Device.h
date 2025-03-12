@@ -4,7 +4,18 @@
  * @version 1.0
  *
  * @brief Run-Time Environment interconnections for Infineon XMC48/47_F144
+ * This file contains just the fixed-in-silicon interconnection information and
+ * excludes all project-specific config.  It can therefore be used, unmodified,
+ * by any project building for XMC48/47_F144.
  * 
+ * Usage Requirements
+ * ------------------
+ * This file is meant to be used in concert with a collection of files providing
+ * pcb and project details.  See "example/firmware/config/spi_pcbDetails.h".
+ * Find template pcb detail files in ./template_pcbDetails/
+ * 
+ * This File's Origins
+ * -------------------
  * The RTE_Device.h file provided by manufacturers in CMSIS Device Family Packs
  * contains two types of information:
  * 1. Fixed-in-silicon peripheral interconnections that are available for use.
@@ -13,14 +24,7 @@
  *    eg: make CAN module 0 available and use pin 1.4 for Tx with this module. 
  *    These lines of code are generally edited by BSP software, not by hand.
  * 
- * This file contains just the fixed-in-silicon interconnection information and
- * excludes all project-specific config.  It can therefore be used, unmodified,
- * by any XMC48/47_F144 project.
- * 
- * This file is meant to be used in concert with "RTE_DeviceConfig.h" that 
- * contains just the project-specific configuration that conventionally appears
- * in RTE_Device.h files. 
- * 
+ * As mentioned above, this file contains only type 1. information.
  * This version extracted information from Version 1.1.0 (30 June, 2016) of
  * XMC4000_DFP/RTE_Driver/Config/XMC4800_F144/RTE_Device.h
  */
@@ -56,7 +60,7 @@
 
 #pragma once
 
-#include "RTE_DeviceConfig.h"
+#include "RTE_Components.h"
 #include "xmc_device.h"
 #include "xmc_gpio.h"
 #include "xmc4_gpio_map.h"
@@ -69,7 +73,7 @@
 #define FIFO_SIZE_16 4
 #define FIFO_SIZE_32 5
 
-
+#ifdef RTE_Drivers_CAN
 // <e> CAN0 (Controller area network) [Driver_CAN0]
 // <i> Configuration settings for Driver_CAN0 in component ::Drivers:CAN
 //   <o> CAN0 TX Pin <0=>P0_0 <1=>P1_4 <2=>P2_0 <3=>P3_2 <4=>P3_10
@@ -249,7 +253,9 @@
 #error "Invalid CAN5_RX Pin Configuration!"
 #endif
 // </e>
+#endif // RTE_Drivers_CAN
 
+#ifdef RTE_Drivers_UART
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:UART
 //   <o> UART0_TX Pin <0=>P1_5 <1=>P1_7 <2=>P5_1
@@ -741,7 +747,9 @@
 #error "Invalid UART5_TX FIFO SIZE Configuration!"
 #endif
 // </e>
+#endif // RTE_Drivers_UART
 
+#ifdef RTE_Drivers_SPI
 // <e> SPI0 (Serial peripheral interface) [Driver_SPI0]
 // <i> Configuration settings for Driver_SPI0 in component ::Drivers:SPI
 //   <o> SPI0 TX: MOSI(master) MISO(slave) Pin <0=>P1_5 <1=>P1_7 <2=>P5_1
@@ -1808,7 +1816,9 @@
 #else
 #error "Invalid SPI5_TX FIFO SIZE Configuration!"
 #endif
+#endif // RTE_Drivers_SPI
 
+#ifdef RTE_Drivers_I2C
 //</e>
 // <e> I2C0 (Inter-Integrated circuit) [Driver_I2C0]
 // <i> Configuration settings for Driver_I2C0 in component ::Drivers:I2C
@@ -2493,7 +2503,9 @@
 #error "Invalid I2C5_TX FIFO SIZE Configuration!"
 #endif
 //</e>
+#endif // RTE_Drivers_I2C
 
+#ifdef RTE_Drivers_I2S
 // <e> I2S0 (Inter-Integrated Sound) [Driver_SAI0]
 // <i> Configuration settings for Driver_SAI0 in component ::Drivers:SAI
 #define RTE_I2S0                      0
@@ -3141,9 +3153,9 @@
 #elif  (RTE_I2S4_TX_ID == 1)
 #define RTE_I2S4_TX_PORT              P5_0
 #define RTE_I2S4_TX_AF                P5_0_AF_U2C0_DOUT0
-#elif  (RTE_I2C4_TX_ID == 2)
-#define RTE_I2C4_TX_PORT              P6_6
-#define RTE_I2C4_TX_AF                P6_6_AF_U2C0_DOUT0
+#elif  (RTE_I2S4_TX_ID == 2)
+#define RTE_I2S4_TX_PORT              P6_6
+#define RTE_I2S4_TX_AF                P6_6_AF_U2C0_DOUT0
 #else
 #error "Invalid I2S4_TX Pin Configuration!"
 #endif
@@ -3271,9 +3283,9 @@
 #elif  (RTE_I2S5_TX_ID == 1)
 #define RTE_I2S5_TX_PORT              P3_11
 #define RTE_I2S5_TX_AF                P3_11_AF_U2C1_DOUT0
-#elif  (RTE_I2C5_TX_ID == 2)
-#define RTE_I2C5_TX_PORT              P4_7
-#define RTE_I2C5_TX_AF                P4_7_AF_U2C1_DOUT0
+#elif  (RTE_I2S5_TX_ID == 2)
+#define RTE_I2S5_TX_PORT              P4_7
+#define RTE_I2S5_TX_AF                P4_7_AF_U2C1_DOUT0
 #else
 #error "Invalid I2S5_TX Pin Configuration!"
 #endif
@@ -3407,7 +3419,9 @@
 #error "Invalid I2S5_TX FIFO SIZE Configuration!"
 #endif
 //</e>
+#endif // RTE_Drivers_I2S
 
+#ifdef RTE_Drivers_ENET
 // <e> ENET (Ethernet Interface) [Driver_ETH_MAC0]
 // <i> Configuration settings for Driver_ETH_MAC0 in component ::Drivers:Ethernet MAC
 
@@ -3837,7 +3851,9 @@
 #else
  #error "Invalid MDC pin!"
 #endif
+#endif // RTE_Drivers_ENET
 
+#ifdef RTE_Drivers_USB
 //   </h> MIIM (Management Data Interface)
 // </e> ENET (Ethernet Interface) [Driver_ETH_MAC0]
 
@@ -3852,7 +3868,9 @@
 #endif
 
 // </e> USB (Universal Serial Bus) [Driver_USBH]
+#endif // RTE_Drivers_USB
 
+#ifdef RTE_Drivers_SDMMC
 // <e> SD/MMC Interface [Driver_MCI0]
 // <i> Configuration settings for Driver_MCI0 in component ::Drivers:MCI
 #define RTE_SDMMC0                      0
@@ -3965,6 +3983,7 @@
 #error "Invalid SDMMC0_CLK Pin Configuration!"
 #endif
 // </e> SD/MMC Interface [Driver_MCI0]
+#endif // RTE_Drivers_SDMMC
 
 #if ((RTE_UART0+RTE_I2C0+RTE_SPI0+RTE_I2S0)>1)
 #error "Choose just one Driver_I2C0/SPI0/UART0/SAI0 driver !"

@@ -1,9 +1,10 @@
 /**
- * This fake MCU header supplies stand-in "port addresses" to fmt_gpio_stub.c.
- * It works like mcu_gpio.h files for real MCUs, providing macros that
- * can be used to create structs needed for feature initialization.
+ * This fake mcuDetails.h supplies stand-in "port addresses" to gpio_spy.c.
+ * It works like gpio_mcuDetail.h files for real MCUs, except it's built to
+ * work in a hardware-agnostic way, where the port "address" is an index to
+ * a static array.
  * 
- * Client(s): config/gpio_pcb.h
+ * Client(s): config/gpio_pcbDetails.h
  * Selected by: project CMakeLists.txt variable PORT_DIR, -> 
  *   port/<family>/CMakeLists - target_include_directories(PUBLIC .)
  *

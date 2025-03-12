@@ -18,7 +18,7 @@
 #include <fmt_log.h>
 #include <fmt_flash.h>
 #include <fmt_gpio.h>
-#include "config/gpio_pcb.h"
+#include "config/gpio_pcbDetails.h"
 #include <core_port.h>  // NVIC_SystemReset()
 
 #define CALLS_PER_FULL_ROTATION 1000U

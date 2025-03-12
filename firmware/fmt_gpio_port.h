@@ -1,7 +1,7 @@
 /**
  * Interface for the gpio port implementations.  This gets consumed by 
  * Clients: fmt-gpio.c
- * Implementers: fmt_gpio_xmc.c, fmt_gpio_stub.c
+ * Implementers: gpio_xmc4.c, gpio_spy.c
  * 
  * These functions are for firment's internal use.  fmt_gpio.h is the public 
  * interface.

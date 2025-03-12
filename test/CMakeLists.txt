@@ -15,7 +15,7 @@ add_subdirectory(${FIRMENT_DIR} firment)
 add_executable(testFirment
   ../firmware/test/testFirment.cpp 
   ../firmware/test/gpioTest.cpp
-  ../firmware/test/iocTestTest.cpp
+  ../firmware/test/iocSpyTest.cpp
   ../firmware/test/logTest.cpp
   ../firmware/test/spiTest.cpp
   ../firmware/test/stub_comms.c

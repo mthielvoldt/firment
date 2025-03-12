@@ -2,7 +2,7 @@
 
 extern "C" {
   #include <fmt_gpio.h>
-  #include <gpio_pcb.h>
+  #include <gpio_pcbDetails.h>
 }
 
 TEST_GROUP(fmt_gpio)
