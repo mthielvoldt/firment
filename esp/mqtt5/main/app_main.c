@@ -19,7 +19,7 @@
 #include "mqtt_client.h"
 #include "freertos/task.h"
 
-#include "spi_app.h"
+#include "fmt_esp_spi.h"
 
 #define MAX_PAYLOAD_BYTES 64
 #define MQTT_BUFFER_SIZE (100 * MAX_PAYLOAD_BYTES)

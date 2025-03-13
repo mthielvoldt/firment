@@ -27,7 +27,6 @@ bool initQueue(
 bool enqueueBack(queue_t *queue, const void *src)
 {
   bool success = false;
-  int_fast16_t indexToWrite;
 
   disableLowPriorityInterrupts(queue->highestSenderPriority);
   if (queue->numItemsWaiting < queue->maxNumItems)
