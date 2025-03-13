@@ -7,13 +7,13 @@ typedef struct
   uint32_t highestSenderPriority; // min numeric value; highest preemtion priority.
   uint_fast16_t maxNumItems;
   volatile uint_fast16_t front;
-  volatile uint_fast16_t numSlotsClaimed;  // Claimed by an in-process enqueue. 
-  volatile uint_fast16_t numItemsWaiting;  // 
+  volatile uint_fast16_t back;
+  volatile uint_fast16_t numItemsWaiting;
   size_t itemSize;
   uint8_t *items;
 } queue_t;
 
-void initQueue(
+bool initQueue(
     size_t itemSize, uint32_t length, queue_t *queue, uint8_t *itemsStore, 
     uint32_t highestSenderPriority);
 
