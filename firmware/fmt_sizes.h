@@ -13,3 +13,16 @@
 #define MAX_SENDER_PRIORITY 16U
 
 #define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - PREFIX_SIZE_BYTES)
+
+/** Get the position of the CRC in bytes from the first element of the packet.
+ * CRC position must be 16-bit aligned (even number) for hardware CRC engines.
+ * so if the length of the buffer (including length prefix,) is odd, there
+ * will be a byte of padding, between the buffer and the CRC.
+ * The value of the padding byte (if present) will be checked by the CRC, but it
+ * has no effect on the decoded message.
+ */
+// TODO: move.  Feature envy.
+inline static uint32_t getCRCPosition(uint8_t *lengthPrefixedBuffer)
+{
+  return ((lengthPrefixedBuffer[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
+}

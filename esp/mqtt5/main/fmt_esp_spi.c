@@ -14,7 +14,7 @@
 #include "driver/gpio_filter.h"
 #include "esp32s3/rom/crc.h"
 
-#include "spi_app.h"
+#include "fmt_esp_spi.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////// Please update the following configuration according to your HardWare spec /////////////////
