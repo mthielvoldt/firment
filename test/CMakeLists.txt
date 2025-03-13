@@ -17,6 +17,7 @@ add_executable(testFirment
   ../firmware/test/gpioTest.cpp
   ../firmware/test/iocSpyTest.cpp
   ../firmware/test/logTest.cpp
+  ../firmware/test/queueTest.cpp
   ../firmware/test/spiTest.cpp
   ../firmware/test/stub_comms.c
   ../firmware/test/updateTest.cpp
