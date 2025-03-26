@@ -26,4 +26,5 @@ TEST_GROUP(spi_app)
 TEST(spi_app, init)
 {
   CHECK_TRUE(initSuccess);
+  FAIL("forced fail");
 }
