@@ -42,7 +42,8 @@
             "firmware/port/XMC4/XMC4000_DFP/RTE_Driver",
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
-            "protocol/nanopb"
+            "protocol/nanopb",
+            "test/cpputest/include"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
@@ -78,7 +79,8 @@
             "firmware/port/XMC4/XMC4000_DFP/RTE_Driver",
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
-            "protocol/nanopb"
+            "protocol/nanopb",
+            "test/cpputest/include"
           ],
           "cStandard": "c11",
           "cppStandard": "c++11",

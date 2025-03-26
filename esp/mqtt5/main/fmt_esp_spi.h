@@ -19,6 +19,7 @@ This application uses two hardware flow-control pins:
 
 #include "esp_err.h"
 #include <fmt_sizes.h>
+#include <stdbool.h>
 
 #define GPIO_CLEAR_TO_SEND 9
 #define GPIO_MESSAGE_WAITING 46
