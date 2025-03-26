@@ -1,2 +1,3 @@
 #!/bin/bash
-cmake --build test/build --target testFirment && test/build/testFirment
+cmake -B test/build -S test && \
+  cmake --build test/build --target testFirment && test/build/testFirment
