@@ -4,7 +4,6 @@ extern "C"
 {
 #include <fmt_comms.h>
 #include <fmt_spi.h>
-#include <spi_config.h>
 #include <fmt_crc.h>
 #include <ioc_spy.h>
 #include <spi_test.h>
@@ -72,12 +71,6 @@ TEST(fmt_spi, init)
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
-TEST(fmt_spi, project_init)
-{
-  // Tests that the example config's init function succeeds.
-  CHECK_TRUE(project_initSpi());
-}
-
 TEST(fmt_spi, msgWaitingTriggersTransfer)
 {
   // Trigger msg-waiting
@@ -106,7 +99,7 @@ TEST(fmt_spi, initClearsPendingMessages)
   iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
   // With a message in rxQueue, re-initialize spi.
-  initSuccess = project_initSpi();
+  initSuccess = fmt_initSpi(cfg);
 
   CHECK_TRUE(initSuccess);
   // No message should be there.

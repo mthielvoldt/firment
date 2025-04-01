@@ -34,7 +34,7 @@ Firment's main job is to help you build a web interface to your firmware, which 
 
 ## Integrating Firment
 ### CMSIS Drivers
-Firment firmware is middleware that expects a CMSIS driver under it.  To integrate CMSIS Drivers in your project: 
+Firment firmware is middleware that expects a communication driver under it that implements a CMSIS interface.  To integrate CMSIS Drivers in your project: 
 - Download the [CMSIS pack](https://www.keil.arm.com/packs/) for your processor and add the relevant include folders / c files to CMakeLists.txt.  Often you only need a few of the folders in a pack. See `example/firmware/lib`
 - Download [CMSIS Driver headers](https://github.com/ARM-software/CMSIS_6/tree/main/CMSIS/Driver/Include) and add to your include paths.
 

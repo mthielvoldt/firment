@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 /**
  * Nomenclature note: "High priority" ISRs preempt "Low priority" ISRs.
@@ -6,8 +7,8 @@
  * "least/greatest".  So the "Highest priority" ISR will have the "least"
  * NVIC_prio.
  */
-extern void (*disableLowPriorityInterruptsCallback)(void);
-extern void (*enableAllInterruptsCallback)(void);
+void (*disableLowPriorityInterruptsCallback)(void) = NULL;
+void (*enableAllInterruptsCallback)(void) = NULL;
 
 inline static void disableLowPriorityInterrupts(uint32_t leastDisabledNVIC_prio)
 {

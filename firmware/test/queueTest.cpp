@@ -9,8 +9,8 @@ extern "C"
 #define ITEM_SIZE 4
 #define PRIORITY 10
 
-void (*disableLowPriorityInterruptsCallback)(void) = NULL;
-void (*enableAllInterruptsCallback)(void) = NULL;
+extern void (*disableLowPriorityInterruptsCallback)(void);
+extern void (*enableAllInterruptsCallback)(void);
 const uint8_t inBuff[ITEM_SIZE] = {0xC0, 0xFF, 0xEE};
 uint8_t outBuff[ITEM_SIZE];
 queue_t queue[1];
