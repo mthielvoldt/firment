@@ -51,7 +51,7 @@ add_executable(${EXECUTABLE}
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
-  ${PROJECT_CONFIG_DIR}/spi_config.c
+  firmware/init_spi.c
 )
 
 # Specify the project's include directories. Libraries add their own. 

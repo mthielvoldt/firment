@@ -1,6 +1,6 @@
 
 #include "ISR_Config.h"
-#include "config/spi_config.h"
+#include "init_spi.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic_port.h>
