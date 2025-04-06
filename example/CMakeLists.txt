@@ -16,25 +16,26 @@ cmake_minimum_required(VERSION 3.22.1)
 # Read the version from an external file
 file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
 # Strip any trailing whitespace
-string(STRIP "${VERSION_CONTENT}" PROJECT_VERSION)
-message(STATUS "Project version: ${PROJECT_VERSION}")
+string(STRIP "${VERSION_CONTENT}" APP_VERSION)
+message(STATUS "App version: ${APP_VERSION}")
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Disables CXX (C++)
-project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
+project(spi_example VERSION ${APP_VERSION} LANGUAGES C ASM)
 
-include(firmentConfig.cmake)
+include(config/partitions.cmake)
+include(config/firmentConfig.cmake)
+include(config/mcuCompileOpts.cmake)
+
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
 
 # Project-wide compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")  # debug symbols
-  # -g3
-  # -gdwarf-2
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0") # Optimizations off
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall") # Warnings: all
-message(STATUS "C flags: ${CMAKE_C_FLAGS}")
-
-set(EXECUTABLE ${PROJECT_NAME}.elf)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 
 # Select which MCU port library ('MCUPort' target) build project against.
@@ -47,7 +48,7 @@ add_subdirectory(${FIRMENT_DIR} firment)
 
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
-add_executable(${EXECUTABLE}
+add_executable(app_root.elf
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
@@ -55,7 +56,7 @@ add_executable(${EXECUTABLE}
 )
 
 # Specify the project's include directories. Libraries add their own. 
-target_include_directories(${EXECUTABLE} PRIVATE
+target_include_directories(app_root.elf PRIVATE
   firmware
   ${PROJECT_CONFIG_DIR}
 )
@@ -63,25 +64,25 @@ target_include_directories(${EXECUTABLE} PRIVATE
 # Specify which libraries the top-level target depends on directly. 
 # Note: top-level needs MCUPort to select the peripheral modules to use.
 # Note: -lm links the standard math library (math.h).
-target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
+target_link_libraries(app_root.elf FirmentFW MCUPort -lm)
 
 
 set(LINKER_FILE ${PORT_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld)
-target_link_options(${EXECUTABLE} PRIVATE
+target_link_options(app_root.elf PRIVATE
     "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections,-T${LINKER_FILE}"
 )
 ## Uncomment to see full linker command.
-# target_link_options(${EXECUTABLE} PRIVATE "-v")
+# target_link_options(app_root.elf PRIVATE "-v")
 
 # Build a hex file from the elf.
-add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS ${EXECUTABLE})
+add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS app_root.elf)
 add_custom_command(TARGET ${PROJECT_NAME}.hex
-    COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex ${EXECUTABLE} ${PROJECT_NAME}.hex)
+    COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex app_root.elf ${PROJECT_NAME}.hex)
 
 # Build a binary.
-add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
+add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS app_root.elf)
 add_custom_command(TARGET ${PROJECT_NAME}.bin
-  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary ${EXECUTABLE} ${PROJECT_NAME}.bin)
+  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary app_root.elf ${PROJECT_NAME}.bin)
 
 add_custom_target(web-ui ALL
   DEPENDS
