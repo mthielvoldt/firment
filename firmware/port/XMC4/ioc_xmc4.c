@@ -99,6 +99,7 @@ bool fmt_getIocPinState(uint8_t iocId)
 /******************* ISRs *******************/
 #if 1
 #if IOC_USE_ISR_0
+void ERU0_0_IRQHandler(void); // suppress missing-declaration warning
 void ERU0_0_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[0];
@@ -107,6 +108,7 @@ void ERU0_0_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_1
+void ERU0_1_IRQHandler(void); // suppress missing-declaration warning
 void ERU0_1_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[1];
@@ -115,6 +117,7 @@ void ERU0_1_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_2
+void ERU0_2_IRQHandler(void); // suppress missing-declaration warning
 void ERU0_2_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[2];
@@ -123,6 +126,7 @@ void ERU0_2_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_3
+void ERU0_3_IRQHandler(void); // suppress missing-declaration warning
 void ERU0_3_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[3];
@@ -131,6 +135,7 @@ void ERU0_3_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_4
+void ERU1_0_IRQHandler(void); // suppress missing-declaration warning
 void ERU1_0_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[4];
@@ -139,6 +144,7 @@ void ERU1_0_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_5
+void ERU1_1_IRQHandler(void); // suppress missing-declaration warning
 void ERU1_1_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[5];
@@ -147,6 +153,7 @@ void ERU1_1_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_6
+void ERU1_2_IRQHandler(void); // suppress missing-declaration warning
 void ERU1_2_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[6];
@@ -155,6 +162,7 @@ void ERU1_2_IRQHandler(void)
 }
 #endif
 #if IOC_USE_ISR_7
+void ERU1_3_IRQHandler(void); // suppress missing-declaration warning
 void ERU1_3_IRQHandler(void)
 {
   isrCallback_t cb = callbacks[7];

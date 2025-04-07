@@ -94,7 +94,7 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, int len)
   return 0;
 }
 
-bool isSectorErased(int sector)
+static bool isSectorErased(int sector)
 {
   uint32_t *address, *endAddress;
   address = (uint32_t*)sector_base[sector];
