@@ -27,9 +27,14 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Disables CXX (C++)
 project(spi_example VERSION ${APP_VERSION} LANGUAGES C ASM)
 
+include(config/mcuCompileOptions.cmake)
 include(config/partitions.cmake)
+include(config/cryptOptions.cmake)
 include(config/firmentConfig.cmake)
-include(config/mcuCompileOpts.cmake)
+
+set(MGTBOOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mgt-boot)
+set(LINKER_SCRIPT_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
+include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
