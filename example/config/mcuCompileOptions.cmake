@@ -5,6 +5,9 @@ set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mfloat-abi=hard -ffreestanding -fdata-sectio
 # "-Wa," must precede each option passed to the assembler.
 set(ASSEMBLER_FLAGS "-Wa,-mcpu=cortex-m4")
 
+# Warnings
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-declarations")
+
 set(MCU_FAMILY "XMC4")
 set(MCU_VARIANT "XMC4700")
 set(MCU_SPEED_VARIANT "F144")

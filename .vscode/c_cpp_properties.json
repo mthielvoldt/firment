@@ -10,6 +10,7 @@
             "example/firmware",
             "example/firmware/config",
             "example/build/xmc/firment",
+            "example/mgt-boot/inc",
             "esp/mqtt5/build/config",
             "../esp-idf/components/esp_common/include",
             "../esp-idf/components/esp_driver_gpio/include",
@@ -71,6 +72,7 @@
             "example/firmware",
             "example/firmware/config",
             "example/build/xmc/firment",
+            "example/mgt-boot/inc",
             "firmware",
             "firmware/port/XMC4",
             "firmware/port/XMC4/4800_F144",
@@ -96,6 +98,7 @@
           "includePath": [
             "example/firmware",
             "example/firmware/config",
+            "example/mgt-boot/inc",
             "firmware",
             "firmware/port/host",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",

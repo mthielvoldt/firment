@@ -38,19 +38,15 @@ set(LINKER_SCRIPT_TEMPLATE
 include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
-set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
-
-# Project-wide compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-declarations")
-
-
 # Select which MCU port library ('MCUPort' target) build project against.
-# Note: MCU_FAMILY specified in the toolchain file. TODO: move into fmt. CML.
-add_subdirectory(${PORT_DIR} ${MCU_FAMILY})
+set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
+add_subdirectory(${PORT_DIR} ${MCU_FAMILY}) # provides MCUPort library.
 
 # Add firment, and set where (in the binary dir) to place firment output files.
 # Must come after add_subdirectory() for port or it won't find MCUPort target.
 add_subdirectory(${FIRMENT_DIR} firment)
+
+include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
