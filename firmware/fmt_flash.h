@@ -1,7 +1,7 @@
 
 #include <stdint.h>
 
-/** hal_flash_write
+/** fmt_flash_write
  * @param address Either an offset from the program memory base address, or an
  * absolute address.  Un-aligned addresses are permitted.
  * @param data the payload to be stored in the flash.
@@ -11,9 +11,9 @@
  * time.  So this function implements a read-modify-write process than handles
  * both un-aligned start and end addresses.
  */
-int hal_flash_write(uint32_t address, const uint8_t *data, int len);
+int fmt_flash_write(uint32_t address, const uint8_t *data, int len);
 
-/** hal_flash_erase
+/** fmt_flash_erase
  * Erase all the sectors within the specified range, accounting for flash sector
  * geometries.
  * @param start_address marks the start of the area to erase. start_address is
@@ -21,4 +21,4 @@ int hal_flash_write(uint32_t address, const uint8_t *data, int len);
  * @param len specifies the size of the area to be erased. Len is guaranteed to 
  * be a multiple of WOLFBOOT_SECTOR_SIZE. 
  */
-int hal_flash_erase(uint32_t start_address, int len);
+int fmt_flash_erase(uint32_t start_address, int len);
