@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "fmt_hardfault.h"
 
 typedef struct
 {
