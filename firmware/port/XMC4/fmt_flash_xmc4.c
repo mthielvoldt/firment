@@ -2,6 +2,7 @@
  * 
  */
 
+#include <fmt_flash.h>
 #include <stdint.h>
 #include <xmc4_flash.h>
 #include "fmt_flash_port.h"
@@ -45,28 +46,8 @@ const uint32_t sector_base[FLASH_SECTOR_COUNT + 1] = {
 static uint32_t getPreceedingPageBoundary(uint32_t address);
 static int getSectorContainingAddress(uint32_t address);
 
-void hal_init(void)
-{
-  // Max the system clock so crypto ops proceed quickly.
-}
 
-void hal_prepare_boot(void)
-{
-  // Put sysclock back to normal system startup defaults.
-}
-
-void hal_flash_unlock(void)
-{
-  // There is no global flash unlock on XMC.
-  // Each page write and sector erase operation requires a command sequence.
-
-  // If write protection is enabled, it is temporarily disabled sector-by-
-  // sector with a pre-stored user password.
-}
-
-void hal_flash_lock(void) { }
-
-int hal_flash_write(uint32_t address, const uint8_t *data, int len)
+int fmt_flash_write(uint32_t address, const uint8_t *data, int len)
 {
   uint8_t page_buffer[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
   
@@ -128,7 +109,7 @@ bool isSectorErased(int sector)
   return true;
 }
 
-int hal_flash_erase(uint32_t start_address, int len)
+int fmt_flash_erase(uint32_t start_address, int len)
 {
   // Work with absolute addresses. 
   if (start_address < ARCH_FLASH_OFFSET) {
