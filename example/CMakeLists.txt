@@ -33,14 +33,15 @@ include(config/cryptOptions.cmake)
 include(config/firmentConfig.cmake)
 
 set(MGTBOOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mgt-boot)
-set(LINKER_SCRIPT_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
+set(LINKER_SCRIPT_TEMPLATE 
+  ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
 include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
 
 # Project-wide compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-declarations")
 
 
 # Select which MCU port library ('MCUPort' target) build project against.
