@@ -38,7 +38,8 @@ int main(void)
 }
 
 // 1kHz
-void periodicA()
+void periodicA(void); // suppress missing-declaration warning
+void periodicA(void)
 {
   comm_handleTelemetry();
   fmt_handleRx();
