@@ -17,6 +17,10 @@
  * indicating who performed the test, and on what pcb.  Un-initialed
  * lines should be considered provisional and not mergeable.
  */
+#ifndef gpio_mcuDetails_h
+#define gpio_mcuDetails_h
+
+#include <stdint.h>
 
 typedef struct portPin_s
 {
@@ -25,5 +29,7 @@ typedef struct portPin_s
 } portPin_t;
 
 // Next 2 lines MGT, PCBv0.1.0
-#define P5_8 {(void *)5, 8}
-#define P5_9 {(void *)5, 9}
+#define P5_8 (void *)5, 8
+#define P5_9 (void *)5, 9
+
+#endif //gpio_mcuDetails_h
