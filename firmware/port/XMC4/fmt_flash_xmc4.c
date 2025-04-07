@@ -47,7 +47,7 @@ static uint32_t getPreceedingPageBoundary(uint32_t address);
 static int getSectorContainingAddress(uint32_t address);
 
 
-int fmt_flash_write(uint32_t address, const uint8_t *data, int len)
+int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
   uint8_t page_buffer[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
   
@@ -109,7 +109,7 @@ static bool isSectorErased(int sector)
   return true;
 }
 
-int fmt_flash_erase(uint32_t start_address, int len)
+int fmt_flash_erase(uint32_t start_address, uint32_t len)
 {
   // Work with absolute addresses. 
   if (start_address < ARCH_FLASH_OFFSET) {
