@@ -1,0 +1,2 @@
+set(SIGN ED25519)
+set(HASH SHA256)
