@@ -1,18 +1,36 @@
 {
   "configurations": [
     {
-      "name": "XMC",
+      "name": "app_root",
       "type": "cortex-debug",
       "servertype": "jlink",
       "request": "launch",
       "serverpath": "JLinkGDBServerCLExe",
-      "executable": "example/build/xmc/spi_example.elf",
+      "executable": "example/build/xmc/app_root.elf",
       "interface": "swd",
       "device": "XMC4700-2048",
       "preLaunchTask": "cmake build xmc",
       "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
       "showDevDebugOutput": "raw",
       // "runToEntryPoint": "main"
+    },
+    {
+      "name": "BL+App-noFlash",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "request": "launch",
+      "serverpath": "JLinkGDBServerCLExe",
+      "cwd": "${workspaceFolder}/example/build/xmc",
+      "loadFiles": [],
+      "symbolFiles": ["mgt-boot/bootloader.elf", "app_offset.elf"],
+      "device": "XMC4700-2048",
+      "showDevDebugOutput": "vscode",
+      // "preLaunchCommands": [
+      //   "loadbin images/factory_v3.bin, 0x0C000000",
+      //   "reset",
+      //   "add-symbol-file build/bootloader.elf",
+      //   "add-symbol-file images/app_v2.elf"
+      // ]
     },
     {
       "name": "testFirment",
