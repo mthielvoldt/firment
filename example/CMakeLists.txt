@@ -13,19 +13,22 @@
 
 cmake_minimum_required(VERSION 3.22.1)
 
-# Read the version from an external file
-file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
-# Strip any trailing whitespace
-string(STRIP "${VERSION_CONTENT}" APP_VERSION)
-message(STATUS "App version: ${APP_VERSION}")
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+# Read the version from an external file
+file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
+# Strip any trailing whitespace
+string(STRIP "${VERSION_CONTENT}" VERSION_SEM)
 # Disables CXX (C++)
-project(spi_example VERSION ${APP_VERSION} LANGUAGES C ASM)
+project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
+math(EXPR APP_VERSION
+  "${CMAKE_PROJECT_VERSION_MAJOR} * 1000000 + 
+   ${CMAKE_PROJECT_VERSION_MINOR} * 1000 + 
+   ${CMAKE_PROJECT_VERSION_PATCH}")
+message(STATUS "App version: ${CMAKE_PROJECT_VERSION} (${APP_VERSION})")
 
 include(config/mcuCompileOptions.cmake)
 include(config/partitions.cmake)
@@ -76,16 +79,6 @@ add_executable(app_offset.elf $<TARGET_OBJECTS:app_lib>)
 target_link_libraries(app_offset.elf app_lib)
 target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
 
-
-# Build a hex file from the elf.
-add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS app_root.elf)
-add_custom_command(TARGET ${PROJECT_NAME}.hex
-    COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex app_root.elf ${PROJECT_NAME}.hex)
-
-# Build a binary.
-add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS app_root.elf)
-add_custom_command(TARGET ${PROJECT_NAME}.bin
-  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary app_root.elf ${PROJECT_NAME}.bin)
 
 # Invoke bootloader build
 add_subdirectory(${MGTBOOT_DIR} mgt-boot)
