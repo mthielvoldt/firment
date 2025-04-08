@@ -50,31 +50,32 @@ include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
-add_executable(app_root.elf
+add_library(app_lib OBJECT
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
   firmware/init_spi.c
 )
-
-# Specify the project's include directories. Libraries add their own. 
-target_include_directories(app_root.elf PRIVATE
+target_include_directories(app_lib PRIVATE
   firmware
   ${PROJECT_CONFIG_DIR}
 )
-
 # Specify which libraries the top-level target depends on directly. 
 # Note: top-level needs MCUPort to select the peripheral modules to use.
 # Note: -lm links the standard math library (math.h).
-target_link_libraries(app_root.elf FirmentFW MCUPort -lm)
+target_link_libraries(app_lib FirmentFW MCUPort -lm)
 
 
-set(LINKER_FILE ${PORT_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld)
-target_link_options(app_root.elf PRIVATE
-    "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections,-T${LINKER_FILE}"
-)
+add_executable(app_root.elf $<TARGET_OBJECTS:app_lib>)
+target_link_libraries(app_root.elf app_lib)
+target_link_options(app_root.elf PRIVATE "-T${ROOT_PARTITION_LINKER_FILE}")
 ## Uncomment to see full linker command.
 # target_link_options(app_root.elf PRIVATE "-v")
+
+add_executable(app_offset.elf $<TARGET_OBJECTS:app_lib>)
+target_link_libraries(app_offset.elf app_lib)
+target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
+
 
 # Build a hex file from the elf.
 add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS app_root.elf)
@@ -85,6 +86,9 @@ add_custom_command(TARGET ${PROJECT_NAME}.hex
 add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS app_root.elf)
 add_custom_command(TARGET ${PROJECT_NAME}.bin
   COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary app_root.elf ${PROJECT_NAME}.bin)
+
+# Invoke bootloader build
+add_subdirectory(${MGTBOOT_DIR} mgt-boot)
 
 add_custom_target(web-ui ALL
   DEPENDS

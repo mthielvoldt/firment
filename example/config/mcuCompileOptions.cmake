@@ -7,6 +7,10 @@ set(ASSEMBLER_FLAGS "-Wa,-mcpu=cortex-m4")
 
 # Warnings
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-declarations")
+set(CMAKE_C_FLAGS_DEBUG "-Og -g")
+
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections")
+# set(COMMON_LINK_OPTIONS "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections")
 
 set(MCU_FAMILY "XMC4")
 set(MCU_VARIANT "XMC4700")
