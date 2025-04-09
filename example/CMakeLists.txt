@@ -83,15 +83,30 @@ target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
 # Invoke bootloader build
 add_subdirectory(${MGTBOOT_DIR} mgt-boot)
 
-add_custom_target(web-ui ALL
+# Example UI
+set(EXAMPLE_UI_DIR ${PROJECT_SOURCE_DIR}/web-ui)
+
+add_custom_command(OUTPUT ${EXAMPLE_UI_DIR}/node_modules
   DEPENDS
-    ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
+    ${EXAMPLE_UI_DIR}/package.json
     FirmentUI
+  WORKING_DIRECTORY ${EXAMPLE_UI_DIR}
+  COMMAND npm install --no-audit
 )
 
-# No DEPENDS - if firment-ui exists in web-ui/node_modules/, it's up-to-date. 
-add_custom_command(
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/web-ui
-  OUTPUT ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
-  COMMAND npm install ${FIRMENT_DIR}/web-ui 
+add_custom_command(OUTPUT ${EXAMPLE_UI_DIR}/dist/index.html
+  DEPENDS
+    ${EXAMPLE_UI_DIR}/node_modules
+    ${EXAMPLE_UI_DIR}/src/App.tsx
+    ${EXAMPLE_UI_DIR}/src/index.css
+    ${EXAMPLE_UI_DIR}/src/main.tsx
+    ${EXAMPLE_UI_DIR}/src/profiler.ts
+    ${EXAMPLE_UI_DIR}/src/vite-env.d.ts
+    ${EXAMPLE_UI_DIR}/tsconfig.app.json
+    ${EXAMPLE_UI_DIR}/tsconfig.node.json
+    ${EXAMPLE_UI_DIR}/vite.config.ts
+  WORKING_DIRECTORY ${EXAMPLE_UI_DIR}
+  COMMAND npm run build
 )
+
+add_custom_target(example_ui ALL DEPENDS ${EXAMPLE_UI_DIR}/dist/index.html)
