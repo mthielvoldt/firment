@@ -85,14 +85,14 @@ jobs:
         id: restore-build-tools
         uses: actions/cache/restore@v4
         with:
-          path: build/build-tools
+          path: example/build/build-tools
           key: build-tools-${{ steps.submodule-hashes.outputs.wolfboot }}
       
       - name: Restore venv from cache
         id: restore-venv
         uses: actions/cache/restore@v4
         with:
-          path: build/venv
+          path: example/build/venv
           key: venv-${{ hashFiles('protocol/nanopb_py_env.cmake') }}
 
       - name: Cmake Build
@@ -102,14 +102,14 @@ jobs:
         if: steps.restore-venv.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: build/venv
+          path: example/build/venv
           key: venv-${{ hashFiles('protocol/nanopb_py_env.cmake') }}
 
       - name: Save build-tools to cache
         if: steps.restore-build-tools.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: build/build-tools
+          path: example/build/build-tools
           key: build-tools-${{ steps.submodule-hashes.outputs.wolfboot }}
 
       - name: Set up Node
