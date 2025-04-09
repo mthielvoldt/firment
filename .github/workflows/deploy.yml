@@ -6,7 +6,6 @@ on:
   push:
     branches: 
       - 'main'
-  
   pull_request:
     branches:
       - 'main'
@@ -78,8 +77,41 @@ jobs:
       - name: Verify Installation
         run: arm-none-eabi-gcc --version
 
+      - name: Get submodule hashes
+        id: submodule-hashes
+        run: echo "wolfboot=$(git -C mgt-boot/deps/wolfBoot/ rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Restore build-tools from cache
+        id: restore-build-tools
+        uses: actions/cache/restore@v4
+        with:
+          path: build/build-tools
+          key: build-tools-${{ steps.submodule-hashes.outputs.wolfboot }}
+      
+      - name: Restore venv from cache
+        id: restore-venv
+        uses: actions/cache/restore@v4
+        with:
+          path: build/venv
+          key: venv-${{ hashFiles('protocol/nanopb_py_env.cmake') }}
+
       - name: Cmake Build
         run: . build-xmc.sh
+
+      - name: Save venv to cache
+        if: steps.restore-venv.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: build/venv
+          key: venv-${{ hashFiles('protocol/nanopb_py_env.cmake') }}
+
+      - name: Save build-tools to cache
+        if: steps.restore-build-tools.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: build/build-tools
+          key: build-tools-${{ steps.submodule-hashes.outputs.wolfboot }}
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
