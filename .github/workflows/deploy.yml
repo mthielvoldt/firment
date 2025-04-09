@@ -25,22 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  secret-test:
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: example
-    steps:
-      - name: Store secrets
-        run: |
-          mkdir -p build/build-keys
-          echo "${{ secrets.TEST_SECRET_0 }}" > build/build-keys/my_secret.txt
-          chmod 600 build/build-keys/my_secret.txt
-          cat build/build-keys/my_secret.txt
-          false
-
   test:
-    needs: secret-test
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -50,6 +35,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'true'
+      - name: Store secrets
+        run: |
+          cd example
+          mkdir -p build/build-keys
+          echo "${{ secrets.TEST_SECRET_0 }}" > build/build-keys/my_secret.txt
+          chmod 600 build/build-keys/my_secret.txt
+          cat build/build-keys/my_secret.txt
+          false
       - name: Cmake Build
         run: . run-tests.sh
 
