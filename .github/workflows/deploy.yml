@@ -183,7 +183,7 @@ jobs:
 
       - run: npx playwright install chromium --only-shell --with-deps
 
-      - name: Save playwright browsers from cache
+      - name: Save playwright browsers to cache
         if: steps.restore-browsers.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
@@ -195,7 +195,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: example/e2e/playwright-report/
           retention-days: 15
 
 
