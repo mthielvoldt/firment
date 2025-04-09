@@ -81,8 +81,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd ../web-ui && npm run dev', //'npm run start' for prod build
-    url: 'http://localhost:5173/firment/',
+    command: 'cd ../web-ui && npm run preview', //'npm run start' for prod build
+    url: 'http://localhost:4173/firment/',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',
     stderr: 'pipe',
