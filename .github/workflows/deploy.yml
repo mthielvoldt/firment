@@ -29,13 +29,14 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: .
+        working-directory: example
     steps:
       - name: Store secrets
         run: |
-          echo "${{ secrets.TEST_SECRET_0 }}" >> build/keys/my_secret.txt
-          chmod 600 build/keys/my_secret.txt
-          cat build/keys/my_secret.txt
+          mkdir -p build/build-keys
+          echo "${{ secrets.TEST_SECRET_0 }}" > build/build-keys/my_secret.txt
+          chmod 600 build/build-keys/my_secret.txt
+          cat build/build-keys/my_secret.txt
           false
 
   test:
