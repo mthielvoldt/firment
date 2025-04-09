@@ -174,20 +174,12 @@ jobs:
           key: node-${{ hashFiles('example/web-ui/package-lock.json') }}
       - run: npm ci
 
-      - name: Get playwright version
-        id: playwright-version
-        run: echo "pw-version=$(\
-            grep -A1 '"node_modules/playwright"' package-lock.json | \
-            grep '"version"' | \
-            sed -E 's/.*"version": "([^"]+)".*/\1/' \
-          )" >> $GITHUB_OUTPUT
-
       - name: Restore playwright browsers from cache
         id: restore-browsers
         uses: actions/cache/restore@v4
         with:
           path: ~/.cache/ms-playwright
-          key: browsers-${{ steps.playwright-version.outputs.pw-version }}
+          key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
 
       - run: npx playwright install chromium --only-shell --with-deps
 
@@ -197,7 +189,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.cache/ms-playwright
-          key: pw-browsers-${{ steps.playwright-version.output.pw-version }}
+          key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
 
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
