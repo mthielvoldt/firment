@@ -136,7 +136,16 @@ jobs:
           path: example/web-ui/node_modules
           key: node-${{ hashFiles('example/web-ui/package-lock.json') }}
 
-      - name: Upload artifact
+      - name: Upload UI and FW images for E2E
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-and-images
+          path: |
+            example/web-ui/dist
+            example/build/build-images/v*/
+          compression-level: 0
+
+      - name: Upload UI Artifact for GH Pages
         # only upload artifacts if this job is triggered by a push to main. 
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
