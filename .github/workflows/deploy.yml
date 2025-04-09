@@ -185,7 +185,7 @@ jobs:
 
       - name: Save playwright browsers from cache
         if: steps.restore-browsers.outputs.cache-hit != 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/save@v4
         with:
           path: ~/.cache/ms-playwright
           key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
