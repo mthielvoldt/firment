@@ -43,7 +43,7 @@ jobs:
           chmod 600 build/build-keys/my_secret.txt
       - name: Get secrets
         run: |
-          echo $(< example/build/build-keys/my_secret.txt)
+          sed 's/\ /#/g' example/build/build-keys/my_secret.txt
           echo "another thing."
           false
       - name: Cmake Build
