@@ -1,6 +1,6 @@
 
 #include "ISR_Config.h"
-#include "config/spi_config.h"
+#include "init_spi.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic_port.h>
@@ -38,7 +38,8 @@ int main(void)
 }
 
 // 1kHz
-void periodicA()
+void periodicA(void); // suppress missing-declaration warning
+void periodicA(void)
 {
   comm_handleTelemetry();
   fmt_handleRx();

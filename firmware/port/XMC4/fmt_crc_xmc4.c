@@ -41,9 +41,9 @@ static XMC_FCE_t engine = {
 
 static bool isInitialized = false;
 
-ARM_DRIVER_VERSION_t GetVersion(void) { return DriverVersion; }
+static ARM_DRIVER_VERSION_t GetVersion(void) { return DriverVersion; }
 
-FMT_CRC_CAPABILITIES_t GetCapabilities(void) { return DriverCapabilities; }
+static FMT_CRC_CAPABILITIES_t GetCapabilities(void) { return DriverCapabilities; }
 
 static int32_t Initialize(void)
 {

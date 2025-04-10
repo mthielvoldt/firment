@@ -7,3 +7,6 @@
 [submodule "test/cpputest"]
 	path = test/cpputest
 	url = https://github.com/cpputest/cpputest.git
+[submodule "example/mgt-boot"]
+	path = example/mgt-boot
+	url = https://github.com/mthielvoldt/mgt-boot.git

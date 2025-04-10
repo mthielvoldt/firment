@@ -7,10 +7,12 @@ add_compile_options("-g")
 include(firmentConfig.cmake)
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
+set(CPPUTEST_INC_DIR ${PROJECT_SOURCE_DIR}/cpputest/include)
 
 add_subdirectory(cpputest ../cpputest_build)
 add_subdirectory(${PORT_DIR} port)
 add_subdirectory(${FIRMENT_DIR} firment)
+add_subdirectory(../example/test example-test)
 
 add_library(esp_lib
   ../esp/mqtt5/main/fmt_esp_spi.c
@@ -33,7 +35,6 @@ add_executable(testFirment
   ../firmware/test/stub_comms.c
   ../firmware/test/updateTest.cpp
   ../esp/mqtt5/test/espSpiTest.cpp
-  ${PROJECT_CONFIG_DIR}/spi_config.c
 )
 
 target_include_directories(testFirment PRIVATE ${PROJECT_CONFIG_DIR})

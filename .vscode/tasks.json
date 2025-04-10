@@ -23,7 +23,7 @@
     {
       "label": "cmake build xmc",
       "type": "shell",
-      "command": "cmake --build . --target=spi_example.elf",
+      "command": "cmake --build . --target=app_root.elf",
       "options": {
         "cwd": "${workspaceFolder}/example/build/xmc"
       },

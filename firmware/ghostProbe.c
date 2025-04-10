@@ -60,11 +60,6 @@ void handleRunScanCtl(RunScanCtl scanCtl)
   }
 }
 
-void gp_stopScan()
-{
-  running = false;
-}
-
 void gp_periodic(void)
 {
   static uint_fast32_t callCount = 0;

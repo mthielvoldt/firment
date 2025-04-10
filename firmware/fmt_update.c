@@ -135,9 +135,9 @@ static void processPage(void)
     if (downloadStartCb)
       downloadStartCb();
     // TODO: erase the other sectors to support multi-sector partitions.
-    // hal_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
+    // fmt_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }
-  hal_flash_write(
+  fmt_flash_write(
       FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * FLASH_PAGE_SIZE,
       pageBuffer,
       FLASH_PAGE_SIZE);

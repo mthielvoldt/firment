@@ -18,7 +18,7 @@ void fmt_handleRx(void)
     {
     case Top_Ack_tag:
     {
-      Ack subMsg = incomingMessage.sub.Ack;
+      // New Feature placeholder: handle ack
       break;
     }
       /*--GENERATED CONTENT MARKER--*/

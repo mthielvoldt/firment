@@ -13,85 +13,100 @@
 
 cmake_minimum_required(VERSION 3.22.1)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 # Read the version from an external file
 file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
 # Strip any trailing whitespace
-string(STRIP "${VERSION_CONTENT}" PROJECT_VERSION)
-message(STATUS "Project version: ${PROJECT_VERSION}")
-
+string(STRIP "${VERSION_CONTENT}" VERSION_SEM)
 # Disables CXX (C++)
-project(spi_example VERSION ${PROJECT_VERSION} LANGUAGES C ASM)
+project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
+math(EXPR APP_VERSION
+  "${CMAKE_PROJECT_VERSION_MAJOR} * 1000000 + 
+   ${CMAKE_PROJECT_VERSION_MINOR} * 1000 + 
+   ${CMAKE_PROJECT_VERSION_PATCH}")
+message(STATUS "App version: ${CMAKE_PROJECT_VERSION} (${APP_VERSION})")
 
-include(firmentConfig.cmake)
+include(config/mcuCompileOptions.cmake)
+include(config/partitions.cmake)
+include(config/cryptOptions.cmake)
+include(config/firmentConfig.cmake)
 
-set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
-
-# Project-wide compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")  # debug symbols
-  # -g3
-  # -gdwarf-2
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0") # Optimizations off
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall") # Warnings: all
-message(STATUS "C flags: ${CMAKE_C_FLAGS}")
-
-set(EXECUTABLE ${PROJECT_NAME}.elf)
+set(MGTBOOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mgt-boot)
+set(LINKER_SCRIPT_TEMPLATE 
+  ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
+include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
 # Select which MCU port library ('MCUPort' target) build project against.
-# Note: MCU_FAMILY specified in the toolchain file. TODO: move into fmt. CML.
-add_subdirectory(${PORT_DIR} ${MCU_FAMILY})
+set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
+add_subdirectory(${PORT_DIR} ${MCU_FAMILY}) # provides MCUPort library.
 
 # Add firment, and set where (in the binary dir) to place firment output files.
 # Must come after add_subdirectory() for port or it won't find MCUPort target.
 add_subdirectory(${FIRMENT_DIR} firment)
 
+include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
+
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
-add_executable(${EXECUTABLE}
+add_library(app_lib OBJECT
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
-  ${PROJECT_CONFIG_DIR}/spi_config.c
+  firmware/init_spi.c
 )
-
-# Specify the project's include directories. Libraries add their own. 
-target_include_directories(${EXECUTABLE} PRIVATE
+target_include_directories(app_lib PRIVATE
   firmware
   ${PROJECT_CONFIG_DIR}
 )
-
 # Specify which libraries the top-level target depends on directly. 
 # Note: top-level needs MCUPort to select the peripheral modules to use.
 # Note: -lm links the standard math library (math.h).
-target_link_libraries(${EXECUTABLE} FirmentFW MCUPort -lm)
+target_link_libraries(app_lib FirmentFW MCUPort -lm)
 
 
-set(LINKER_FILE ${PORT_DIR}/${MCU_VARIANT}x${MCU_MEM_VARIANT}.ld)
-target_link_options(${EXECUTABLE} PRIVATE
-    "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections,-T${LINKER_FILE}"
-)
+add_executable(app_root.elf $<TARGET_OBJECTS:app_lib>)
+target_link_libraries(app_root.elf app_lib)
+target_link_options(app_root.elf PRIVATE "-T${ROOT_PARTITION_LINKER_FILE}")
 ## Uncomment to see full linker command.
-# target_link_options(${EXECUTABLE} PRIVATE "-v")
+# target_link_options(app_root.elf PRIVATE "-v")
 
-# Build a hex file from the elf.
-add_custom_target(${PROJECT_NAME}.hex ALL DEPENDS ${EXECUTABLE})
-add_custom_command(TARGET ${PROJECT_NAME}.hex
-    COMMAND ${CMAKE_C_OBJCOPY} ARGS -O ihex ${EXECUTABLE} ${PROJECT_NAME}.hex)
+add_executable(app_offset.elf $<TARGET_OBJECTS:app_lib>)
+target_link_libraries(app_offset.elf app_lib)
+target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
 
-# Build a binary.
-add_custom_target(${PROJECT_NAME}.bin ALL DEPENDS ${EXECUTABLE})
-add_custom_command(TARGET ${PROJECT_NAME}.bin
-  COMMAND ${CMAKE_C_OBJCOPY} ARGS -O binary ${EXECUTABLE} ${PROJECT_NAME}.bin)
 
-add_custom_target(web-ui ALL
+# Invoke bootloader build
+add_subdirectory(${MGTBOOT_DIR} mgt-boot)
+
+# Example UI
+set(EXAMPLE_UI_DIR ${PROJECT_SOURCE_DIR}/web-ui)
+
+add_custom_command(OUTPUT ${EXAMPLE_UI_DIR}/node_modules
   DEPENDS
-    ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
+    ${EXAMPLE_UI_DIR}/package.json
     FirmentUI
+  WORKING_DIRECTORY ${EXAMPLE_UI_DIR}
+  COMMAND npm install --no-audit
 )
 
-# No DEPENDS - if firment-ui exists in web-ui/node_modules/, it's up-to-date. 
-add_custom_command(
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/web-ui
-  OUTPUT ${PROJECT_SOURCE_DIR}/web-ui/node_modules/firment-ui
-  COMMAND npm install ${FIRMENT_DIR}/web-ui 
+add_custom_command(OUTPUT ${EXAMPLE_UI_DIR}/dist/index.html
+  DEPENDS
+    ${EXAMPLE_UI_DIR}/node_modules
+    ${EXAMPLE_UI_DIR}/src/App.tsx
+    ${EXAMPLE_UI_DIR}/src/index.css
+    ${EXAMPLE_UI_DIR}/src/main.tsx
+    ${EXAMPLE_UI_DIR}/src/profiler.ts
+    ${EXAMPLE_UI_DIR}/src/vite-env.d.ts
+    ${EXAMPLE_UI_DIR}/tsconfig.app.json
+    ${EXAMPLE_UI_DIR}/tsconfig.node.json
+    ${EXAMPLE_UI_DIR}/vite.config.ts
+  WORKING_DIRECTORY ${EXAMPLE_UI_DIR}
+  COMMAND npm run build
 )
+
+add_custom_target(example_ui ALL DEPENDS ${EXAMPLE_UI_DIR}/dist/index.html)
