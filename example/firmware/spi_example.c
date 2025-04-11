@@ -8,7 +8,6 @@
 #include "control.h"
 #include "project_comms.h"
 #include "frequency.h"
-#include "fmt_version.h"
 
 int main(void)
 {
