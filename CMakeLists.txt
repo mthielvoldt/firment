@@ -27,7 +27,7 @@ add_library(FirmentFW
 )
 
 # Generate the version header for the firmware
-configure_file(firmware/fmt_version.h.in version.h)
+configure_file(firmware/fmt_version.h.in fmt_version.h)
 
 # Generate firment.proto with field size/length values filled in from 
 # firment_config.json (in the project directory)
@@ -97,14 +97,12 @@ configure_file(web-ui/src/flashPage.ts.in
 
 target_include_directories(FirmentFW 
   PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR} #  fmt_rx_pb.c > fmt_spi.h > messages.pb.h
     ${APP_FW_CONFIG_DIR} # fmt_rx.pb.c > project_comms.h 
   PUBLIC
+    ${CMAKE_CURRENT_BINARY_DIR} #  fmt_rx_pb.c > fmt_spi.h > messages.pb.h
     firmware/lib/CMSIS-6.1.0/Driver/Include # fmt_rx_pb.c > fmt_spi.h > Driver_SPI.h
     protocol/nanopb # fmt_spi.h > messages.pb.h > pb.h
     firmware # fmt_rx.h used by fmt_rx.pb.c
-  INTERFACE     # Consuming targets need these headers, but this library doesn't
-    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 
