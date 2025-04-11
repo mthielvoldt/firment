@@ -18,6 +18,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+set(PROJECT_CONFIG_DIR ${CMAKE_CURRENT_LIST_DIR}/config)
 include(config/version.cmake) # -> VERSION_SEM
 
 # Disables CXX (C++)
