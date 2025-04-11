@@ -98,7 +98,7 @@ configure_file(web-ui/src/flashPage.ts.in
 target_include_directories(FirmentFW 
   PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR} #  fmt_rx_pb.c > fmt_spi.h > messages.pb.h
-    ${PROJECT_CONFIG_DIR} # fmt_rx.pb.c > project_comms.h 
+    ${APP_FW_CONFIG_DIR} # fmt_rx.pb.c > project_comms.h 
   PUBLIC
     firmware/lib/CMSIS-6.1.0/Driver/Include # fmt_rx_pb.c > fmt_spi.h > Driver_SPI.h
     protocol/nanopb # fmt_spi.h > messages.pb.h > pb.h

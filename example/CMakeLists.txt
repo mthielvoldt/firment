@@ -18,10 +18,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-# Read the version from an external file
-file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
-# Strip any trailing whitespace
-string(STRIP "${VERSION_CONTENT}" VERSION_SEM)
+include(config/version.cmake) # -> VERSION_SEM
+
 # Disables CXX (C++)
 project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
 
@@ -61,7 +59,7 @@ add_library(app_lib OBJECT
 )
 target_include_directories(app_lib PRIVATE
   firmware
-  ${PROJECT_CONFIG_DIR}
+  ${APP_FW_CONFIG_DIR}
   ${PROJECT_BINARY_DIR} # build_time.h
 )
 # Specify which libraries the top-level target depends on directly. 
