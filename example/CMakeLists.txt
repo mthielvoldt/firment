@@ -1,6 +1,6 @@
 ## This Top-level CMakeLists.txt is accountable to: 
 # TODO
-# - Generate version.h with values from version.txt, and include it in build.
+# - Generate fmt_version.h with values from version.txt, and include it in build.
 # - Generate firment.proto with values from firment.config. 
 # - Link project to a local copy of the firment library.
 # - Link project to the chosen firment MCU lib.
