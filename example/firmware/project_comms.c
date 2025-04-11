@@ -18,6 +18,7 @@
 #include <fmt_log.h>
 #include <fmt_flash.h>
 #include <fmt_gpio.h>
+#include <fmt_version.h>
 #include "config/gpio_pcbDetails.h"
 #include <core_port.h>  // NVIC_SystemReset()
 
@@ -54,6 +55,10 @@ void comm_handleTelemetry(void)
                 .voltageV = telem.voltage}}});
 
     break;
+  }
+  case 1:
+  {
+    fmt_sendVersion();
   }
   case 200:
   {
