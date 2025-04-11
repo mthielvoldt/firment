@@ -22,7 +22,7 @@ test('Update the firmware', async ({ page }) => {
   
   await page.getByRole("button", {name: "Send Image"}).click();
 
-  const version = page.getByText("FW Version");
+  const buildId = page.getByTestId("fw-build-id");
 
   // Improve how to unambiguously identify the FW version. 
   // Fix whatevers making the version not show up. 
@@ -30,6 +30,6 @@ test('Update the firmware', async ({ page }) => {
   // Get the version we just allegedly uploaded from "version.txt". 
   // look for a match with whats on screen (after a wait)
   // End early if there's a failure notice.
-  await expect(version).toHaveText("0.2.0");
+  await expect(buildId).toHaveText("0.2.0");
   
 });

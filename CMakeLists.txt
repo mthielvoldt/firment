@@ -126,14 +126,24 @@ add_custom_command(
   WORKING_DIRECTORY ${UI_DIR}
   COMMAND npm run build
   DEPENDS
+    ${UI_SRC_DIR}/plot/axisTools.ts
+    ${UI_SRC_DIR}/plot/Plot.css
+    ${UI_SRC_DIR}/plot/Plot.tsx
+    ${UI_SRC_DIR}/plot/plotColors.ts
+    ${UI_SRC_DIR}/plot/plotLabeler.ts
+    ${UI_SRC_DIR}/plot/PlotLabels.tsx
+    ${UI_SRC_DIR}/plot/plotModel.tsx
+    ${UI_SRC_DIR}/plot/traceStats.ts
     ${UI_SRC_DIR}/App.css
     ${UI_SRC_DIR}/BrokerAddress.tsx
+    ${UI_SRC_DIR}/flashPage.ts.in
     ${UI_SRC_DIR}/Image.tsx 
     ${UI_SRC_DIR}/index.ts
     ${UI_SRC_DIR}/Log.tsx
     ${UI_SRC_DIR}/mockSignal.tsx
     ${UI_SRC_DIR}/mqclient.tsx # Should be .ts
     ${UI_SRC_DIR}/Reset.tsx
+    ${UI_SRC_DIR}/Version.tsx
 )
 
 add_custom_command(
