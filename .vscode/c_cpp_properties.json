@@ -9,6 +9,7 @@
           "includePath": [
             "example/firmware",
             "example/firmware/config",
+            "example/build/xmc",
             "example/build/xmc/firment",
             "example/mgt-boot/inc",
             "esp/mqtt5/build/config",
@@ -71,6 +72,7 @@
           "includePath": [
             "example/firmware",
             "example/firmware/config",
+            "example/build/xmc",
             "example/build/xmc/firment",
             "example/mgt-boot/inc",
             "firmware",

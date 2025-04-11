@@ -24,11 +24,6 @@ file(READ "${CMAKE_SOURCE_DIR}/version.txt" VERSION_CONTENT)
 string(STRIP "${VERSION_CONTENT}" VERSION_SEM)
 # Disables CXX (C++)
 project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
-math(EXPR APP_VERSION
-  "${CMAKE_PROJECT_VERSION_MAJOR} * 1000000 + 
-   ${CMAKE_PROJECT_VERSION_MINOR} * 1000 + 
-   ${CMAKE_PROJECT_VERSION_PATCH}")
-message(STATUS "App version: ${CMAKE_PROJECT_VERSION} (${APP_VERSION})")
 
 include(config/mcuCompileOptions.cmake)
 include(config/partitions.cmake)
@@ -51,6 +46,10 @@ add_subdirectory(${FIRMENT_DIR} firment)
 
 include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
+# Update the build_time, which gets used as the app version for signing.
+set(APP_DEPENDS app_lib FirmentFW MCUPort)
+include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
+
 # Specify the project's source files.
 # TODO: make this so it re-builds when linker script changes. 
 add_library(app_lib OBJECT
@@ -58,10 +57,12 @@ add_library(app_lib OBJECT
   firmware/project_comms.c
   firmware/control.c
   firmware/init_spi.c
+  ${BUILD_TIME_HEADER}
 )
 target_include_directories(app_lib PRIVATE
   firmware
   ${PROJECT_CONFIG_DIR}
+  ${PROJECT_BINARY_DIR} # build_time.h
 )
 # Specify which libraries the top-level target depends on directly. 
 # Note: top-level needs MCUPort to select the peripheral modules to use.
