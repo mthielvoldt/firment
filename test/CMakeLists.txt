@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(firment_test CXX C)
 
 add_compile_options("-g")
 
-include(firmentConfig.cmake)
+set(PROJECT_CONFIG_DIR ${CMAKE_CURRENT_LIST_DIR}/../example/config)
+include(${PROJECT_CONFIG_DIR}/version.cmake) # -> VERSION_SEM
+project(firment_test  VERSION ${VERSION_SEM} LANGUAGES CXX C)
+
+include(${PROJECT_CONFIG_DIR}/partitions.cmake)
+include(${PROJECT_CONFIG_DIR}/firmentConfig.cmake)
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
 set(CPPUTEST_INC_DIR ${PROJECT_SOURCE_DIR}/cpputest/include)
@@ -34,10 +38,14 @@ add_executable(testFirment
   ../firmware/test/spiTest.cpp
   ../firmware/test/stub_comms.c
   ../firmware/test/updateTest.cpp
+  ../firmware/test/versionTest.cpp
   ../esp/mqtt5/test/espSpiTest.cpp
 )
 
-target_include_directories(testFirment PRIVATE ${PROJECT_CONFIG_DIR})
+target_include_directories(testFirment PRIVATE 
+  ${APP_FW_CONFIG_DIR}
+  
+)
 
 target_link_libraries(testFirment 
   CppUTest 

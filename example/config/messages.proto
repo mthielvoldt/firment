@@ -45,5 +45,6 @@ message Top {
     WaveformCtl WaveformCtl = 8;
     WaveformTlm WaveformTlm = 9;
     Reset Reset = 10;
+    Version Version = 11;
   }
 }
