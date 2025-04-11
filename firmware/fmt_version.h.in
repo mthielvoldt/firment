@@ -4,11 +4,13 @@
 #define fmt_version_h
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define VERSION_MAJOR @CMAKE_PROJECT_VERSION_MAJOR@
 #define VERSION_MINOR @CMAKE_PROJECT_VERSION_MINOR@
 #define VERSION_PATCH @CMAKE_PROJECT_VERSION_PATCH@
 
 bool fmt_sendVersion(void);
+void fmt_setBuildIdGetter(uint32_t (*getter)(void));
 
 #endif // fmt_version_h

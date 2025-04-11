@@ -107,7 +107,7 @@
             "protocol/nanopb",
             "test/build/firment",  // messages.pb.h
             "test/cpputest/include",
-            "test/firmware"
+            "test/build/firment"
           ],
           "forcedInclude": [],
           "cStandard": "c11",
