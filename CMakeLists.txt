@@ -3,8 +3,8 @@
 include(protocol/nanopb_py_env.cmake)
 
 # TODO: this should probably be passed in from project somehow. 
-set(PROJECT_PROTO ${PROJECT_SOURCE_DIR}/messages.proto)
-set(PROBES_PROTO ${PROJECT_SOURCE_DIR}/probes.proto)
+set(PROJECT_PROTO ${PROJECT_CONFIG_DIR}/messages.proto)
+set(PROBES_PROTO ${PROJECT_CONFIG_DIR}/probes.proto)
 set(NANOPB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protocol/nanopb)
 set(PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protocol/pb-plugins)
 set(PROTOC ${NANOPB_DIR}/generator/protoc)
@@ -18,6 +18,7 @@ add_library(FirmentFW
   firmware/fmt_log.c
   firmware/fmt_spi.c
   firmware/fmt_update.c
+  firmware/fmt_version.c
   firmware/fmt_waveform.c
   firmware/ghostProbe.c
   firmware/queue.c
@@ -66,7 +67,7 @@ add_custom_command(
     ${VENV_ACTIVATE} &&
     mkdir -p ${UI_GENERATED_DIR} &&
     ${PROTOC}
-      -I ${PROJECT_SOURCE_DIR}  # messages.proto, probes.proto
+      -I ${PROJECT_CONFIG_DIR}  # messages.proto, probes.proto
       -I ${CMAKE_CURRENT_BINARY_DIR} # firment_msg.proto
       --plugin=protoc-gen-firment=${PLUGIN_DIR}/gen-firment.py
       --plugin=protoc-gen-widgets=${PLUGIN_DIR}/gen-widgets.py
@@ -141,7 +142,7 @@ add_custom_command(
     ${UI_DIR}/node_modules/protobufjs-cli/bin/pbjs
       -p ${NANOPB_DIR}/generator/proto
       -p ${CMAKE_CURRENT_BINARY_DIR}
-      -p ${PROJECT_SOURCE_DIR}
+      -p ${PROJECT_CONFIG_DIR}
       -t static-module
       -w es6
       -o ${UI_SRC_DIR}/generated/messages.js
