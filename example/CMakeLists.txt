@@ -45,36 +45,32 @@ add_subdirectory(${FIRMENT_DIR} firment)
 
 include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
-# Update the build_time, which gets used as the app version for signing.
-set(APP_SRCS
-  firmware/spi_example.c
-  firmware/project_comms.c
-  firmware/control.c
-  firmware/init_spi.c
+add_library(app_lib 
+firmware/spi_example.c
+firmware/project_comms.c
+firmware/control.c
+firmware/init_spi.c
 )
-set(APP_DEPENDS ${APP_SRCS} $<TARGET_FILE:FirmentFW> $<TARGET_FILE:MCUPort>)
-include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
-
-# Only an OBJECT lib for slight performance improvement - may be promoted.
-add_library(app_lib OBJECT ${APP_SRCS} ${BUILD_TIME_HEADER})
-target_include_directories(app_lib PRIVATE
-  firmware
-  ${APP_FW_CONFIG_DIR}
-  ${PROJECT_BINARY_DIR} # build_time.h
+target_include_directories(app_lib 
+  PRIVATE firmware ${APP_FW_CONFIG_DIR}
+  PUBLIC ${MGTBOOT_DIR}/inc # build_time.h
 )
 # Specify which libraries the top-level target depends on directly. 
-# Note: top-level needs MCUPort to select the peripheral modules to use.
 # Note: -lm links the standard math library (math.h).
 target_link_libraries(app_lib FirmentFW MCUPort -lm)
 
 
-add_executable(app_root.elf $<TARGET_OBJECTS:app_lib>)
+# Update the build_time, which gets used as the app version for signing.
+set(APP_DEPENDS $<TARGET_FILE:app_lib>)
+include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
+
+add_executable(app_root.elf ${BUILD_TIME_C})
 target_link_libraries(app_root.elf app_lib)
 target_link_options(app_root.elf PRIVATE "-T${ROOT_PARTITION_LINKER_FILE}")
 ## Uncomment to see full linker command.
 # target_link_options(app_root.elf PRIVATE "-v")
 
-add_executable(app_offset.elf $<TARGET_OBJECTS:app_lib>)
+add_executable(app_offset.elf ${BUILD_TIME_C})
 target_link_libraries(app_offset.elf app_lib)
 target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
 
