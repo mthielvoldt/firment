@@ -61,7 +61,11 @@ target_link_libraries(app_lib FirmentFW MCUPort -lm)
 
 
 # Update the build_time, which gets used as the app version for signing.
-set(APP_DEPENDS $<TARGET_FILE:app_lib>)
+set(APP_DEPENDS 
+  $<TARGET_FILE:app_lib> 
+  $<TARGET_FILE:FirmentFW> 
+  $<TARGET_FILE:MCUPort>
+)
 include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
 
 add_executable(app_root.elf ${BUILD_TIME_C})
