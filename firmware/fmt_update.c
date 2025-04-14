@@ -134,8 +134,7 @@ static void processPage(void)
     // This might erase one or more sectors in this partition, so preceeds write.
     if (downloadStartCb)
       downloadStartCb();
-    // TODO: erase the other sectors to support multi-sector partitions.
-    // fmt_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
+    fmt_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }
   fmt_flash_write(
       FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * FLASH_PAGE_SIZE,
