@@ -46,18 +46,17 @@ add_subdirectory(${FIRMENT_DIR} firment)
 include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
 # Update the build_time, which gets used as the app version for signing.
-set(APP_DEPENDS app_lib FirmentFW MCUPort)
-include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
-
-# Specify the project's source files.
-# TODO: make this so it re-builds when linker script changes. 
-add_library(app_lib OBJECT
+set(APP_SRCS
   firmware/spi_example.c
   firmware/project_comms.c
   firmware/control.c
   firmware/init_spi.c
-  ${BUILD_TIME_HEADER}
 )
+set(APP_DEPENDS ${APP_SRCS} $<TARGET_FILE:FirmentFW> $<TARGET_FILE:MCUPort>)
+include(${MGTBOOT_DIR}/tools/genBuildTime.cmake)
+
+# Only an OBJECT lib for slight performance improvement - may be promoted.
+add_library(app_lib OBJECT ${APP_SRCS} ${BUILD_TIME_HEADER})
 target_include_directories(app_lib PRIVATE
   firmware
   ${APP_FW_CONFIG_DIR}
@@ -79,6 +78,7 @@ add_executable(app_offset.elf $<TARGET_OBJECTS:app_lib>)
 target_link_libraries(app_offset.elf app_lib)
 target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
 
+add_custom_target(app_elfs DEPENDS app_root.elf app_offset.elf)
 
 # Invoke bootloader build
 add_subdirectory(${MGTBOOT_DIR} mgt-boot)

@@ -22,7 +22,7 @@ spiCfg_t spiConfig = {
   .baudHz = 1000000,
   .busMode = BUS_MODE_MAIN,
   .ssActiveLow = true,
-  .irqPriority = spiTxBuf_priority, // TODO: check if this is used.
+  .irqPriority = spiTxBuf_priority,
 };
 
 bool project_initSpi(void)
