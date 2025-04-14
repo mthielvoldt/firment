@@ -1,5 +1,4 @@
 
-#include <build_time.h>
 #include "ISR_Config.h"
 #include "init_spi.h"
 #include <fmt_rx.h>
