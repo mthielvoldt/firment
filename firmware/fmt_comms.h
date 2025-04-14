@@ -1,3 +1,5 @@
+#ifndef fmt_comms_h
+#define fmt_comms_h
 
 #include <messages.pb.h>
 /** fmt_sendMsg
@@ -10,3 +12,5 @@
 extern bool (*fmt_sendMsg)(Top message);
 
 extern bool (*fmt_getMsg)(Top *message);
+
+#endif // fmt_comms_h

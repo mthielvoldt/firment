@@ -25,17 +25,13 @@
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
-static uint32_t getBuildId(void)
-{
-  return BUILD_TIME;
-}
 
 bool comm_init(void)
 {
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
   success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
-  fmt_setBuildIdGetter(getBuildId);
+  fmt_setBuildIdGetter(getBuildTime);
   return success;
 }
 
