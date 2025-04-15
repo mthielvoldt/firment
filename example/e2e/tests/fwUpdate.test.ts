@@ -5,8 +5,8 @@ import * as fs from 'fs';
 function getBuildIdData() {
   const appBinary = path.resolve( __dirname, 
     "../../build/xmc/mgt-boot/app_offset_signed.bin")
-  const buildTimeFile = path.resolve(
-    __dirname, '../../build/xmc/build_time.txt');
+  const buildTimeFile = path.resolve(__dirname, 
+    '../../build/xmc/build_time.txt');
   const appBuildId = fs.readFileSync(buildTimeFile, 'ascii');
   return {appBinary, appBuildId}
 }

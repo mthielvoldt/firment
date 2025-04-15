@@ -142,8 +142,9 @@ jobs:
           name: ui-and-images
           path: |
             example/web-ui/dist
-            example/build/build-images/v*/
-            example/build/xmc/mgt-boot/app_offset_latest_signed.bin
+            example/build/xmc/build_time.txt
+            example/build/xmc/mgt-boot/app_offset_*
+            example/build/xmc/mgt-boot/factory.bin
           compression-level: 0
 
       - name: Upload UI Artifact for GH Pages
