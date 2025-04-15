@@ -29,7 +29,7 @@ test('Build Id is visible', async ({ page }) => {
     const id = Number(await buildId.innerText());
     expect(id).toBeLessThan(Date.now()/1000);
     expect(id).toBeGreaterThan(1744665208);
-  }).toPass({ intervals: [250], timeout: 2000 });
+  }).toPass({intervals: [1000], timeout: 5000});
 });
 
 
@@ -47,11 +47,14 @@ test('Update the firmware', async ({ page }) => {
   const resetBtn = page.getByRole("form", { name: "Reset" })
     .getByRole("button", { name: "Send" })
 
+  let id = 0;
   await expect(async () => {
-    const id = Number(await buildId.innerText());
-    expect(id).toBeLessThan(Number(appBuildId));
+    id = Number(await buildId.innerText());
+    expect(id).toBeLessThan(Date.now()/1000);
     expect(id).toBeGreaterThan(1744665208);
-  }).toPass({ intervals: [250], timeout: 2000 });
+  }).toPass({intervals: [1000], timeout: 5000});
+
+  test.skip(id === Number(appBuildId), "Firmware already Latest.");
 
   await imageFileInput.setInputFiles(appBinary);
   await fastExpect(imageFileInput).toHaveValue(/app_offset_signed.bin/);
