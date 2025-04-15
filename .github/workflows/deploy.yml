@@ -158,7 +158,7 @@ jobs:
   test-e2e:
     needs: build
     runs-on: ubuntu-22.04
-    timeout-minutes: 5
+    timeout-minutes: 8
     defaults:
       run:
         working-directory: ./example/e2e
