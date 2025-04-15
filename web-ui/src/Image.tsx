@@ -8,7 +8,7 @@ let activePageIndex = 0;
 let pages: ArrayBuffer[] = [];
 
 export default function Image({ }) {
-  const [progress, setProgress] = useState("");
+  const [progress, setProgress] = useState("No upload yet");
   const [image, setImage] = useState(new ArrayBuffer());
 
   function handleTimeout() {
@@ -52,19 +52,19 @@ export default function Image({ }) {
         pages = [];
         activePageIndex = 0;
         clearTimeout(timeoutId);
-        setProgress("Upload complete.");
+        setProgress("Upload complete");
       }
       else {
         activePageIndex++;
         sendPage(pages[activePageIndex], activePageIndex, pages.length);
-        setProgress(`Upload progres: ${activePageIndex}/${pages.length}`);
+        setProgress(`Upload in progress: ${activePageIndex}/${pages.length}`);
       }
     }
     else {
       pages = [];
       activePageIndex = 0;
       clearTimeout(timeoutId);
-      setProgress(`Failed at page ${message.pageIndex}`);
+      setProgress(`Failed at page: ${message.pageIndex}`);
     }
   };
 
@@ -81,7 +81,7 @@ export default function Image({ }) {
     // flashPageSize comes from a #define in a .h file in the firmware port,
     // through cmake 'flash_page_size' property on the MCUPort target.   
     const pageCount = Math.ceil(image.byteLength / flashPageSize);
-    setProgress(`Upload progres: 0/${pageCount}`);
+    setProgress(`Upload in progress: 0/${pageCount}`);
     pages = [];
     activePageIndex = 0;
 
@@ -116,7 +116,7 @@ export default function Image({ }) {
         <input type="file" name="image-file" accept=".bin"
           onChange={handleFileChange} />
       </label>
-      <p>{progress}</p>
+      <p data-testid="upload-progress">{progress}</p>
 
     </form>
   )
