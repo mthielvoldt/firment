@@ -9,13 +9,13 @@ test('Title is correct', async ({ page }) => {
   await expect(page).toHaveTitle("Embedded Project");
 });
 
-test('Loads displaying not connected', async ({page}) => {
-  await expect(page.getByText("Not Connected")).toBeVisible();
+test('Successfully connects', async ({page}) => {
+  await expect(page.getByText(/Active/)).toBeVisible();
 });
 
-test('Successfully connects', async ({ page }) => {
+test('Fails for bad URL', async ({ page }) => {
   const ipInput = page.getByLabel("Broker IP Address:")
-  await ipInput.fill("listpalette.com");
+  await ipInput.fill("bogus-url.com");
   ipInput.press('Enter');
-  await expect(page.getByText(/Active/)).toBeVisible();
+  await expect(page.getByText("Not Connected")).toBeVisible();
 });

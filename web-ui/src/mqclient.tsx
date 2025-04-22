@@ -11,8 +11,11 @@ let client: MqttClient;
 let messageHandlers: { [index: string]: ({ }) => void } = {}
 let ranOnce = false;
 
-export function setupMq(brokerHost: string, onSubscribe: () => void,
-  onMessage: () => void) {
+export function setupMq(
+  brokerHost: string,
+  onSubscribe: () => void,
+  onMessage: () => void,
+  onFail: () => void) {
   if (ranOnce) {
     teardownMq();
   }
@@ -31,7 +34,7 @@ export function setupMq(brokerHost: string, onSubscribe: () => void,
 
   client.on("connect", () => {
     client.subscribe("hq-bound", (err) => {
-      if (!err) { 
+      if (!err) {
         console.log("Subscribed to 'hq-bound'");
         onSubscribe();
       }
@@ -45,8 +48,14 @@ export function setupMq(brokerHost: string, onSubscribe: () => void,
   // client.on("packetsend", (packet) => {console.log("packetsend: ", packet)});
   // client.on("packetreceive", (packet) => {console.log("packetreceive: ", packet)});
   client.on("disconnect", () => { console.log("disconnect") });
-  client.on("close", () => { console.log("close") });
-  client.on("end", () => { console.log("end") });
+  client.on("close", () => {
+    console.log("close");
+    client.end();
+  });
+  client.on("end", () => {
+    console.log("end");
+    onFail();
+  });
 
 
   client.on("message", (_, buffer) => {
@@ -95,7 +104,7 @@ export function setMessageHandler(messageName: string, callback: MessageHandler)
   return () => { delete messageHandlers[messageName]; }
 }
 
-export function sendMessage(message_name: string, state_obj: object, verbose=true) {
+export function sendMessage(message_name: string, state_obj: object, verbose = true) {
   let message = { [message_name]: state_obj }
   const packet: Uint8Array = pb.Top.encodeDelimited(message).finish();
   client.publish("edge-bound", packet as Buffer);
@@ -116,7 +125,7 @@ function packMessages(messages: Uint8Array[]) {
   return packedMessages;
 }
 
-export function sendPacked(messageArray: Uint8Array[], verbose=true){
+export function sendPacked(messageArray: Uint8Array[], verbose = true) {
   const packedMqttMessage = packMessages(messageArray);
   client.publish("edge-bound", packedMqttMessage as Buffer)
   if (verbose)
