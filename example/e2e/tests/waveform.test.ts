@@ -1,14 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
+import { connectedAndReset } from './shared';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('http://localhost:4173/firment/');
-  const ipInput = page.getByLabel("Broker IP Address:")
-  await ipInput.fill("listpalette.com");
-  ipInput.press('Enter');
-  await expect(page.getByText(/Active/)).toBeVisible();
-  await page.getByRole("form", { name: "Reset" })
-    .getByRole("button", { name: "Send" })
-    .click();
+  await connectedAndReset(page);
 });
 
 
