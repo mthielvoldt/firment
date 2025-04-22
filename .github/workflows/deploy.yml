@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Build. On push-to-main, Deploy to Pages
+name: Deploy Flow
 
 on:
   # Runs on pushes targeting the default branch
