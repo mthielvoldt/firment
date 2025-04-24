@@ -14,8 +14,7 @@ let ranOnce = false;
 export function setupMq(
   brokerHost: string,
   onSubscribe: () => void,
-  onMessage: () => void,
-  onFail: () => void) {
+  onMessage: () => void) {
   if (ranOnce) {
     teardownMq();
   }
@@ -50,11 +49,9 @@ export function setupMq(
   client.on("disconnect", () => { console.log("disconnect") });
   client.on("close", () => {
     console.log("close");
-    client.end();
   });
   client.on("end", () => {
     console.log("end");
-    onFail();
   });
 
 

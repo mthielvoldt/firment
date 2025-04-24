@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { setupMq } from './mqclient';
+import { setupMq, teardownMq } from './mqclient';
 
 interface Status { colors: string; text: string };
 interface ConnectOptions {
@@ -16,6 +16,7 @@ export default function BrokerAddress({ }) {
   const [address, setAddress] = useState("listpalette.com");
   const [connectStatus, setConnectStatus] = useState<keyof ConnectOptions>("disconnected");
   let staleTimeout: NodeJS.Timeout;
+  let connectTimeout: NodeJS.Timeout;
 
   useEffect(() => {
     connectToBroker();
@@ -28,12 +29,15 @@ export default function BrokerAddress({ }) {
 
   function connectToBroker() {
     clearTimeout(staleTimeout);
+    clearTimeout(connectTimeout);
+    connectTimeout = setTimeout(onConnectFail, 5000);
     setConnectStatus("connecting");
-    setupMq(address, onSubscribe, onMessage, onConnectFail);
+    setupMq(address, onSubscribe, onMessage);
   }
   
   function onSubscribe() {
     setConnectStatus("stale");
+    clearTimeout(connectTimeout);
   }
   function onMessage() {
     clearTimeout(staleTimeout);
@@ -42,7 +46,9 @@ export default function BrokerAddress({ }) {
   }
   function onConnectFail() {
     clearTimeout(staleTimeout);
+    clearTimeout(connectTimeout);
     setConnectStatus("disconnected");
+    teardownMq();
   }
 
   return (
