@@ -1,3 +1,5 @@
+
+import { useRef } from "react";
 import { AxisLabel } from "./axisTools";
 
 /** Labels are text elements overlaid on a canvas, which is managed elsewhere.
@@ -6,12 +8,46 @@ import { AxisLabel } from "./axisTools";
  * Axis labels positionally and value-wise evenly spaced.  
  */
 
-export function PlotLabels({ xAxis }: { xAxis: AxisLabel[] }) {
-  const labels = xAxis.map((label, i) => {
+interface Props {
+  xLabels: AxisLabel[];
+  yLabels: AxisLabel[];
+};
+
+
+
+export function PlotLabels({ xLabels, yLabels }: Props) {
+  const divRef = useRef<HTMLDivElement>(null);
+
+  let axisLabels: {top: number, left: number, text: string }[] = [];
+  const widthPx = (divRef.current) ? divRef.current.clientWidth : 0;
+  const heightPx = (divRef.current) ? divRef.current.clientHeight : 0;
+
+  // todo: get widthPx, height using ref.  Then test id. 
+
+  xLabels.forEach((xLabel) => {
+    axisLabels.push({
+      top: 0,
+      left: Math.floor((xLabel.position + 1) * widthPx / 2),
+      text: xLabel.text
+    });
+  });
+
+  const CLEARANCE_FOR_X_LABELS_PX = 8;
+  yLabels.forEach((yLabel) => {
+    const top = Math.floor((-yLabel.position + 1) * heightPx / 2);
+    axisLabels.push({
+      top,
+      left: 0,
+      // Prevent X and Y label overlap in upper left corner.
+      text: (top > CLEARANCE_FOR_X_LABELS_PX) ? yLabel.text : ""
+    });
+  });
+
+  const labels = axisLabels.map((label, i) => {
     return (
       <div key={i} className="plot-label" style={{
-        top: label.position.y,
-        left: label.position.x
+        top: label.top,
+        left: label.left
       }}>
         {label.text}
       </div>
@@ -19,7 +55,7 @@ export function PlotLabels({ xAxis }: { xAxis: AxisLabel[] }) {
   });
 
   return (
-    <div className="plot-labels-div">
+    <div ref={divRef} className="plot-labels-div">
       {labels}
     </div>
   )
