@@ -11,7 +11,7 @@ type ProbeSignal = {  // candidate rename: ProbeSample
 type ProbeSignals = { // SampleSet
   probeSignals: ProbeSignal[];
 };
-type Trace = {
+export interface Trace {
   testPointId: number;
   testPointName: string;
   data: number[];
@@ -24,15 +24,13 @@ export interface Record {
 }
 
 // An array of Records.
-let data: Trace[][] = [[]];
+let data: Trace[][] = [];
 let lastSignals: ProbeSignal[] = [];
 
-/* This tracks the last record in the data table, which is where new
-signals get appended.  It indicates the start of the trace data that hasn't
-been read yet by getNewData */
-let firstUnreadIndex = 0;
 
 export function handleProbeSignals(signals: ProbeSignals) {
+  if (signals.probeSignals.length === 0) return;
+
   const idsSame =
     (signals.probeSignals.length == lastSignals.length) &&
     signals.probeSignals.reduce((accum, signal, index) =>
@@ -50,7 +48,6 @@ export function handleProbeSignals(signals: ProbeSignals) {
       }
     ));
     data.push(newRecord);
-    firstUnreadIndex = 0; // with a new record, we haven't read any yet.
     console.log("newRecord: ", newRecord);
   }
   signals.probeSignals.forEach((signal, index) => {
@@ -58,47 +55,41 @@ export function handleProbeSignals(signals: ProbeSignals) {
   })
 }
 
+/*
+ * getSlicedRecord(recordId, numPoints, lastPoint?)
+ * - returns Record {traces, traceLen} | {[], 0} if recordId not found. 
+ * - 0-pads returned traces as needed to fill numPoints.
+ * - lastPoint not provided: gives latest numPoints. 
+ */
+export function getRecordSlice(
+  record: number,
+  numPoints: number,
+  desiredEnd = Infinity) {
 
-export function readRecord(record: number): Record {
   let traces: Trace[] = [];
   let traceLen = 0;
-  if (record < data.length) {
-    traces = data[record];
-    traceLen = (traces.length > 0) ? traces[0].data.length : 0;
+  let indexOfFirstPt = 0;
 
-    /* If this is the last record, which grows as new signals arrive, update the
-    variable that keeps track of how much has been read. */
-    if (record === data.length -1)
-      firstUnreadIndex = traceLen;
+  if (data[record] && data[record].length) {
+    traceLen = data[record][0].data.length; // guaranteed to have at least one trace.
+    
+    let sliceEnd = Math.min(traceLen, desiredEnd);
+    let sliceStart = Math.max(0, (sliceEnd - numPoints));
+    indexOfFirstPt = sliceEnd - numPoints;
+    const padding = (indexOfFirstPt < 0) ?
+      Array(-indexOfFirstPt).fill(0) : [];
+
+    data[record].forEach((fullTrace) => {
+      traces.push({
+        testPointId: fullTrace.testPointId,
+        testPointName: fullTrace.testPointName,
+        data: padding.concat(fullTrace.data.slice(sliceStart, sliceEnd))
+      });
+    })
   }
-  return { traces, traceLen }
+  return { traces, traceLen, indexOfFirstPt }
 }
 
-/** Returns true iff:
- * - recordId is last in the table, since new data only ever goes there.
- * - The record has at least one trace.
- * - The traces in this record are longer than firstUnreadIndex indicates.
- * */
-export function hasNewData(recordId: number): boolean {
-  return (
-    recordId === (data.length - 1) && 
-    data[recordId].length > 0 && 
-    data[recordId][0].data.length > firstUnreadIndex
-  );
-}
-
-export function recordNewlyDefined(recordId: number): boolean {
-  return (
-    recordId === (data.length - 1) &&
-    data[recordId].length > 0 &&
-    firstUnreadIndex === 0
-  );
-}
-
-export function getNewData(recordId: number) {
-  const unreadTraceTails = data[recordId].map((trace) => (
-    new Float32Array(trace.data.slice(firstUnreadIndex))
-  ));
-  firstUnreadIndex = data[recordId][0].data.length;
-  return unreadTraceTails;
+export function getTraceLen(record: number): number {
+  return (data[record]) ? data[record][0].data.length : 0;
 }
