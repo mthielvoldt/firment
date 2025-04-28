@@ -36,32 +36,31 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
   //   }
   // });
 
+  
+  // Command SINE on Channel A with range: [0.4,0.6]
   const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
-
-  // Command sine wave at 1.2Hz, ranging 0 to 1 on Channel A
   await waveformCtl.getByLabel('enabled').check();
   await waveformCtl.getByLabel("channel").selectOption({ index: 0 }); // CHAN_A
-  await waveformCtl.getByLabel("shape").selectOption("DC")
-  await waveformCtl.getByLabel('amplitudeV').fill('0.5');
-  await waveformCtl.getByLabel('frequencyHz').fill('1');
+  await waveformCtl.getByLabel("shape").selectOption("SINE")
+  await waveformCtl.getByLabel('amplitudeV').fill('0.1');
+  await waveformCtl.getByLabel('frequencyHz').fill('5');
   await waveformCtl.getByLabel('offsetV').fill('0.5');
   await waveformCtl.getByRole('button', { name: 'Send' }).click();
 
+  const numPtsInput = page.getByLabel("Num Points:");
+  await numPtsInput.fill('200');
+
   // Turn on Scanning at 10Hz
   const scanCtl = page.getByLabel('RunScanCtl');
-  await scanCtl.getByLabel('freq').selectOption('10');
+  await scanCtl.getByLabel('freq').selectOption('100');
   await scanCtl.getByLabel('probe_0').selectOption('CHAN_A');
   await scanCtl.getByRole('button', { name: 'Send' }).click();
 
-  // Switch plot view to active record.
-  const recordInput = page.getByLabel('Record:');
-  await recordInput.fill('1');
-  await recordInput.press('Enter');
 
   const AAvgLocator = page.getByTestId('CHAN_A-ave');
 
   // This expect makes it clear if the element is found.
-  await expect(AAvgLocator).toBeVisible({ timeout: 4000 });
+  await expect(AAvgLocator).toBeVisible({ timeout: 2000 });
 
   // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
   await expect(async () => {
@@ -69,5 +68,5 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
     const avg = Number(avgAsString);
     expect(avg).toBeLessThan(0.6);
     expect(avg).toBeGreaterThan(0.4);
-  }).toPass({ intervals: [1000], timeout: 10000 });
+  }).toPass({ intervals: [1000], timeout: 4000 });
 });
