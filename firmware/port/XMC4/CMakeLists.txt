@@ -37,6 +37,7 @@ target_include_directories(MCUPort
     XMC4000_DFP/CMSIS/RTOS/RTX/INC
     ../../lib/CMSIS-6.1.0/Driver/Include
     ${APP_FW_CONFIG_DIR}
+    ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
     PUBLIC
     ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
     ${RTE_DEVICE_DIR}

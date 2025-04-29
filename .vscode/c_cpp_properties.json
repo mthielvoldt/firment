@@ -9,6 +9,7 @@
           "includePath": [
             "example/firmware",
             "example/firmware/config",
+            "example/firmware/config/pcb0",
             "example/build/xmc",
             "example/build/xmc/firment",
             "example/mgt-boot/inc",
@@ -72,6 +73,7 @@
           "includePath": [
             "example/firmware",
             "example/firmware/config",
+            "example/firmware/config/pcb0",
             "example/build/xmc",
             "example/build/xmc/firment",
             "example/mgt-boot/inc",

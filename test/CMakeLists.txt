@@ -9,6 +9,7 @@ project(firment_test  VERSION ${VERSION_SEM} LANGUAGES CXX C)
 
 include(${PROJECT_CONFIG_DIR}/partitions.cmake)
 include(${PROJECT_CONFIG_DIR}/firmentConfig.cmake)
+message(STATUS "PCB: ${PCB}")
 
 set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
 set(CPPUTEST_INC_DIR ${PROJECT_SOURCE_DIR}/cpputest/include)
@@ -44,7 +45,7 @@ add_executable(testFirment
 
 target_include_directories(testFirment PRIVATE 
   ${APP_FW_CONFIG_DIR}
-  
+  ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
 )
 
 target_link_libraries(testFirment 
