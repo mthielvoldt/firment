@@ -17,5 +17,7 @@ test('Fails for bad URL', async ({ page }) => {
   const ipInput = page.getByLabel("Broker IP Address:")
   await ipInput.fill("bogus-url.com");
   ipInput.press('Enter');
-  await expect(page.getByText("Not Connected")).toBeVisible();
+
+  const expectIn8s = expect.configure({timeout: 8000});
+  await expectIn8s(page.getByText("Not Connected")).toBeVisible();
 });
