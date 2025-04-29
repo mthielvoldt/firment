@@ -30,8 +30,7 @@ include(config/cryptOptions.cmake)
 include(config/firmentConfig.cmake)
 
 set(MGTBOOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mgt-boot)
-set(LINKER_SCRIPT_TEMPLATE 
-  ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
+
 include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
@@ -49,11 +48,15 @@ add_library(app_lib
 firmware/spi_example.c
 firmware/project_comms.c
 firmware/control.c
-firmware/init_spi.c
+firmware/init_spi_pcb${PCB}.c
 )
 target_include_directories(app_lib 
-  PRIVATE firmware ${APP_FW_CONFIG_DIR}
-  PUBLIC ${MGTBOOT_DIR}/inc # build_time.h
+  PRIVATE 
+    firmware 
+    ${APP_FW_CONFIG_DIR} 
+    ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
+  PUBLIC 
+    ${MGTBOOT_DIR}/inc # build_time.h
 )
 # Specify which libraries the top-level target depends on directly. 
 # Note: -lm links the standard math library (math.h).

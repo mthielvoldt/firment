@@ -19,7 +19,7 @@
 #include <fmt_flash.h>
 #include <fmt_gpio.h>
 #include <fmt_version.h>
-#include "config/gpio_pcbDetails.h"
+#include <gpio_pcbDetails.h>
 #include <core_port.h>  // NVIC_SystemReset()
 #include <build_time.h>
 
