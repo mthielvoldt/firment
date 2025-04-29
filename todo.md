@@ -1,15 +1,8 @@
 # Doing 
-1. Use descriptive names in ioc_pcbDetails.h
-2. Excise "RTE" from ioc_pcbDetails.h
-3. Can I ditch the AVAILABLE_<FEAT>s tables? 
-  - maybe it allows for run-time selection of pins (for HW_ID changes)?
-4. Can I make a more performant interface for GPIO / IOC?
-  - Would it actually get better test-coverage?
-5. Move host/<feat>_mcuDetails.h files to project test dir.
+
 
 # Project structuring
-12. break fmt_rx -> project_comms dependency. 
-13. move USE_xxx to firmentConfig
+12. break fmt_rx -> project_comms dependency? (why?)
 
 ## Consolidating HW-data
 Consolidate HW-specifc values into a single choke-point in port/ Cmake files.
@@ -38,6 +31,9 @@ Outputs:
   - CRC checks
   - message serialization
   - queue management (drop counters)
+
+# Performance
+12. Make a more performant interface for GPIO.
 
 # New Tests
 4. host/core_cm4.h spy on NVIC priority functions.
