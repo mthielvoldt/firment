@@ -18,13 +18,13 @@ if(${PCB} STREQUAL "0")
   set(MCU_SPEED_VARIANT "F144")
   set(MCU_MEM_VARIANT "2048")
   set(LINKER_SCRIPT_TEMPLATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.template)
+    ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.in)
   add_compile_definitions(${MCU_VARIANT}_${MCU_SPEED_VARIANT}x${MCU_MEM_VARIANT})
 elseif(${PCB} STREQUAL "1")
   set(MCU_FAMILY "stm32l4")
   set(MCU_VARIANT "stm32l476")
   set(LINKER_SCRIPT_TEMPLATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32L476.ld.template)
+    ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32L476XX_FLASH.ld.in)
   add_compile_definitions("STM32L476xx")
 endif()
 
