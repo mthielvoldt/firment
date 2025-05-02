@@ -1,0 +1,61 @@
+
+set(HAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/stm32l4xx-hal-driver")
+set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
+set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMSIS-Driver_STM32/Drivers")
+
+set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s")
+set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
+
+# Note: In the STM32 ecosystem, there is no equivalent of RTE_Device.h in XMC
+# ecosystem, which combines MCU-wiring information for several peripherals. 
+# The stm32<fam>xx_hal_<feat>_ex.h files provide MCU wiring constraints.  
+# example: stm32l4xx_hal_gpio_ex.h provides wiring for pin alternate functions.
+
+add_library(MCUPort
+  ${SYSTEM_FILE}
+  ${STARTUP_FILE}
+  CMSIS-Driver_STM32/Drivers/SPI_STM32.c
+  ${HAL_DIR}/Src/stm32l4xx_hal.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_flash.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_flash_ex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_flash_ramfunc.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_gpio.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_spi.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_spi_ex.c
+  # fmt_crc_port.c
+  # fmt_flash_port.c
+  # fmt_periodic_port.c
+  # fmt_spi_port.c
+  # gpio_port.c
+  # ioc_port.c
+)
+
+target_include_directories(MCUPort
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE
+    ../..   # fmt headers.
+    ${CMSIS_DRIVER_DIR}
+    ../../lib/CMSIS-6.1.0/Driver/Include
+    ${APP_FW_CONFIG_DIR}
+    ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
+    PUBLIC
+    ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
+    ${HAL_DIR}/Inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
+    ${CMSIS_FAMILY_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
+)
+
+# Tells the assembler what architecture the toolchain file specifies. 
+target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
+
+# Contains the page size for the flash write operations. This propagates up so 
+# web-ui can break FW-image sends into page-size chunks, waiting in between.
+
+# TODO: flash page-size is actually *irrelevant*.  The UI actually needs to 
+# know how much data the **ESP** can buffer, and send that much data.
+
+# "2048" is from stm32l4xx_hal_flash.h line 855: 
+# #define FLASH_PAGE_SIZE  ((uint32_t)0x800)
+
+set_target_properties(MCUPort PROPERTIES flash_page_size "2048")

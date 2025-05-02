@@ -1,5 +1,5 @@
 # Doing 
-
+1. flash_page_size: Excise from Web-ui, replacing with ESP buffer size.
 
 # Project structuring
 12. break fmt_rx -> project_comms dependency? (why?)
@@ -15,7 +15,6 @@ Outputs:
 - Configured .h for firmware  (multiple, or single?)
 - Configured .ts (or .json?) for ui.
 
-1. flash_page_size: HW.h (parse) > {fmt_flash_port.h, web-ui config'd file}
 7. move SOT for all project-discretion build-time items to firmentConfig.cmake
   - firment_msg_config.json, ghostProbe, waveform configs. 
 9. make waveform and ghost probe opt-in using firmentConfig.cmake
