@@ -1,8 +1,10 @@
 
 set(XMC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/XMCLib")
-set(XMC_SERIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700")
-set(STARTUP_FILE "${XMC_SERIES_DIR}/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
-set(SYSTEM_FILE  "${XMC_SERIES_DIR}/Source/system_${MCU_VARIANT}.c")
+set(CMSIS_DEVICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700")
+set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/XMC4000_DFP/RTE_Driver")
+
+set(STARTUP_FILE "${CMSIS_DEVICE_DIR}/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
+set(SYSTEM_FILE  "${CMSIS_DEVICE_DIR}/Source/system_${MCU_VARIANT}.c")
 if(MCU_VARIANT STREQUAL "XMC4700" OR MCU_VARIANT STREQUAL "XMC4800")
 set(RTE_DEVICE_DIR "4800_F144")
 endif()
@@ -32,9 +34,8 @@ target_include_directories(MCUPort
   INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
-    ../..   # fmt headers.  TODO: this seems wrong.
-    XMC4000_DFP/RTE_Driver
-    XMC4000_DFP/CMSIS/RTOS/RTX/INC
+    ../..   # fmt headers.
+    ${CMSIS_DRIVER_DIR}
     ../../lib/CMSIS-6.1.0/Driver/Include
     ${APP_FW_CONFIG_DIR}
     ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
@@ -42,7 +43,7 @@ target_include_directories(MCUPort
     ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
     ${RTE_DEVICE_DIR}
     ${XMC_LIB}/inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
-    ${XMC_SERIES_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
+    ${CMSIS_DEVICE_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
 )
 
 # Tells the assembler what architecture the toolchain file specifies. 

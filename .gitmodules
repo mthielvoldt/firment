@@ -11,11 +11,11 @@
 	path = example/mgt-boot
 	url = https://github.com/mthielvoldt/mgt-boot.git
 [submodule "firmware/port/STM32L4/stm32l4xx-hal-driver"]
-	path = firmware/port/STM32L4/stm32l4xx-hal-driver
+	path = firmware/port/stm32l4/stm32l4xx-hal-driver
 	url = https://github.com/STMicroelectronics/stm32l4xx-hal-driver.git
 [submodule "firmware/port/STM32L4/cmsis_device_l4"]
-	path = firmware/port/STM32L4/cmsis_device_l4
+	path = firmware/port/stm32l4/cmsis_device_l4
 	url = https://github.com/STMicroelectronics/cmsis_device_l4.git
 [submodule "firmware/port/STM32L4/CMSIS-Driver_STM32"]
-	path = firmware/port/STM32L4/CMSIS-Driver_STM32
+	path = firmware/port/stm32l4/CMSIS-Driver_STM32
 	url = https://github.com/Open-CMSIS-Pack/CMSIS-Driver_STM32.git
