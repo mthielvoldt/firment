@@ -8,7 +8,6 @@
 #ifndef ioc_pcbDetails_h
 #define ioc_pcbDetails_h
 
-#include <ioc_mcuDetails.h>
 
 /* Interrupt-on-Change pins.  See ioc_mcuDetails.h for your target hardware.*/
 /* Note: IOC_n_RTE_INDEX should match position of IOC_n in AVAILABLE_IOCs */
@@ -18,13 +17,12 @@
 
 // clearToSend OUTPUT 2
 // msgWaiting OUTPUT 3
-#define IOC_USE_ISR_0 0
-#define IOC_USE_ISR_1 0
-#define IOC_USE_ISR_2 1
-#define IOC_USE_ISR_3 1
-#define IOC_USE_ISR_4 0
-#define IOC_USE_ISR_5 0
-#define IOC_USE_ISR_6 0
-#define IOC_USE_ISR_7 0
+#define IOC_USE_EXTI0 0
+#define IOC_USE_EXTI1 0
+#define IOC_USE_EXTI2 1
+#define IOC_USE_EXTI3 1
+#define IOC_USE_EXTI4 0
+#define IOC_USE_EXTI9_5 0
+#define IOC_USE_EXTI15_10 0
 
 #endif // include once
