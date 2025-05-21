@@ -36,8 +36,8 @@ typedef enum _outputMode {
 } outputMode_t;
 
 typedef enum _outLevel {
+  OUTPUT_LOW = 0,
   OUTPUT_HIGH,
-  OUTPUT_LOW,
   OUTPUT_TOGGLE,
 } outLevel_t;
 
