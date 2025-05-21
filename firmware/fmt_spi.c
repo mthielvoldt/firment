@@ -3,10 +3,13 @@
 // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
 
 #include "fmt_spi.h"
+#include <spi_mcuDetails.h> // SPI_BUILTIN_CRC
 #include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
 #include <core_port.h> // NVIC_...()  __BKPT()
 #include <cmsis_gcc.h>
+#if !SPI_BUILTIN_CRC
 #include "fmt_crc.h"
+#endif
 #include "fmt_ioc.h" // fmt_initIoc
 #include "queue.h"
 #include <pb_encode.h>
@@ -35,16 +38,18 @@ static ARM_DRIVER_SPI *spi;
 static uint8_t clearToSendIocId; // An Interrupt-on-Change config.
 static uint8_t msgWaitingIocId;
 
+#if !SPI_BUILTIN_CRC
 extern FMT_DRIVER_CRC Driver_CRC0;
 static FMT_DRIVER_CRC *crc = &Driver_CRC0;
+#endif
 
 ARM_SPI_SignalEvent_t callback;
 
 /* Declarations of private functions */
 static void SendNextPacket(void);
 static void spiEventHandlerISR(uint32_t event);
-static uint32_t getCRCPosition(uint8_t *lengthPrefixedBuffer);
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
+static bool checkCRCMatch(const uint8_t packet[]);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
@@ -66,8 +71,10 @@ bool fmt_initSpi(spiCfg_t cfg)
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.irqPriority, 0U);
   NVIC_SetPriority(spiEventIRQn, encodedPrio);
 
+#if !SPI_BUILTIN_CRC
   ASSERT_ARM_OK(crc->Initialize());
   ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
+#endif
 
   ASSERT_SUCCESS(
       fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING,
@@ -235,6 +242,11 @@ void subClearToSendISR(void)
 
 /* PRIVATE (static) functions */
 
+#if SPI_BUILTIN_CRC
+static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]) {}
+static bool checkCRCMatch(const uint8_t packet[]) { return true; }
+
+#else
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
 {
   uint32_t crcPosition = getCRCPosition(packet);
@@ -246,6 +258,16 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
     __BKPT(0);
   }
 }
+
+static bool checkCRCMatch(const uint8_t packet[])
+{
+  uint32_t crcPosition = getCRCPosition(packet);
+  uint16_t result;
+  int32_t status = crc->ComputeCRC(packet, crcPosition, &result);
+  return status == ARM_DRIVER_OK &&
+         result == *(uint16_t *)(&packet[crcPosition]);
+}
+#endif
 
 /** Event Handler ISR
  * Runs when the SPI module detects one of the following events:
@@ -262,13 +284,9 @@ static void spiEventHandlerISR(uint32_t event)
     if (rxPacket[0])
     {
       // check CRC here so we don't consume Rx queue with errors.
-      // Todo: pad messages so all lengths are even.
-      uint16_t result;
+      bool crcMatch = checkCRCMatch(rxPacket);
 
-      uint32_t crcPosition = getCRCPosition(rxPacket);
-      int32_t status = crc->ComputeCRC(rxPacket, crcPosition, &result);
-      if (status == ARM_DRIVER_OK &&
-          result == *(uint16_t *)(&rxPacket[crcPosition]))
+      if (crcMatch)
       {
         bool success = enqueueBack(&rxQueue, rxPacket);
         if (!success)
