@@ -43,7 +43,7 @@ const uint32_t sector_base[FLASH_SECTOR_COUNT + 1] = {
     FLASH_TOP
 };
 
-static uint32_t getPreceedingPageBoundary(uint32_t address);
+static uint32_t getPreceedingWriteBoundary(uint32_t address);
 static int getSectorContainingAddress(uint32_t address);
 
 
@@ -57,7 +57,7 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
   }
   
   /* Find the closest page-aligned address preceeding first address to write*/
-  uint32_t page_adr = getPreceedingPageBoundary(address);
+  uint32_t page_adr = getPreceedingWriteBoundary(address);
   uint32_t final_write_end_adr = address + len;
   uint32_t page_write_end_adr;   // One past the last address to be written.
   uint32_t page_write_start_adr; // The first address to be written. 
@@ -140,7 +140,7 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
 /**
  * @param address must be an absolute address, not an offset.
  */
-static uint32_t getPreceedingPageBoundary(uint32_t address)
+static uint32_t getPreceedingWriteBoundary(uint32_t address)
 {
   return (address / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE;
 }
