@@ -1,12 +1,16 @@
 
-#include "ISR_Config.h"
 #include "init_spi.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
-#include <fmt_periodic_port.h>
+#include <fmt_periodic.h>
 #include "control.h"
-#include "project_comms.h"
 #include "frequency.h"
+#include "project_comms.h"
+
+#define periodicA_priority 30
+#define spiTxBuf_priority 25
+
+static void periodicA(void);
 
 int main(void)
 {
@@ -15,13 +19,8 @@ int main(void)
   comm_init();
 
   // Set periodicA to 1kHz frequency.
-  initPeriodicISR(
-      CCU40,
-      CCU40_CC40,
-      XMC_CCU4_SLICE_PRESCALER_128,
-      PRESCALE_128_TICKS_IN_1MS,
-      periodicA_IRQn,
-      periodicA_priority);
+  fmt_initPeriodic(0, PERIODIC_A_PERIOD_US, periodicA_priority, periodicA);
+
 
   ctl_init(WAVE_UPDATE_FREQ);
   gp_init(GHOST_PROBE_CALL_FREQ);
@@ -37,8 +36,7 @@ int main(void)
 }
 
 // 1kHz
-void periodicA(void); // suppress missing-declaration warning
-void periodicA(void)
+static void periodicA(void)
 {
   comm_handleTelemetry();
   fmt_handleRx();

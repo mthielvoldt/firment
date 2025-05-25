@@ -4,6 +4,7 @@
  * - Knows what role this chip plays on the spi bus (Main, sub).
  * - Communicates this information to the spi driver.
  */
+#include <init_spi.h>
 #include <fmt_spi.h>
 #include <spi_pcbDetails.h> // replaces RTEDevice.h for ARM SPI driver
 #include <ioc_pcbDetails.h>
