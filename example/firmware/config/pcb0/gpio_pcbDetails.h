@@ -9,13 +9,7 @@
 #ifndef gpio_pcbDetails_h
 #define gpio_pcbDetails_h
 
-#include <xmc_gpio.h>
-
-typedef struct portPin_s
-{
-  XMC_GPIO_PORT_t *const port;
-  uint8_t pin;
-} portPin_t;
+#include <gpio_mcuDetails.h>
 
 #define LED_0_PIN P5_9
 #define LED_1_PIN P5_8
