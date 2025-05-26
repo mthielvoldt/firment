@@ -22,7 +22,7 @@
  * has no effect on the decoded message.
  */
 // TODO: move.  Feature envy.
-inline static uint32_t getCRCPosition(uint8_t *lengthPrefixedBuffer)
+inline static uint32_t getCRCPosition(const uint8_t *lengthPrefixedBuffer)
 {
   return ((lengthPrefixedBuffer[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
 }
