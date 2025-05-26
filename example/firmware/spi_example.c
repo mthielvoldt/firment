@@ -5,10 +5,9 @@
 #include <fmt_periodic.h>
 #include "control.h"
 #include "frequency.h"
+#include "priority.h"
 #include "project_comms.h"
 
-#define periodicA_priority 30
-#define spiTxBuf_priority 25
 
 static void periodicA(void);
 

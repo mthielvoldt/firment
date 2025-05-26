@@ -9,7 +9,7 @@
 #include <spi_pcbDetails.h> // replaces RTEDevice.h for ARM SPI driver
 #include <ioc_pcbDetails.h>
 #include <ioc_mcuDetails.h> // IOC_x_to_ISR_y mcu-supported routing options
-#include "ISR_Config.h"
+#include <priority.h>
 
 extern ARM_DRIVER_SPI Driver_SPI4;
 

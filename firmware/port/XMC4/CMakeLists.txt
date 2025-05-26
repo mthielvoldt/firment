@@ -31,7 +31,7 @@ add_library(MCUPort
 )
 
 target_include_directories(MCUPort
-  INTERFACE
+  PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
     ../..   # fmt headers.
