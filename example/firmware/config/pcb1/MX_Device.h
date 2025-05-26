@@ -27,7 +27,7 @@
 #include <stm32l4xx_hal_gpio.h>
 #include <stm32l4xx_hal_gpio_ex.h>
 #include <stm32l4xx_hal_dma.h>
-#define CMSIS_device_header <stm32l476xx.h>
+#define CMSIS_device_header <stm32l4xx.h>
 
 
 #include "spi_pcbDetails.h"

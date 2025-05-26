@@ -23,16 +23,16 @@ add_library(MCUPort
   ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_spi.c
   ${HAL_DIR}/Src/stm32l4xx_hal_spi_ex.c
-  # fmt_crc_port.c
-  # fmt_flash_port.c
-  # fmt_periodic_port.c
-  # fmt_spi_port.c
-  # gpio_port.c
-  # ioc_port.c
+  fmt_crc_port.c
+  fmt_flash_port.c
+  fmt_periodic_port.c
+  fmt_spi_port.c
+  gpio_port.c
+  ioc_port.c
 )
 
 target_include_directories(MCUPort
-  INTERFACE
+  PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
     ../..   # fmt headers.
