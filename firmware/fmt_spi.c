@@ -5,8 +5,8 @@
 #include "fmt_spi.h"
 #include <spi_mcuDetails.h> // SPI_BUILTIN_CRC
 #include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
-#include <core_port.h> // NVIC_...()  __BKPT()
-#include <cmsis_gcc.h>
+#include <core_port.h> // NVIC_...()
+#include <cmsis_gcc.h> // __BKPT()
 #if !SPI_BUILTIN_CRC
 #include "fmt_crc.h"
 #endif
