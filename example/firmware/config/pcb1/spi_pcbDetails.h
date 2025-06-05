@@ -37,6 +37,7 @@
 #ifndef spi_pcbDetails_h
 #define spi_pcbDetails_h
 
+#include <stm32l4xx_hal_dma.h>  // DMA_HandleTypeDef (needed by _hal_spi.h)
 #include <stm32l4xx_hal_spi.h>
 #include <stm32l4xx_hal_spi_ex.h>
 
