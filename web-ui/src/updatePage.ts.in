@@ -1,0 +1,2 @@
+const updatePageSize = @UPDATE_PAGE_SIZE@;
+export default updatePageSize;

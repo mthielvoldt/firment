@@ -20,20 +20,9 @@
 #include <string.h>
 #include <stm32l4xx_hal_flash.h>
 
-#ifndef ARCH_FLASH_OFFSET
-// Access address that bypasses the prefetch cache. Table 7-2
-#define ARCH_FLASH_OFFSET XMC_FLASH_UNCACHED_BASE
-#endif
-
-/* Assembly helpers - Data Memory Barrier */
-// #define DMB() asm volatile ("dmb")
-
-/*** FLASH ***/
-#define FLASH_TOP (XMC_FLASH_UNCACHED_BASE + 0x0200000UL)
-
 /**
- * Flash is organized into 2 banks of 512kB each, (256X 2kB pages).
- * Each page can be independently erased.
+ * STM32L4 Flash is organized into 2 banks of 512kB each, (256X 2kB pages).
+ * "Page" means a block that can be independently erased (not programmed).
  * CPU can continue fetching (reading) the bank that's not being written/erased.
  */
 #define WRITE_BLOCK_SIZE 8

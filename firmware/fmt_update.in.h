@@ -13,6 +13,7 @@
 
 // Source: firment_msg_config.json  "image-part-max-size"
 #define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
+#define UPDATE_PAGE_SIZE @UPDATE_PAGE_SIZE@
 
 typedef void (*callback_t)(void);
 
