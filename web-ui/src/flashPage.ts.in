@@ -1,2 +1,0 @@
-const flashPageSize = @FLASH_PAGE_SIZE@;
-export default flashPageSize;

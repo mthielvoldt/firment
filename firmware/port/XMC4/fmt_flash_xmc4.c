@@ -5,8 +5,9 @@
 #include <fmt_flash.h>
 #include <stdint.h>
 #include <xmc4_flash.h>
-#include "fmt_flash_port.h"
 
+
+#define WRITE_BLOCK_SIZE XMC_FLASH_BYTES_PER_PAGE
 
 #ifndef ARCH_FLASH_OFFSET
 // Access address that bypasses the prefetch cache. Table 7-2
@@ -49,7 +50,7 @@ static int getSectorContainingAddress(uint32_t address);
 
 int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
-  uint8_t page_buffer[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
+  uint8_t page_buffer[WRITE_BLOCK_SIZE] __attribute__((aligned(4)));
   
   /* adjust for flash base to allow for both offsets and absolute addresses. */
   if (address < ARCH_FLASH_OFFSET) {
@@ -64,10 +65,10 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
   uint32_t bytes_written = 0;    // count of bytes written in previous pages.
 
   while (page_adr < final_write_end_adr) {
-    memset(page_buffer, 0, FLASH_PAGE_SIZE);
+    memset(page_buffer, 0, WRITE_BLOCK_SIZE);
     page_write_start_adr = address + bytes_written;
-    page_write_end_adr = (page_adr + FLASH_PAGE_SIZE < final_write_end_adr) ? 
-      page_adr + FLASH_PAGE_SIZE : final_write_end_adr;
+    page_write_end_adr = (page_adr + WRITE_BLOCK_SIZE < final_write_end_adr) ? 
+      page_adr + WRITE_BLOCK_SIZE : final_write_end_adr;
     
     //  WRITE FIRST PAGE
     //      _______buffer______ 
@@ -89,7 +90,7 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 
     // Prepare for next page.
     bytes_written += page_write_end_adr - page_write_start_adr;
-    page_adr += FLASH_PAGE_SIZE;
+    page_adr += WRITE_BLOCK_SIZE;
   }
   return 0;
 }
@@ -142,7 +143,7 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
  */
 static uint32_t getPreceedingWriteBoundary(uint32_t address)
 {
-  return (address / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE;
+  return (address / WRITE_BLOCK_SIZE) * WRITE_BLOCK_SIZE;
 }
 
 /**

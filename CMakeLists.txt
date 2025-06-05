@@ -90,11 +90,8 @@ target_link_libraries(FirmentFW
     MCUPort
 )
 
-get_target_property(FLASH_PAGE_SIZE MCUPort flash_page_size)
-message(STATUS "Flash page size: ${FLASH_PAGE_SIZE}")
-
-configure_file(web-ui/src/flashPage.ts.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/web-ui/src/generated/flashPage.ts)
+configure_file(web-ui/src/updatePage.ts.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/web-ui/src/generated/updatePage.ts)
 
 target_include_directories(FirmentFW 
   PRIVATE
@@ -137,7 +134,7 @@ add_custom_command(
     ${UI_SRC_DIR}/plot/traceStats.ts
     ${UI_SRC_DIR}/App.css
     ${UI_SRC_DIR}/BrokerAddress.tsx
-    ${UI_SRC_DIR}/flashPage.ts.in
+    ${UI_SRC_DIR}/updatePage.ts.in
     ${UI_SRC_DIR}/Image.tsx 
     ${UI_SRC_DIR}/index.ts
     ${UI_SRC_DIR}/Log.tsx

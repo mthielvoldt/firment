@@ -15,7 +15,6 @@
 extern "C"
 {
 #include <fmt_update.h>
-#include <fmt_flash_port.h>
 #include "stub_comms.h"
 }
 #define TOO_GREAT 1000

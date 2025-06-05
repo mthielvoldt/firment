@@ -16,11 +16,3 @@ target_include_directories(MCUPort
     ${APP_FW_CONFIG_DIR}
     ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
 )
-
-# TODO: (1) make this the SOT for page size in FW, configuring fmt_flash_port.h
-
-# flash_page_size is used in:
-# - web-ui for <Image> upload widget (via /web-ui/src/generated/flashPage.ts)
-# - fmt_flash_port.h > fmt_update.c  
-# It's normally parsed from a target specific header.
-set_target_properties(MCUPort PROPERTIES flash_page_size 256)

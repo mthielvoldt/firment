@@ -2,16 +2,15 @@
 #include <fmt_update.h> // in build binary dir
 #include "fmt_comms.h"  // fmt_sendMsg
 #include "fmt_flash.h"
-#include "fmt_flash_port.h"
 #include <stdbool.h>
 
-#define CHUNKS_PER_PAGE_MAX (FLASH_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
-#define PAGES_PER_SECTOR_MAX (FMT_IMAGE_DOWNLOAD_SECTOR_SIZE / FLASH_PAGE_SIZE)
+#define CHUNKS_PER_PAGE_MAX (UPDATE_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
+#define PAGES_PER_SECTOR_MAX (FMT_IMAGE_DOWNLOAD_SECTOR_SIZE / UPDATE_PAGE_SIZE)
 #define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
 
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
 static uint32_t activePage = 0;
-static uint8_t pageBuffer[FLASH_PAGE_SIZE];
+static uint8_t pageBuffer[UPDATE_PAGE_SIZE];
 static callback_t downloadStartCb = NULL;
 static callback_t downloadCompleteCb = NULL;
 
@@ -137,7 +136,7 @@ static void processPage(void)
     fmt_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
   }
   fmt_flash_write(
-      FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * FLASH_PAGE_SIZE,
+      FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * UPDATE_PAGE_SIZE,
       pageBuffer,
-      FLASH_PAGE_SIZE);
+      UPDATE_PAGE_SIZE);
 }

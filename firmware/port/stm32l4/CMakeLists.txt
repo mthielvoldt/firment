@@ -48,14 +48,3 @@ target_include_directories(MCUPort
 
 # Tells the assembler what architecture the toolchain file specifies. 
 target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
-
-# Contains the page size for the flash write operations. This propagates up so 
-# web-ui can break FW-image sends into page-size chunks, waiting in between.
-
-# TODO: flash page-size is actually *irrelevant*.  The UI actually needs to 
-# know how much data the **ESP** can buffer, and send that much data.
-
-# "2048" is from stm32l4xx_hal_flash.h line 855: 
-# #define FLASH_PAGE_SIZE  ((uint32_t)0x800)
-
-set_target_properties(MCUPort PROPERTIES flash_page_size "2048")

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import flashPageSize from "./generated/flashPage"
+import updatePageSize from "./generated/updatePage"
 import { sendPacked, setMessageHandler } from "./mqclient";
 import { PageStatus, PageStatusEnum, Top } from "./generated/messages";
 
@@ -78,17 +78,16 @@ export default function Image({ }) {
     const imageBytes = new Uint8Array(image);
     console.log(imageBytes.slice(0, 512));
 
-    // flashPageSize comes from a #define in a .h file in the firmware port,
-    // through cmake 'flash_page_size' property on the MCUPort target.   
-    const pageCount = Math.ceil(image.byteLength / flashPageSize);
+    // updatePageSize comes from cmake var 'UPDATE_PAGE_SIZE' in firment CML.
+    const pageCount = Math.ceil(image.byteLength / updatePageSize);
     setProgress(`Upload in progress: 0/${pageCount}`);
     pages = [];
     activePageIndex = 0;
 
     for (let pageIdx = 0; pageIdx < pageCount; pageIdx++) {
-      const pageStartIdx = pageIdx * flashPageSize;
+      const pageStartIdx = pageIdx * updatePageSize;
       // slice won't extend past iterable's length, regardless of param: end. 
-      const pageData = image.slice(pageStartIdx, pageStartIdx + flashPageSize);
+      const pageData = image.slice(pageStartIdx, pageStartIdx + updatePageSize);
       pages.push(pageData);
     }
     // Kick off the first page transfer.
