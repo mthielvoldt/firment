@@ -1,5 +1,5 @@
 #include "queue.h"
-#include <crit_section_port.h>
+#include <crit_section.h>
 #include <memory.h>
 
 #define FAIL_IF_PARAMS_IMPROPER       \

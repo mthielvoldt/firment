@@ -1,4 +1,4 @@
-#include <stdint-gcc.h>
+#include <stdint.h>
 
 /**
  * Stolen from vPortRaiseBASEPRI implementation found in:
