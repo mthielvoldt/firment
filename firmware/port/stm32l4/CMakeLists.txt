@@ -34,6 +34,7 @@ add_library(MCUPort
 target_include_directories(MCUPort
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../arm_generic
   PRIVATE
     ../..   # fmt headers.
     ${CMSIS_DRIVER_DIR}

@@ -33,17 +33,17 @@ add_library(MCUPort
 target_include_directories(MCUPort
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../arm_generic # crit_section.h
+    ${XMC_LIB}/inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
+    ${CMSIS_DEVICE_DIR}/Include # xmc_device.h > XMC4700.h
+    ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
+    ${RTE_DEVICE_DIR} # ioc_mcuDetails.h
   PRIVATE
     ../..   # fmt headers.
     ${CMSIS_DRIVER_DIR}
     ../../lib/CMSIS-6.1.0/Driver/Include
     ${APP_FW_CONFIG_DIR}
     ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
-    PUBLIC
-    ../../lib/CMSIS-6.1.0/Core/Include # core_cm4.h
-    ${RTE_DEVICE_DIR}
-    ${XMC_LIB}/inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
-    ${CMSIS_DEVICE_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
 )
 
 # Tells the assembler what architecture the toolchain file specifies. 
