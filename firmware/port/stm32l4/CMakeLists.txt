@@ -16,13 +16,15 @@ add_library(MCUPort
   ${STARTUP_FILE}
   CMSIS-Driver_STM32/Drivers/SPI_STM32.c
   ${HAL_DIR}/Src/stm32l4xx_hal.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_dma.c
   ${HAL_DIR}/Src/stm32l4xx_hal_flash.c
   ${HAL_DIR}/Src/stm32l4xx_hal_flash_ex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_flash_ramfunc.c
   ${HAL_DIR}/Src/stm32l4xx_hal_gpio.c
-  ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_spi.c
   ${HAL_DIR}/Src/stm32l4xx_hal_spi_ex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_tim.c
   fmt_crc_port.c
   fmt_flash_port.c
   fmt_periodic_port.c
