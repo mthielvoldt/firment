@@ -15,9 +15,11 @@ typedef struct _RTE_IOC
  * From stm32l4xx_hal_exti.c: 
    Exti lines 0 to 15 are linked to gpio pin number 0 to 15. Gpio port can
         be selected through multiplexer.
+
+  Some EXTI channels (specifically 5-9 and 10-15) share IRQn's
  */
-#define IOC_4  {GPIOC, 13, EXTI15_10_IRQn}
-#define IOC_14 {GPIOD,  2, EXTI2_IRQn}
+#define IOC_B1 {GPIOB, 1, EXTI1_IRQn}
+#define IOC_B2 {GPIOB, 2, EXTI2_IRQn}
 
 
 #endif // ioc_mcuDetails_H

@@ -10,15 +10,15 @@
 #include <ioc_mcuDetails.h> // IOC_x_to_ISR_y mcu-supported routing options
 #include <priority.h>
 
-SPI_HandleTypeDef hspi3;
-extern ARM_DRIVER_SPI Driver_SPI3;
+SPI_HandleTypeDef hspi2;
+extern ARM_DRIVER_SPI Driver_SPI2;
 
 spiCfg_t spiConfig = {
-  .spiModuleId = 4,
-  .spiModule = &Driver_SPI3,
-  .msgWaitingIocId = IOC_14_RTE_INDEX, // IOC_14: P1_0 on XMC4700
+  .spiModuleId = 2,
+  .spiModule = &Driver_SPI2,
+  .msgWaitingIocId = IOC_B1_RTE_INDEX, // 
   .msgWaitingIocOut = 0,  // not used in stm32; no output routing stage in IOC
-  .clearToSendIocId = IOC_4_RTE_INDEX, // IOC_4:  P0_4 on XMC4700
+  .clearToSendIocId = IOC_B2_RTE_INDEX, // 
   .clearToSendIocOut = 0, // not used in stm32; no output routing stage in IOC
   .baudHz = 1000000,
   .busMode = BUS_MODE_MAIN,
