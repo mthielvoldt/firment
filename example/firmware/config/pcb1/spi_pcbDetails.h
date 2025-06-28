@@ -23,12 +23,14 @@
  *   push-pull is available for perpiheral to use, but not necessarily used.
  * 
  * @note Recommended Edit Process
- * - _Pin, _GPIO_Pin, _GPIOx values can be inspected in CubeMX or PCB schematic.
+ * - _Pin, _GPIO_Pin, _GPIOx values can be inspected in CubeMX, PCB schematic,
+ *   or looked up in Table 17. Alternate function AF0 to AF7bin datasheet 
+ *   https://www.st.com/resource/en/datasheet/stm32l476rg.pdf.
  * - All _Mode are GPIO_MODE_AF_PP. This just gives peripheral control of pin.
  * - All _PuPd are GPIO_NOPULL.  No pull resistors connected.
  * - All _Speed are GPIO_SPEED_FREQ_LOW. **Not sure why**
  * - Look up the proper _AF value in stm32<fam>xx_hal_gpio_ex.h.  Here's how: 
- *   - Assuming you're using SPI3, Search for regex: "GPIO_AF[0-9]*_SPI3".
+ *   - Assuming you're using SPI3, Search for regex: "GPIO_AF[0-9]_SPI3".
  *   - Inspect each result to find the one that applies to your device.  This 
  *     can be made obvious by defining your device in c_cpp_properties.json
  *     eg: "defines": ["STM32L476xx"].  The right value will be the one search
@@ -41,47 +43,41 @@
 #include <stm32l4xx_hal_spi.h>
 #include <stm32l4xx_hal_spi_ex.h>
 
-#define MX_SPI3                                 1
+#define MX_SPI2 1
 
-/* Peripheral Clock Frequency */
-#define MX_SPI3_PERIPH_CLOCK_FREQ               80000000
+/* SPI2 */
+#define MX_SPI2_PERIPH_CLOCK_FREQ               80000000
 
-/* SPI3_MISO */
-#define MX_SPI3_MISO_Pin                        PC11
-#define MX_SPI3_MISO_GPIO_Pin                   GPIO_PIN_11
-#define MX_SPI3_MISO_GPIOx                      GPIOC
-#define MX_SPI3_MISO_GPIO_Mode                  GPIO_MODE_AF_PP 
-#define MX_SPI3_MISO_GPIO_PuPd                  GPIO_NOPULL
-#define MX_SPI3_MISO_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
-#define MX_SPI3_MISO_GPIO_AF                    GPIO_AF6_SPI3
+#define MX_SPI2_MISO_Pin                        PB14
+#define MX_SPI2_MISO_GPIO_Pin                   GPIO_PIN_14
+#define MX_SPI2_MISO_GPIOx                      GPIOB
+#define MX_SPI2_MISO_GPIO_Mode                  GPIO_MODE_AF_PP 
+#define MX_SPI2_MISO_GPIO_PuPd                  GPIO_NOPULL
+#define MX_SPI2_MISO_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
+#define MX_SPI2_MISO_GPIO_AF                    GPIO_AF5_SPI2
 
-/* SPI3_MOSI */
-#define MX_SPI3_MOSI_Pin                        PD4
-#define MX_SPI3_MOSI_GPIO_Pin                   GPIO_PIN_4
-#define MX_SPI3_MOSI_GPIOx                      GPIOD
-#define MX_SPI3_MOSI_GPIO_Mode                  GPIO_MODE_AF_PP
-#define MX_SPI3_MOSI_GPIO_PuPd                  GPIO_NOPULL
-#define MX_SPI3_MOSI_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
-#define MX_SPI3_MOSI_GPIO_AF                    GPIO_AF6_SPI3
+#define MX_SPI2_MOSI_Pin                        PB15
+#define MX_SPI2_MOSI_GPIO_Pin                   GPIO_PIN_15
+#define MX_SPI2_MOSI_GPIOx                      GPIOB
+#define MX_SPI2_MOSI_GPIO_Mode                  GPIO_MODE_AF_PP
+#define MX_SPI2_MOSI_GPIO_PuPd                  GPIO_NOPULL
+#define MX_SPI2_MOSI_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
+#define MX_SPI2_MOSI_GPIO_AF                    GPIO_AF5_SPI2
 
-/* SPI3_NSS */
-#define MX_SPI3_NSS_Pin                         PB12
-#define MX_SPI3_NSS_GPIO_Pin                    GPIO_PIN_12
-#define MX_SPI3_NSS_GPIOx                       GPIOB
-#define MX_SPI3_NSS_GPIO_Mode                   GPIO_MODE_AF_PP
-#define MX_SPI3_NSS_GPIO_PuPd                   GPIO_NOPULL
-#define MX_SPI3_NSS_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
-#define MX_SPI3_NSS_GPIO_AF                     GPIO_AF6_SPI3
+#define MX_SPI2_NSS_Pin                         PB12
+#define MX_SPI2_NSS_GPIO_Pin                    GPIO_PIN_12
+#define MX_SPI2_NSS_GPIOx                       GPIOB
+#define MX_SPI2_NSS_GPIO_Mode                   GPIO_MODE_AF_PP
+#define MX_SPI2_NSS_GPIO_PuPd                   GPIO_NOPULL
+#define MX_SPI2_NSS_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_SPI2_NSS_GPIO_AF                     GPIO_AF5_SPI2
 
-/* SPI3_SCK */
-#define MX_SPI3_SCK_Pin                         PD1
-#define MX_SPI3_SCK_GPIO_Pin                    GPIO_PIN_1
-#define MX_SPI3_SCK_GPIOx                       GPIOD
-#define MX_SPI3_SCK_GPIO_Mode                   GPIO_MODE_AF_PP
-#define MX_SPI3_SCK_GPIO_PuPd                   GPIO_NOPULL
-#define MX_SPI3_SCK_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
-#define MX_SPI3_SCK_GPIO_AF                     GPIO_AF6_SPI3
-
-
+#define MX_SPI2_SCK_Pin                         PB13
+#define MX_SPI2_SCK_GPIO_Pin                    GPIO_PIN_13
+#define MX_SPI2_SCK_GPIOx                       GPIOB
+#define MX_SPI2_SCK_GPIO_Mode                   GPIO_MODE_AF_PP
+#define MX_SPI2_SCK_GPIO_PuPd                   GPIO_NOPULL
+#define MX_SPI2_SCK_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_SPI2_SCK_GPIO_AF                     GPIO_AF5_SPI2
 
 #endif // include once
