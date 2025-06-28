@@ -12,8 +12,8 @@
 #include <gpio_mcuDetails.h>
 
 
-#define LED_0_PIN GPIOD, 13
-#define LED_1_PIN GPIOD, 12
+#define LED_0_PIN GPIOC, 10
+#define LED_1_PIN GPIOA, 5
 
 
 #define AVAILABLE_GPIOs {{LED_0_PIN}, {LED_1_PIN}}
