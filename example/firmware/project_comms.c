@@ -31,6 +31,9 @@ bool comm_init(void)
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
   success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
+  fmt_setPin(LED_0_PIN_ID, OUTPUT_HIGH);
+  fmt_setPin(LED_1_PIN_ID, OUTPUT_HIGH);
+
   fmt_setBuildIdGetter(getBuildTime);
   return success;
 }
