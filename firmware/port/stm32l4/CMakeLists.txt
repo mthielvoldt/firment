@@ -27,6 +27,7 @@ add_library(MCUPort
   fmt_flash_port.c
   fmt_periodic_port.c
   fmt_spi_port.c
+  fmt_sysInit_port.c
   gpio_port.c
   ioc_port.c
 )
