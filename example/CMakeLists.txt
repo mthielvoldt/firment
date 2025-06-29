@@ -24,10 +24,10 @@ include(config/version.cmake) # -> VERSION_SEM
 # Disables CXX (C++)
 project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
 
-include(config/mcuCompileOptions.cmake)
-include(config/partitions.cmake)
-include(config/cryptOptions.cmake)
-include(config/firmentConfig.cmake)
+include(config/cryptOptions.cmake)      # no deps
+include(config/firmentConfig.cmake)     # no deps
+include(config/mcuCompileOptions.cmake) # after firmentConfig
+include(config/partitions.cmake)        # after mcuCompileOptions
 
 set(MGTBOOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mgt-boot)
 
@@ -35,7 +35,7 @@ include(${MGTBOOT_DIR}/tools/genLinker.cmake) # req: LINKER_SCRIPT_TEMPLATE
 
 
 # Select which MCU port library ('MCUPort' target) build project against.
-set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
+
 add_subdirectory(${PORT_DIR} ${MCU_FAMILY}) # provides MCUPort library.
 
 # Add firment, and set where (in the binary dir) to place firment output files.
@@ -45,6 +45,7 @@ add_subdirectory(${FIRMENT_DIR} firment)
 include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
 
 add_library(app_lib 
+${STARTUP_FILE}
 firmware/spi_example.c
 firmware/project_comms.c
 firmware/control.c
@@ -61,6 +62,9 @@ target_include_directories(app_lib
 # Specify which libraries the top-level target depends on directly. 
 # Note: -lm links the standard math library (math.h).
 target_link_libraries(app_lib FirmentFW MCUPort -lm)
+
+# Some startup files in assembly don't specify the architecture; this does.
+target_compile_options(app_lib PRIVATE ${ASSEMBLER_FLAGS})
 
 
 # Update the build_time, which gets used as the app version for signing.

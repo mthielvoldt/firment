@@ -3,7 +3,6 @@ set(HAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/stm32l4xx-hal-driver")
 set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
 set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMSIS-Driver_STM32/Drivers")
 
-set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s")
 set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
 
 # Note: In the STM32 ecosystem, there is no equivalent of RTE_Device.h in XMC
@@ -13,7 +12,6 @@ set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c"
 
 add_library(MCUPort
   ${SYSTEM_FILE}
-  ${STARTUP_FILE}
   CMSIS-Driver_STM32/Drivers/SPI_STM32.c
   ${HAL_DIR}/Src/stm32l4xx_hal.c
   ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
@@ -48,6 +46,3 @@ target_include_directories(MCUPort
     ${HAL_DIR}/Inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
     ${CMSIS_FAMILY_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
 )
-
-# Tells the assembler what architecture the toolchain file specifies. 
-target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})
