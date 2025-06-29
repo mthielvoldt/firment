@@ -1,9 +1,8 @@
 
 set(XMC_LIB "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/XMCLib")
-set(CMSIS_DEVICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700")
+set(CMSIS_DEVICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_${MCU_VARIANT}")
 set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/XMC4000_DFP/RTE_Driver")
 
-set(STARTUP_FILE "${CMSIS_DEVICE_DIR}/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
 set(SYSTEM_FILE  "${CMSIS_DEVICE_DIR}/Source/system_${MCU_VARIANT}.c")
 if(MCU_VARIANT STREQUAL "XMC4700" OR MCU_VARIANT STREQUAL "XMC4800")
 set(RTE_DEVICE_DIR "4800_F144")
@@ -11,7 +10,6 @@ endif()
 
 add_library(MCUPort
   ${SYSTEM_FILE}
-  ${STARTUP_FILE}
   XMC4000_DFP/RTE_Driver/SPI.c
   ${XMC_LIB}/src/xmc_ccu4.c
   ${XMC_LIB}/src/xmc_eru.c
@@ -45,6 +43,3 @@ target_include_directories(MCUPort
     ${APP_FW_CONFIG_DIR}
     ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
 )
-
-# Tells the assembler what architecture the toolchain file specifies. 
-target_compile_options(MCUPort PRIVATE ${ASSEMBLER_FLAGS})

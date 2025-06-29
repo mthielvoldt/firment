@@ -17,12 +17,18 @@ if(${PCB} STREQUAL "0")
   set(MCU_VARIANT "XMC4700")
   set(MCU_SPEED_VARIANT "F144")
   set(MCU_MEM_VARIANT "2048")
+
+  set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
+  set(STARTUP_FILE "${PORT_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.in)
   add_compile_definitions(${MCU_VARIANT}_${MCU_SPEED_VARIANT}x${MCU_MEM_VARIANT})
 elseif(${PCB} STREQUAL "1")
   set(MCU_FAMILY "stm32l4")
   set(MCU_VARIANT "stm32l476")
+
+  set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
+  set(STARTUP_FILE "${PORT_DIR}/cmsis_device_l4/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32L476XX_FLASH.ld.in)
   add_compile_definitions("STM32L476xx")

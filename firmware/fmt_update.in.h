@@ -8,8 +8,8 @@
 #include <stdint.h>
 
 // Source: project-level .cmake (these values shared with bootloader).
-#define FMT_IMAGE_DOWNLOAD_ADDRESS @FMT_IMAGE_DOWNLOAD_ADDRESS@
-#define FMT_IMAGE_DOWNLOAD_SECTOR_SIZE @FMT_IMAGE_DOWNLOAD_SECTOR_SIZE@
+#define FMT_IMAGE_DOWNLOAD_ADDRESS @PARTITION_UPDATE_ADDRESS@
+#define FMT_IMAGE_DOWNLOAD_SECTOR_SIZE @SECTOR_SIZE@
 
 // Source: firment_msg_config.json  "image-part-max-size"
 #define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
