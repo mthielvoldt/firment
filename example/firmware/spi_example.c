@@ -3,6 +3,7 @@
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic.h>
+#include <fmt_sysInit.h>
 #include "control.h"
 #include "frequency.h"
 #include "priority.h"
@@ -13,6 +14,8 @@ static void periodicA(void);
 
 int main(void)
 {
+  fmt_initSys();
+
   project_initSpi();
   
   comm_init();
