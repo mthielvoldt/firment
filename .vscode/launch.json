@@ -1,7 +1,24 @@
 {
   "configurations": [
+    // stmApp
     {
-      "name": "app_root",
+      "name": "stmApp",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "interface": "swd",
+      "device": "STM32L476RG",
+      "cwd": "${workspaceFolder}/example/build/stm",
+      "executable": "app_root.elf",
+      "showDevDebugOutput": "raw",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32l4x.cfg",
+      ]
+    },
+    // xmcApp
+    {
+      "name": "xmcApp",
       "type": "cortex-debug",
       "servertype": "jlink",
       "request": "launch",
@@ -14,8 +31,9 @@
       "showDevDebugOutput": "raw",
       // "runToEntryPoint": "main"
     },
+    // xmcFact_noFlash
     {
-      "name": "BL+App-noFlash",
+      "name": "xmcFact_noFlash",
       "type": "cortex-debug",
       "servertype": "jlink",
       "request": "launch",
@@ -25,13 +43,24 @@
       "symbolFiles": ["mgt-boot/bootloader.elf", "app_offset.elf"],
       "device": "XMC4700-2048",
       "showDevDebugOutput": "vscode",
-      // "preLaunchCommands": [
-      //   "loadbin images/factory_v3.bin, 0x0C000000",
-      //   "reset",
-      //   "add-symbol-file build/bootloader.elf",
-      //   "add-symbol-file images/app_v2.elf"
-      // ]
     },
+    // xmcFactory
+    {
+      "name": "xmcFactory",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "request": "launch",
+      "serverpath": "JLinkGDBServerCLExe",
+      "cwd": "${workspaceFolder}/example/build/xmc",
+      "loadFiles": [],
+      "symbolFiles": ["mgt-boot/bootloader.elf", "app_offset.elf"],
+      "device": "XMC4700-2048",
+      "showDevDebugOutput": "vscode",
+      "preLaunchCommands": [
+        "restore mgt-boot/factory.bin binary 0x08000000"
+      ],
+    },
+    // testFirment
     {
       "name": "testFirment",
       "type": "cppdbg",
@@ -57,6 +86,7 @@
       ],
       "preLaunchTask": "build-tests"
     },
+    // esp32s3-contained
     {
       "name": "esp32s3-contained",
       "type": "cppdbg",

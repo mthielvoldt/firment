@@ -3,21 +3,14 @@
 #include <stm32l4xx_hal_rcc.h>
 #include <stm32l4xx_hal_pwr_ex.h>
 
-// Here to force the linker to keep stm32l4xx_it.o in the archive, which would 
-// otherwise be dropped since it only provides defs for funcs that already have
-// weak definitions. 
-extern const int dummyLinkStm32l4xx_it;
 
 void SystemClock_Config(void);
 void Error_Handler(void);
 
 void fmt_initSys(void)
 {
-  volatile int myVar = dummyLinkStm32l4xx_it;
   HAL_Init();
   SystemClock_Config();
-
-  // SysTick_Handler();  // a dummy link to force inclusion of stm32l4xx_it.o
 }
 
 void SystemClock_Config(void)
@@ -74,4 +67,13 @@ void Error_Handler(void)
   {
   }
   /* USER CODE END Error_Handler_Debug */
+}
+
+/**
+ * @brief Configured and initialized by HAL_Init() at 1ms.
+ * @note TICK_INT_PRIORITY defined in stm32l4xx_hal_conf.h sets the priority. 
+ */
+void SysTick_Handler(void)
+{
+  HAL_IncTick();
 }
