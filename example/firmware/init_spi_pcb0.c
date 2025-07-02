@@ -14,7 +14,7 @@
 extern ARM_DRIVER_SPI Driver_SPI4;
 
 spiCfg_t spiConfig = {
-  .spiModuleId = 4,
+  .spiDriverId = 4,
   .spiModule = &Driver_SPI4,
   .msgWaitingIocId = IOC_14_RTE_INDEX, // IOC_14: P1_0 on XMC4700
   .msgWaitingIocOut = IOC_14_to_ISR_3,

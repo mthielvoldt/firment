@@ -73,6 +73,7 @@ void Error_Handler(void)
  * @brief Configured and initialized by HAL_Init() at 1ms.
  * @note TICK_INT_PRIORITY defined in stm32l4xx_hal_conf.h sets the priority. 
  */
+void SysTick_Handler(void);
 void SysTick_Handler(void)
 {
   HAL_IncTick();

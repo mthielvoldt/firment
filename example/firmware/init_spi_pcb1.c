@@ -11,11 +11,10 @@
 #include <ioc_mcuDetails.h> // IOC_x_to_ISR_y mcu-supported routing options
 #include <priority.h>
 
-SPI_HandleTypeDef hspi2;
 extern ARM_DRIVER_SPI Driver_SPI2;
 
 spiCfg_t spiConfig = {
-  .spiModuleId = 2,
+  .spiDriverId = 2,
   .spiModule = &Driver_SPI2,
   .msgWaitingIocId = IOC_B1_RTE_INDEX, // 
   .msgWaitingIocOut = 0,  // not used in stm32; no output routing stage in IOC
