@@ -3,6 +3,7 @@
 // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
 
 #include "fmt_spi.h"
+#include <fmt_spi_port.h> // port_initSpiModule()  port_getSpiEventIRQn()
 #include <spi_mcuDetails.h> // SPI_BUILTIN_CRC
 #include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
 #include <core_port.h> // NVIC_...()
@@ -57,8 +58,9 @@ bool fmt_initSpi(spiCfg_t cfg)
   spi = cfg.spiModule;
   clearToSendIocId = cfg.clearToSendIocId;
   msgWaitingIocId = cfg.msgWaitingIocId;
-  uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiModuleId);
+  uint32_t spiEventIRQn = port_getSpiEventIRQn(cfg.spiDriverId);
   ASSERT_SUCCESS(spiEventIRQn);
+  ASSERT_SUCCESS(port_initSpiModule(&cfg));
 
   ASSERT_ARM_OK(spi->Initialize(spiEventHandlerISR));
   ASSERT_ARM_OK(spi->PowerControl(ARM_POWER_FULL));
@@ -180,7 +182,7 @@ static void SendNextPacket(void)
   {
     bool clearToSend = fmt_getIocPinState(clearToSendIocId);
 
-    if (clearToSend)
+    if (1)
     {
       bool txWaiting = numItemsInQueue(&sendQueue);
       bool rxWaiting = fmt_getIocPinState(msgWaitingIocId);

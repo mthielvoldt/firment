@@ -25,7 +25,7 @@ TEST_GROUP(fmt_spi)
   Top emptyMsg, validMsg;
   uint8_t validPacket[MAX_PACKET_SIZE_BYTES];
   const spiCfg_t cfg = {
-      .spiModuleId = 3,
+      .spiDriverId = 3,
       .spiModule = &Driver_SPI3,
       .msgWaitingIocId = msgWaitingIocId,
       .clearToSendIocId = clearToSendIocId,

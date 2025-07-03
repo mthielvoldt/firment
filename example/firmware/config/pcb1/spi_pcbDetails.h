@@ -42,42 +42,39 @@
 #include <stm32l4xx_hal_dma.h>  // DMA_HandleTypeDef (needed by _hal_spi.h)
 #include <stm32l4xx_hal_spi.h>
 #include <stm32l4xx_hal_spi_ex.h>
+#include <stm32l4xx.h>
+#include <stm32l4xx_hal_gpio.h>
+#include <stm32l4xx_hal_gpio_ex.h>
 
 #define MX_SPI2 1
-
-/* SPI2 */
 #define MX_SPI2_PERIPH_CLOCK_FREQ               80000000
 
-#define MX_SPI2_MISO_Pin                        PB14
-#define MX_SPI2_MISO_GPIO_Pin                   GPIO_PIN_14
-#define MX_SPI2_MISO_GPIOx                      GPIOB
-#define MX_SPI2_MISO_GPIO_Mode                  GPIO_MODE_AF_PP 
-#define MX_SPI2_MISO_GPIO_PuPd                  GPIO_NOPULL
-#define MX_SPI2_MISO_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
-#define MX_SPI2_MISO_GPIO_AF                    GPIO_AF5_SPI2
 
-#define MX_SPI2_MOSI_Pin                        PB15
-#define MX_SPI2_MOSI_GPIO_Pin                   GPIO_PIN_15
-#define MX_SPI2_MOSI_GPIOx                      GPIOB
-#define MX_SPI2_MOSI_GPIO_Mode                  GPIO_MODE_AF_PP
-#define MX_SPI2_MOSI_GPIO_PuPd                  GPIO_NOPULL
-#define MX_SPI2_MOSI_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
-#define MX_SPI2_MOSI_GPIO_AF                    GPIO_AF5_SPI2
+#define FMT_SPI SPI2  // NEEDED? 
+#define FMT_SPI_GPIO_AF                    GPIO_AF5_SPI2
 
-#define MX_SPI2_NSS_Pin                         PB12
-#define MX_SPI2_NSS_GPIO_Pin                    GPIO_PIN_12
-#define MX_SPI2_NSS_GPIOx                       GPIOB
-#define MX_SPI2_NSS_GPIO_Mode                   GPIO_MODE_AF_PP
-#define MX_SPI2_NSS_GPIO_PuPd                   GPIO_NOPULL
-#define MX_SPI2_NSS_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
-#define MX_SPI2_NSS_GPIO_AF                     GPIO_AF5_SPI2
+#define FMT_SPI_MISO_Pin                        PB14
+#define FMT_SPI_MISO_GPIO_Pin                   GPIO_PIN_14
+#define FMT_SPI_MISO_GPIOx                      GPIOB
 
-#define MX_SPI2_SCK_Pin                         PB13
-#define MX_SPI2_SCK_GPIO_Pin                    GPIO_PIN_13
-#define MX_SPI2_SCK_GPIOx                       GPIOB
-#define MX_SPI2_SCK_GPIO_Mode                   GPIO_MODE_AF_PP
-#define MX_SPI2_SCK_GPIO_PuPd                   GPIO_NOPULL
-#define MX_SPI2_SCK_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
-#define MX_SPI2_SCK_GPIO_AF                     GPIO_AF5_SPI2
+#define FMT_SPI_MOSI_Pin                        PB15
+#define FMT_SPI_MOSI_GPIO_Pin                   GPIO_PIN_15
+#define FMT_SPI_MOSI_GPIOx                      GPIOB
+
+#define FMT_SPI_NSS_Pin                         PB12
+#define FMT_SPI_NSS_GPIO_Pin                    GPIO_PIN_12
+#define FMT_SPI_NSS_GPIOx                       GPIOB
+
+#define FMT_SPI_SCK_Pin                         PB13
+#define FMT_SPI_SCK_GPIO_Pin                    GPIO_PIN_13
+#define FMT_SPI_SCK_GPIOx                       GPIOB
+
+/* Needed by SPI_STM32 to configure the NSS pin. (Line 296)*/
+#define MX_SPI2_NSS_Pin        FMT_SPI_NSS_Pin
+#define MX_SPI2_NSS_GPIOx      FMT_SPI_NSS_GPIOx
+#define MX_SPI2_NSS_GPIO_Pin   FMT_SPI_NSS_GPIO_Pin
+#define MX_SPI2_NSS_GPIO_AF    FMT_SPI_GPIO_AF
+#define MX_SPI2_NSS_GPIO_PuPd  GPIO_NOPULL
+#define MX_SPI2_NSS_GPIO_Speed GPIO_SPEED_FREQ_VERY_HIGH
 
 #endif // include once
