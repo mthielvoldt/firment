@@ -11,13 +11,13 @@
 
 #include <gpio_mcuDetails.h>
 
-
-#define LED_0_PIN GPIOC, 10
-#define LED_1_PIN GPIOA, 5
-
-
-#define AVAILABLE_GPIOs {{LED_0_PIN}, {LED_1_PIN}}
 #define LED_0_PIN_ID 0
 #define LED_1_PIN_ID 1
+
+#define LED_0_PIN [LED_O_PIN_ID] = {GPIOC, 10}
+#define LED_1_PIN [LED_1_PIN_ID] = {GPIOA, 5}
+
+
+#define AVAILABLE_GPIOs {LED_0_PIN, LED_1_PIN}
 
 #endif // gpio_pcbDetails_h
