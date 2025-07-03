@@ -16,9 +16,9 @@ extern ARM_DRIVER_SPI Driver_SPI2;
 spiCfg_t spiConfig = {
   .spiDriverId = 2,
   .spiModule = &Driver_SPI2,
-  .msgWaitingIocId = IOC_B1_RTE_INDEX, // 
+  .msgWaitingIocId = MSG_WAIT_IOC_ID, // 
   .msgWaitingIocOut = 0,  // not used in stm32; no output routing stage in IOC
-  .clearToSendIocId = IOC_B2_RTE_INDEX, // 
+  .clearToSendIocId = CTS_IOC_ID, // 
   .clearToSendIocOut = 0, // not used in stm32; no output routing stage in IOC
   .baudHz = 1000000,
   .busMode = BUS_MODE_MAIN,

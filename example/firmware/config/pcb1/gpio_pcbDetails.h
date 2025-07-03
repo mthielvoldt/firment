@@ -14,7 +14,7 @@
 #define LED_0_PIN_ID 0
 #define LED_1_PIN_ID 1
 
-#define LED_0_PIN [LED_O_PIN_ID] = {GPIOC, 10}
+#define LED_0_PIN [LED_0_PIN_ID] = {GPIOC, 10}
 #define LED_1_PIN [LED_1_PIN_ID] = {GPIOA, 5}
 
 
