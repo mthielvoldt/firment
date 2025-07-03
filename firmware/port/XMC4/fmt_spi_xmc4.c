@@ -25,6 +25,7 @@ extern SPI_RESOURCES SPI5_Resources;
 
 bool port_initSpiModule(spiCfg_t *cfg)
 {
+  return true;
 }
 
 uint32_t port_getSpiEventIRQn(uint8_t spiDriverId)
