@@ -15,5 +15,5 @@ elif [ -L "/dev/serial/by-id/$ESP_JTAG_NAME" ]; then
   esp_rfc2217_server.py -v -p 4000 "/dev/serial/by-id/$ESP_JTAG_NAME"
 
 else
-  echo "neither file found."
+  echo "Neither ESP32 port found.  Plugged in?  First-time flashing must use UART, not JTAG."
 fi

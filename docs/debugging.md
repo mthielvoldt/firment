@@ -8,6 +8,9 @@ This document contains guidance for setting up the debugger tools for the variou
 The ESP wifi bridge code is intended to work as-is without user modification, but if you have some need to debug this code, here is how to do so.  
 *Note:* this requires you to install Espressif's fork of OpenOCD on your host (dev) machine, which is additional to the Esp-idf docker container and RFC2217 python script that are required for flashing and monitoring the ESP32S3.  The IDF install includes this, so if you opted to install IDF on your host (not use the container) you already have this.  If, like me, you've been avoiding that, proceed.
 
+## Programming once over FTDI port
+As shipped, the S3 doesn't make USB_JTAG available, so it must be programmed the first time over the FTDI chip (left port with the ports at the top) to enable JTAG debugging.  If in doubt of the
+
 ## Installing OpenOCD
 1. ESP maintains a fork of the OpenOCD project [here](https://github.com/espressif/openocd-esp32).  Clone this to get the .cfg files you need. 
 2. Download the appropriate pre-build binary from [Releases](https://github.com/espressif/openocd-esp32/releases) for your system and extract it.
