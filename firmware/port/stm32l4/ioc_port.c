@@ -12,17 +12,19 @@ const uint32_t edgeMap[] = {
     [EDGE_TYPE_BOTH] = GPIO_MODE_IT_RISING_FALLING,
 };
 
-const RTE_IOC_t iocConfigs[] = AVAILABLE_IOCs;
-
+typedef enum iocErr_e
+{
+  IOC_OK,
+  IOC_ERR_RESOURCE_UNAVAILABLE,
+  IOC_ERR_CALLBACK_ALREADY_ASSIGNED,
+} iocErr_t;
 typedef void (*isrCallback_t)(void);
 
-// How many callbacks do I want to be able to register? 
-isrCallback_t callbacks[sizeof(iocConfigs) / sizeof(RTE_IOC_t)] = {0};
+const RTE_IOC_t iocConfigs[] = AVAILABLE_IOCs;
+#define IOC_CONFIGS_COUNT (sizeof(iocConfigs) / sizeof(RTE_IOC_t))
 
-static bool iocIdValid(uint8_t iocId)
-{
-  return iocId < (sizeof(iocConfigs) / sizeof(RTE_IOC_t));
-}
+static iocErr_t storeCallback(uint8_t pin, isrCallback_t callback);
+static bool iocIdValid(uint8_t iocId);
 
 
 /** Init Interrupt-on-change ISR, linking to a specific GPIO.
@@ -30,7 +32,7 @@ static bool iocIdValid(uint8_t iocId)
  */
 bool fmt_initIoc(
     uint8_t iocId,
-    uint8_t outputChannel,  // unused in stm32l4
+    uint8_t outputChannel, // unused in stm32l4
     edgeType_t activeEdges,
     uint32_t priority,
     void (*callback)(void))
@@ -40,15 +42,15 @@ bool fmt_initIoc(
 
   const RTE_IOC_t *ioc = &iocConfigs[iocId];
 
-  callbacks[iocId] = callback;
+  if (storeCallback(ioc->pin, callback) != IOC_OK)
+    return false;
 
   GPIO_InitTypeDef config = {
-    .Mode = edgeMap[activeEdges],
-    .Pin = (0x1 << iocId),
-    .Pull = GPIO_NOPULL,  // could be passed in.
+      .Mode = edgeMap[activeEdges],
+      .Pin = (0x1 << iocId),
+      .Pull = GPIO_NOPULL, // could be passed in.
   };
   HAL_GPIO_Init(ioc->port, &config);
-
 
   uint32_t encodedPrio =
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority, 0);
@@ -84,69 +86,77 @@ bool fmt_getIocPinState(uint8_t iocId)
 }
 
 /******************* ISRs *******************/
-#if 1
+#define EXTI_HANDLER(n)                    \
+  static isrCallback_t callback##n = NULL; \
+  void EXTI##n##_IRQHandler(void);         \
+  void EXTI##n##_IRQHandler(void)          \
+  {                                        \
+    EXTI->PR1 |= (1UL << n);\
+    if (callback##n)                       \
+      (*callback##n)();                    \
+  }
 #if IOC_USE_EXTI0
-void EXTI0_IRQHandler(void); // suppress missing-declaration warning
-void EXTI0_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[0];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(0)
 #endif
 #if IOC_USE_EXTI1
-void EXTI1_IRQHandler(void); // suppress missing-declaration warning
-void EXTI1_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[1];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(1)
 #endif
 #if IOC_USE_EXTI2
-void EXTI2_IRQHandler(void); // suppress missing-declaration warning
-void EXTI2_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[2];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(2)
 #endif
 #if IOC_USE_EXTI3
-void EXTI3_IRQHandler(void); // suppress missing-declaration warning
-void EXTI3_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[3];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(3)
 #endif
 #if IOC_USE_EXTI4
-void EXTI4_IRQHandler(void); // suppress missing-declaration warning
-void EXTI4_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[4];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(4)
 #endif
 #if IOC_USE_EXTI9_5
-void EXTI9_5_IRQHandler(void); // suppress missing-declaration warning
-void EXTI9_5_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[6];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(9_5)
 #endif
 #if IOC_USE_EXTI15_10
-void EXTI15_10_IRQHandler(void); // suppress missing-declaration warning
-void EXTI15_10_IRQHandler(void)
-{
-  isrCallback_t cb = callbacks[7];
-  if (cb)
-    cb();
-}
+EXTI_HANDLER(15_10)
 #endif
 
+#define CASE_PIN(n)                             \
+  case n:                                       \
+    if (callback##n == NULL)                    \
+      callback##n = callback;                   \
+    else                                        \
+      return IOC_ERR_CALLBACK_ALREADY_ASSIGNED; \
+    break;
+
+static iocErr_t storeCallback(uint8_t pin, isrCallback_t callback)
+{
+  switch (pin)
+  {
+#if IOC_USE_EXTI0
+    CASE_PIN(0)
 #endif
+#if IOC_USE_EXTI1
+    CASE_PIN(1)
+#endif
+#if IOC_USE_EXTI2
+    CASE_PIN(2)
+#endif
+#if IOC_USE_EXTI3
+    CASE_PIN(3)
+#endif
+#if IOC_USE_EXTI4
+    CASE_PIN(4)
+#endif
+#if IOC_USE_EXTI9_5
+    EXTI_HANDLER(9_5)
+#endif
+#if IOC_USE_EXTI15_10
+    CASE_PIN(15_10)
+#endif
+  default:
+    return IOC_ERR_RESOURCE_UNAVAILABLE;
+  }
+  return IOC_OK;
+}
+
+static bool iocIdValid(uint8_t iocId)
+{
+  return iocId < IOC_CONFIGS_COUNT;
+}
