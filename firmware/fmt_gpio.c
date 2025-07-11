@@ -28,7 +28,7 @@ bool fmt_readPin(uint8_t pinId)
 {
   ASSERT_PIN_ID_VALID;
   portPin_t portPin = availableGpios[pinId];
-  return port_readPort((void *)portPin.port);
+  return (port_readPort((void *)portPin.port) & (1UL << portPin.pin)) != 0;
 }
 
 bool fmt_setPin(uint8_t pinId, outLevel_t level)

@@ -26,7 +26,6 @@ const RTE_IOC_t iocConfigs[] = AVAILABLE_IOCs;
 static iocErr_t storeCallback(uint8_t pin, isrCallback_t callback);
 static bool iocIdValid(uint8_t iocId);
 
-
 /** Init Interrupt-on-change ISR, linking to a specific GPIO.
  *
  */
@@ -47,7 +46,7 @@ bool fmt_initIoc(
 
   GPIO_InitTypeDef config = {
       .Mode = edgeMap[activeEdges],
-      .Pin = (0x1 << iocId),
+      .Pin = (0x1 << ioc->pin),
       .Pull = GPIO_NOPULL, // could be passed in.
   };
   HAL_GPIO_Init(ioc->port, &config);
@@ -56,7 +55,6 @@ bool fmt_initIoc(
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority, 0);
 
   NVIC_SetPriority(ioc->irqNum, encodedPrio);
-
   NVIC_EnableIRQ(ioc->irqNum);
   return true;
 }
@@ -86,74 +84,77 @@ bool fmt_getIocPinState(uint8_t iocId)
 }
 
 /******************* ISRs *******************/
-#define EXTI_HANDLER(n)                    \
-  static isrCallback_t callback##n = NULL; \
-  void EXTI##n##_IRQHandler(void);         \
-  void EXTI##n##_IRQHandler(void)          \
-  {                                        \
-    EXTI->PR1 |= (1UL << n);\
-    if (callback##n)                       \
-      (*callback##n)();                    \
+#define EXTI_HANDLER(lower, label)             \
+  static isrCallback_t callback##lower = NULL; \
+  static uint32_t pinEnabled##lower = 0;       \
+  void EXTI##label##_IRQHandler(void);         \
+  void EXTI##label##_IRQHandler(void)          \
+  {                                            \
+    EXTI->PR1 |= pinEnabled##lower;            \
+    if (callback##lower)                       \
+      (*callback##lower)();                    \
   }
 #if IOC_USE_EXTI0
-EXTI_HANDLER(0)
+EXTI_HANDLER(0, 0)
 #endif
 #if IOC_USE_EXTI1
-EXTI_HANDLER(1)
+EXTI_HANDLER(1, 1)
 #endif
 #if IOC_USE_EXTI2
-EXTI_HANDLER(2)
+EXTI_HANDLER(2, 2)
 #endif
 #if IOC_USE_EXTI3
-EXTI_HANDLER(3)
+EXTI_HANDLER(3, 3)
 #endif
 #if IOC_USE_EXTI4
-EXTI_HANDLER(4)
+EXTI_HANDLER(4, 4)
 #endif
 #if IOC_USE_EXTI9_5
-EXTI_HANDLER(9_5)
+EXTI_HANDLER(5, 9_5)
 #endif
 #if IOC_USE_EXTI15_10
-EXTI_HANDLER(15_10)
+EXTI_HANDLER(10, 15_10)
 #endif
 
-#define CASE_PIN(n)                             \
-  case n:                                       \
-    if (callback##n == NULL)                    \
-      callback##n = callback;                   \
+#define CASE_PIN(upper, lower)                  \
+  if (pin >= lower && pin <= upper)             \
+  {                                             \
+    if (callback##lower == NULL)                \
+    {                                           \
+      pinEnabled##lower = (1 << pin);           \
+      callback##lower = callback;               \
+      return IOC_OK;                            \
+    }                                           \
     else                                        \
       return IOC_ERR_CALLBACK_ALREADY_ASSIGNED; \
-    break;
+  }
 
 static iocErr_t storeCallback(uint8_t pin, isrCallback_t callback)
 {
-  switch (pin)
-  {
+
 #if IOC_USE_EXTI0
-    CASE_PIN(0)
+  CASE_PIN(0, 0)
 #endif
 #if IOC_USE_EXTI1
-    CASE_PIN(1)
+  CASE_PIN(1, 1)
 #endif
 #if IOC_USE_EXTI2
-    CASE_PIN(2)
+  CASE_PIN(2, 2)
 #endif
 #if IOC_USE_EXTI3
-    CASE_PIN(3)
+  CASE_PIN(3, 3)
 #endif
 #if IOC_USE_EXTI4
-    CASE_PIN(4)
+  CASE_PIN(4, 4)
 #endif
 #if IOC_USE_EXTI9_5
-    EXTI_HANDLER(9_5)
+  EXTI_HANDLER(9, 5)
 #endif
 #if IOC_USE_EXTI15_10
-    CASE_PIN(15_10)
+  CASE_PIN(15, 10)
 #endif
-  default:
-    return IOC_ERR_RESOURCE_UNAVAILABLE;
-  }
-  return IOC_OK;
+
+  return IOC_ERR_RESOURCE_UNAVAILABLE;
 }
 
 static bool iocIdValid(uint8_t iocId)

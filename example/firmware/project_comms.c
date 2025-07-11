@@ -20,19 +20,16 @@
 #include <fmt_gpio.h>
 #include <fmt_version.h>
 #include <gpio_pcbDetails.h>
-#include <core_port.h>  // NVIC_SystemReset()
+#include <core_port.h> // NVIC_SystemReset()
 #include <build_time.h>
 
 #define CALLS_PER_FULL_ROTATION 1000U
-
 
 bool comm_init(void)
 {
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
   success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
-  fmt_setPin(LED_0_PIN_ID, OUTPUT_HIGH);
-  fmt_setPin(LED_1_PIN_ID, OUTPUT_HIGH);
 
   fmt_setBuildIdGetter(getBuildTime);
   return success;
@@ -82,7 +79,7 @@ void handleWaveformCtl(WaveformCtl msg)
 {
   static float count = 0;
   count++;
-  fmt_setPin(LED_0_PIN_ID, OUTPUT_TOGGLE);
+  // fmt_setPin(LED_0_PIN_ID, OUTPUT_TOGGLE);
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
   const waveShape_t toControlShape[] = {

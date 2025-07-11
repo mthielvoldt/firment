@@ -20,6 +20,7 @@ typedef struct _RTE_IOC
  */
 #define IOC_B1 {GPIOB, 1, EXTI1_IRQn}
 #define IOC_B2 {GPIOB, 2, EXTI2_IRQn}
+#define IOC_B11 {GPIOB, 11, EXTI15_10_IRQn}
 
 
 #endif // ioc_mcuDetails_H
