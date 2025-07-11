@@ -3,11 +3,11 @@
 // Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
 
 #include "fmt_spi.h"
-#include <fmt_spi_port.h> // port_initSpiModule()  port_getSpiEventIRQn()
+#include <fmt_spi_port.h>   // port_initSpiModule()  port_getSpiEventIRQn()
 #include <spi_mcuDetails.h> // SPI_BUILTIN_CRC
-#include "fmt_comms.h" // fmt_sendMsg fmt_getMsg
-#include <core_port.h> // NVIC_...()
-#include <cmsis_gcc.h> // __BKPT()
+#include "fmt_comms.h"      // fmt_sendMsg fmt_getMsg
+#include <core_port.h>      // NVIC_...()
+#include <cmsis_gcc.h>      // __BKPT()
 #if !SPI_BUILTIN_CRC
 #include "fmt_crc.h"
 #endif
@@ -78,14 +78,6 @@ bool fmt_initSpi(spiCfg_t cfg)
   ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
 #endif
 
-  ASSERT_SUCCESS(
-      fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING,
-                  cfg.irqPriority, subClearToSendISR));
-
-  ASSERT_SUCCESS(
-      fmt_initIoc(cfg.msgWaitingIocId, cfg.msgWaitingIocOut, EDGE_TYPE_RISING,
-                  cfg.irqPriority, subMsgWaitingISR));
-
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
    * controls).  However the XMC4000 library *Requires* the mode parameters are
@@ -113,6 +105,17 @@ bool fmt_initSpi(spiCfg_t cfg)
       &rxQueue,
       rxQueueStore,
       MAX_SENDER_PRIORITY);
+
+  ASSERT_SUCCESS(
+      fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING,
+                  cfg.irqPriority, subClearToSendISR));
+  ASSERT_SUCCESS(
+      fmt_initIoc(cfg.msgWaitingIocId, cfg.msgWaitingIocOut, EDGE_TYPE_RISING,
+                  cfg.irqPriority, subMsgWaitingISR));
+
+  // This can kick off transfers immediately.
+  fmt_enableIoc(cfg.msgWaitingIocId);
+
   return true;
 }
 
@@ -182,7 +185,7 @@ static void SendNextPacket(void)
   {
     bool clearToSend = fmt_getIocPinState(clearToSendIocId);
 
-    if (1)
+    if (clearToSend)
     {
       bool txWaiting = numItemsInQueue(&sendQueue);
       bool rxWaiting = fmt_getIocPinState(msgWaitingIocId);

@@ -14,7 +14,7 @@
 #define CTS_IOC_ID 1
 
 #define AVAILABLE_IOCs {        \
-    [MSG_WAIT_IOC_ID] = IOC_B2, \
+    [MSG_WAIT_IOC_ID] = IOC_B11, \
     [CTS_IOC_ID] = IOC_B1,      \
 }
 
@@ -22,10 +22,10 @@
 // msgWaiting OUTPUT 3
 #define IOC_USE_EXTI0 0
 #define IOC_USE_EXTI1 1
-#define IOC_USE_EXTI2 1
+#define IOC_USE_EXTI2 0
 #define IOC_USE_EXTI3 0
 #define IOC_USE_EXTI4 0
 #define IOC_USE_EXTI9_5 0
-#define IOC_USE_EXTI15_10 0
+#define IOC_USE_EXTI15_10 1
 
 #endif // include once
