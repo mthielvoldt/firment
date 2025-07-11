@@ -9,10 +9,10 @@
 
 // Source: project-level .cmake (these values shared with bootloader).
 #define FMT_IMAGE_DOWNLOAD_ADDRESS @PARTITION_UPDATE_ADDRESS@
-#define FMT_IMAGE_DOWNLOAD_SECTOR_SIZE @SECTOR_SIZE@
+#define FMT_IMAGE_DOWNLOAD_PARTITION_SIZE @PARTITION_SIZE@
 
-// Source: firment_msg_config.json  "image-part-max-size"
-#define IMAGE_PART_MAX_SIZE @IMAGE_PART_MAX_SIZE@
+// Source: firment_msg_config.json  "data-msg-payload-size-max"
+#define DATA_MSG_PAYLOAD_SIZE_MAX @DATA_MSG_PAYLOAD_SIZE_MAX@
 #define UPDATE_PAGE_SIZE @UPDATE_PAGE_SIZE@
 
 typedef void (*callback_t)(void);

@@ -16,6 +16,7 @@
  */
 
 #include <fmt_flash.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stm32l4xx_hal_flash.h>
@@ -24,9 +25,12 @@
  * STM32L4 Flash is organized into 2 banks of 512kB each, (256X 2kB pages).
  * "Page" means a block that can be independently erased (not programmed).
  * CPU can continue fetching (reading) the bank that's not being written/erased.
+ * Using fast-programming, 256 bytes (a row) must be programmed as a sequence.
  */
-#define WRITE_BLOCK_SIZE 8
+#define WRITE_BLOCK_SIZE (8 * 32)
 
+static bool isErased(uint32_t address, uint32_t len);
+static void conditionalToAbsolute(uint32_t *address);
 static uint32_t getPreceedingWriteBoundary(uint32_t address);
 static unsigned getBankContainingAddress(uint32_t address);
 static int getPageContainingAddress(uint32_t address);
@@ -38,13 +42,12 @@ static int getPageContainingAddress(uint32_t address);
  */
 int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
-  uint64_t buffer; // write is 8 bytes at a time.
+  static uint64_t buffer[32]; // fast prog is by 32 double-word row. (256b)
 
-  /* adjust for flash base to allow for both offsets and absolute addresses. */
-  if (!(address & 0xFF000000))
-  {
-    address += FLASH_BASE;
-  }
+  conditionalToAbsolute(&address);
+
+  if (!isErased(address, len))
+    fmt_flash_erase(address, len);
 
   /* Find the closest page-aligned address preceeding first address to write*/
   uint32_t page_adr = getPreceedingWriteBoundary(address);
@@ -80,12 +83,15 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
     //                          ^       ^
     //                      page_adr  wr_end
     //                      wr_start
-    buffer = 0;
+    memset(buffer, 0, sizeof(buffer));
     memcpy((uint8_t *)&buffer + (page_write_start_adr - page_adr),
            data + bytes_written,
            page_write_end_adr - page_write_start_adr);
 
-    HAL_FLASH_Program(writeType, page_adr, buffer);
+    /* the Data parameter (last) must be a buffer address (32 dbl-words) when
+    using row fast programming, despite the integer type.  This is documented
+    in the comments preceeding this function's definition.*/
+    HAL_FLASH_Program(writeType, page_adr, (uint32_t)&buffer);
 
     // Prepare for next page.
     bytes_written += page_write_end_adr - page_write_start_adr;
@@ -96,11 +102,7 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 
 int fmt_flash_erase(uint32_t start_address, uint32_t len)
 {
-  // Work with absolute addresses.
-  if (!(start_address & 0xFF000000))
-  {
-    start_address += FLASH_BASE;
-  }
+  conditionalToAbsolute(&start_address);
 
   uint32_t end_address = start_address + len - 1;
 
@@ -126,6 +128,24 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
   return 0;
 }
 
+static bool isErased(uint32_t address, uint32_t len)
+{
+  const uint32_t endAddress = address + len;
+  for (; address < endAddress; address += sizeof(uint32_t))
+  {
+    if (*(uint32_t*)address)
+      return false;
+  }
+  return true;
+}
+
+static void conditionalToAbsolute(uint32_t *address)
+{
+  if (!(*address & 0xFF000000))
+  {
+    *address += FLASH_BASE;
+  }
+}
 /**
  * @param address must be an absolute address, not an offset.
  */
