@@ -3,9 +3,10 @@
 #include "fmt_comms.h"  // fmt_sendMsg
 #include "fmt_flash.h"
 #include <stdbool.h>
+#include <cmsis_gcc.h>
 
-#define CHUNKS_PER_PAGE_MAX (UPDATE_PAGE_SIZE / IMAGE_PART_MAX_SIZE)
-#define PAGES_PER_SECTOR_MAX (FMT_IMAGE_DOWNLOAD_SECTOR_SIZE / UPDATE_PAGE_SIZE)
+#define CHUNKS_PER_PAGE_MAX (UPDATE_PAGE_SIZE / DATA_MSG_PAYLOAD_SIZE_MAX)
+#define PAGES_COUNT_MAX (FMT_IMAGE_DOWNLOAD_PARTITION_SIZE / UPDATE_PAGE_SIZE)
 #define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
 
 static uint32_t chunksPending = NO_CHUNKS_PROCESSED;
@@ -38,13 +39,12 @@ bool handleImageData(ImageData msg)
     processChunk(&msg);
     if (allChunksProcessed())
     {
+      if (downloadStartCb && activePage == 0)
+        downloadStartCb();
       processPage();
       prepForNewPage(PageStatusEnum_WRITE_SUCCESS);
-      if (msg.pageIndex == (msg.pageCount - 1))
-      {
-        if (downloadCompleteCb)
-          downloadCompleteCb();
-      }
+      if (downloadCompleteCb && activePage == (msg.pageCount - 1))
+        downloadCompleteCb();
     }
     return true;
   }
@@ -73,26 +73,45 @@ static bool imageDataMsgValid(ImageData *msg)
   // TODO: consider adding a policy akin to pageIndex that chunkCountInPage
   // can't change once one chunk has been received for the active page.
 
+  union err_u
+  {
+    struct errBits_s
+    {
+      uint32_t chunkIndexTooBig : 1;
+      uint32_t chunkIndexAlreadyReceived : 1;
+      uint32_t shortChunkThatIsntLast : 1;
+      uint32_t payloadSizeTooBig : 1;
+      uint32_t prematureNewPage : 1;
+      uint32_t pageIndexTooBig : 1;
+    } b; // b for bits
+    uint32_t overall;
+  };
+
+  union err_u err = {0};
+
   // (chunkIndexOk && dataSizeOk) implies no buffer overflow.
   // This chunk must be still pending (no repeats).
-  bool chunkIndexOk =
-      msg->chunkIndex < CHUNKS_PER_PAGE_MAX &&
-      chunksPending & (1 << msg->chunkIndex);
+  err.b.chunkIndexTooBig = msg->chunkIndex >= CHUNKS_PER_PAGE_MAX;
+  err.b.chunkIndexAlreadyReceived = !(chunksPending & (1 << msg->chunkIndex));
 
-  bool chunkIsLast = msg->chunkIndex == (msg->chunkCountInPage - 1);
-  bool dataSizeExactlyMax = msg->payload.size == IMAGE_PART_MAX_SIZE;
+  bool chunkNotLast = msg->chunkIndex != (msg->chunkCountInPage - 1);
+  bool shortChunk = msg->payload.size < DATA_MSG_PAYLOAD_SIZE_MAX;
+  err.b.shortChunkThatIsntLast = shortChunk && chunkNotLast;
 
   // Only the last chunk is allowed to be shorter than the max size.
-  bool dataSizeOk =
-      msg->payload.size <= IMAGE_PART_MAX_SIZE &&
-      (dataSizeExactlyMax || chunkIsLast);
+  err.b.payloadSizeTooBig = msg->payload.size > DATA_MSG_PAYLOAD_SIZE_MAX;
 
   // all messages must have the same pageIndex until all chunks are processed.
-  bool pageIndexOk =
-      (msg->pageIndex == activePage || chunksPending == NO_CHUNKS_PROCESSED) &&
-      (msg->pageIndex < PAGES_PER_SECTOR_MAX);
+  err.b.prematureNewPage =
+      msg->pageIndex != activePage && chunksPending != NO_CHUNKS_PROCESSED;
+  err.b.pageIndexTooBig = msg->pageIndex >= PAGES_COUNT_MAX;
 
-  return chunkIndexOk && dataSizeOk && pageIndexOk;
+  if (err.overall)
+  {
+    __BKPT(6);
+  }
+
+  return err.overall == 0;
 }
 
 static bool allChunksProcessed(void)
@@ -117,26 +136,20 @@ static void processChunk(ImageData *msg)
   // its chunkIndex.
   chunksPending ^= (1 << msg->chunkIndex);
 
-  // Clear all bits with position greater than the count of chunks expected.
+  // Clear all b with position greater than the count of chunks expected.
   chunksPending &= ((1 << msg->chunkCountInPage) - 1);
 
   memcpy(
-      pageBuffer + msg->chunkIndex * IMAGE_PART_MAX_SIZE,
+      pageBuffer + msg->chunkIndex * DATA_MSG_PAYLOAD_SIZE_MAX,
       msg->payload.bytes,
       msg->payload.size);
 }
 
 static void processPage(void)
 {
-  if (activePage == 0)
-  {
-    // This might erase one or more sectors in this partition, so preceeds write.
-    if (downloadStartCb)
-      downloadStartCb();
-    fmt_flash_erase(FMT_IMAGE_DOWNLOAD_ADDRESS, FMT_IMAGE_DOWNLOAD_SECTOR_SIZE);
-  }
-  fmt_flash_write(
-      FMT_IMAGE_DOWNLOAD_ADDRESS + activePage * UPDATE_PAGE_SIZE,
-      pageBuffer,
-      UPDATE_PAGE_SIZE);
+
+  uint32_t writeAddress =
+      FMT_IMAGE_DOWNLOAD_ADDRESS + (activePage * UPDATE_PAGE_SIZE);
+
+  fmt_flash_write(writeAddress, pageBuffer, UPDATE_PAGE_SIZE);
 }

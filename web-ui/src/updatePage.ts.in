@@ -1,2 +1,3 @@
+const dataMsgPayloadSizeMax = @DATA_MSG_PAYLOAD_SIZE_MAX@;
 const updatePageSize = @UPDATE_PAGE_SIZE@;
-export default updatePageSize;
+export {dataMsgPayloadSizeMax, updatePageSize};

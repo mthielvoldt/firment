@@ -1,5 +1,5 @@
 # Doing 
-1. flash_page_size: Excise from Web-ui, replacing with ESP buffer size.
+
 
 # Project structuring
 12. break fmt_rx -> project_comms dependency? (why?)
@@ -20,7 +20,6 @@ Outputs:
 9. make waveform and ghost probe opt-in using firmentConfig.cmake
 
 ## Making HW-data test-settable
-2. fmt_flash_port.h defines -> something adjustable by tests.
 8. firmentConfig.cmake sector size. 
 10. ISR_Config.h items. 
 
@@ -30,6 +29,7 @@ Outputs:
   - CRC checks
   - message serialization
   - queue management (drop counters)
+16. fmt_sizes.h needs naming attention. -> fmt_message_geometry.h. Excise PRIORITY. 
 
 # Performance
 12. Make a more performant interface for GPIO.

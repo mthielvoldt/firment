@@ -66,7 +66,7 @@ message ImageData {
   uint32 pageCount = 2;
   uint32 chunkIndex = 3;
   uint32 chunkCountInPage = 4;
-  bytes payload = 5 [(nanopb).max_size = @IMAGE_PART_MAX_SIZE@ ];
+  bytes payload = 5 [(nanopb).max_size = @DATA_MSG_PAYLOAD_SIZE_MAX@ ];
 }
 
 enum PageStatusEnum {

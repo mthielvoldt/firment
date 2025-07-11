@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import updatePageSize from "./generated/updatePage"
+import {updatePageSize, dataMsgPayloadSizeMax} from "./generated/updatePage"
 import { sendPacked, setMessageHandler } from "./mqclient";
 import { PageStatus, PageStatusEnum, Top } from "./generated/messages";
 
@@ -18,14 +18,12 @@ export default function Image({ }) {
   }
 
   function sendPage(data: ArrayBuffer, pageIndex: number, pageCount: number) {
-    // TODO: get max payload size from firment_msg_config.json: image-part-max-size
-    const imagePartMaxSize = 32;
-    const chunkCount = Math.ceil(data.byteLength / imagePartMaxSize);
+    const chunkCount = Math.ceil(data.byteLength / dataMsgPayloadSizeMax);
     let dataIdx = 0;
     let messages: Uint8Array[] = [];
     for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
-      dataIdx = chunkIndex * imagePartMaxSize;
-      const payload = new Uint8Array(data.slice(dataIdx, dataIdx + imagePartMaxSize));
+      dataIdx = chunkIndex * dataMsgPayloadSizeMax;
+      const payload = new Uint8Array(data.slice(dataIdx, dataIdx + dataMsgPayloadSizeMax));
       const msg = {
         ImageData: {
           pageIndex,

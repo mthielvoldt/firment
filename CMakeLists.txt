@@ -30,18 +30,8 @@ add_library(FirmentFW
 # Generate the version header for the firmware
 configure_file(firmware/fmt_version.h.in fmt_version.h)
 
-# Generate firment.proto with field size/length values filled in from 
-# firment_config.json (in the project directory)
-# ALERT:  using configure_file means you need to re-run cmake -B <build-dir>
-# when either of the following change: 
-# - firment_msg_config.json  (project file)
-# - firment_msg.in.proto     (firment file)
-# TODO: make this generation a custom command instead so build step handles it.
-file(READ "${PROJECT_SOURCE_DIR}/firment_msg_config.json" PROTO_CONFIG_JSON)
-string(JSON LOG_TEXT_MAX_SIZE      GET ${PROTO_CONFIG_JSON} log-text-max-size)
-string(JSON IMAGE_PART_MAX_SIZE GET ${PROTO_CONFIG_JSON} image-part-max-size)
-string(JSON PROBE_SIGNAL_MAX_COUNT GET ${PROTO_CONFIG_JSON} probe-signal-max-count)
-message(STATUS "Log text max size: ${LOG_TEXT_MAX_SIZE}")
+# Generate firment.proto with field size/length values filled in from vars from
+# firmentConfig.cmake (in project's config dir)
 configure_file(protocol/firment_msg.in.proto firment_msg.proto)
 
 # Generate fmt_update.h containing memory region info shared with bootloader.
