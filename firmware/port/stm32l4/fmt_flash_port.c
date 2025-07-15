@@ -27,7 +27,9 @@
  * CPU can continue fetching (reading) the bank that's not being written/erased.
  * Using fast-programming, 256 bytes (a row) must be programmed as a sequence.
  */
+#define DOUBLEWORDS_PER_WRITE_BLOCK 32
 #define WRITE_BLOCK_SIZE (8 * 32)
+#define ERASED_STATE 0xFFFFFFFF
 
 static bool isErased(uint32_t address, uint32_t len);
 static void conditionalToAbsolute(uint32_t *address);
@@ -42,16 +44,17 @@ static int getPageContainingAddress(uint32_t address);
  */
 int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
-  static uint64_t buffer[32]; // fast prog is by 32 double-word row. (256b)
+  static uint64_t buffer[DOUBLEWORDS_PER_WRITE_BLOCK]; // 256B
 
   conditionalToAbsolute(&address);
+
+  HAL_FLASH_Unlock();
 
   if (!isErased(address, len))
     fmt_flash_erase(address, len);
 
   /* Find the closest page-aligned address preceeding first address to write*/
   uint32_t page_adr = getPreceedingWriteBoundary(address);
-  uint32_t writeType;
   uint32_t final_write_end_adr = address + len;
   uint32_t page_write_end_adr;   // One past the last address to be written.
   uint32_t page_write_start_adr; // The first address to be written.
@@ -63,12 +66,10 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
     if (page_adr + WRITE_BLOCK_SIZE < final_write_end_adr)
     {
       page_write_end_adr = page_adr + WRITE_BLOCK_SIZE;
-      writeType = TYPEPROGRAM_FAST;
     }
     else
     {
       page_write_end_adr = final_write_end_adr;
-      writeType = TYPEPROGRAM_FAST_AND_LAST;
     }
 
     //  WRITE FIRST PAGE
@@ -84,19 +85,26 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
     //                      page_adr  wr_end
     //                      wr_start
     memset(buffer, 0, sizeof(buffer));
-    memcpy((uint8_t *)&buffer + (page_write_start_adr - page_adr),
+    memcpy(buffer + (page_write_start_adr - page_adr),
            data + bytes_written,
            page_write_end_adr - page_write_start_adr);
 
     /* the Data parameter (last) must be a buffer address (32 dbl-words) when
     using row fast programming, despite the integer type.  This is documented
     in the comments preceeding this function's definition.*/
-    HAL_FLASH_Program(writeType, page_adr, (uint32_t)&buffer);
+    // HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST_AND_LAST, page_adr, (uint32_t)buffer);
+
+    // TODO: Get fast row programming working, and replace this loop. 
+    for (int i = 0; i < DOUBLEWORDS_PER_WRITE_BLOCK; i++)
+    {
+      HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, page_adr + (8*i), buffer[i]);
+    }
 
     // Prepare for next page.
     bytes_written += page_write_end_adr - page_write_start_adr;
     page_adr += WRITE_BLOCK_SIZE;
   }
+  HAL_FLASH_Lock();
   return 0;
 }
 
@@ -133,7 +141,7 @@ static bool isErased(uint32_t address, uint32_t len)
   const uint32_t endAddress = address + len;
   for (; address < endAddress; address += sizeof(uint32_t))
   {
-    if (*(uint32_t*)address)
+    if (*(uint32_t*)address != ERASED_STATE)
       return false;
   }
   return true;
