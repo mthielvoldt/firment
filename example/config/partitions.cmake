@@ -15,6 +15,7 @@ if(${MCU_VARIANT} STREQUAL "XMC4700")
   set(PARTITION_ACTIVE_ADDRESS_CACHED 0x08040000) # for linker
   set(PARTITION_UPDATE_ADDRESS        0x0C080000) # sector 10
   set(PARTITION_BACKUP_ADDRESS        0x0C0C0000) # sector 11
+  set(TEST_RESULT_ADDRESS             0x0C01C000) # sector 7 (last 16kB sector)
 elseif(${MCU_VARIANT} STREQUAL "stm32l476")
   set(PARTITION_SIZE              0x40000) # 256kB
   set(SECTOR_SIZE                 0x800) # 2kB (sector = erase block)
@@ -24,6 +25,7 @@ elseif(${MCU_VARIANT} STREQUAL "stm32l476")
   set(PARTITION_ACTIVE_ADDRESS_CACHED 0x08040000) # no cache; same as prev.
   set(PARTITION_UPDATE_ADDRESS        0x08080000) # bank 2
   set(PARTITION_BACKUP_ADDRESS        0x080C0000) # bank 2
+  set(TEST_RESULT_ADDRESS             0x080FF800) # last page of flash
 endif()
 
 # Arm MCUs often have alignment requirements for the vector table.
