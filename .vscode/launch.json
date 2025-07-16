@@ -16,6 +16,49 @@
         "target/stm32l4x.cfg",
       ]
     },
+    {
+      "name": "stmFact-noFlash",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "interface": "swd",
+      "device": "STM32L476RG",
+      "cwd": "${workspaceFolder}/example/build/stm",
+      "loadFiles": [],
+      "symbolFiles": [
+        "mgt-boot/bootloader.elf",
+        "app_offset.elf"
+      ],
+      "showDevDebugOutput": "raw",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32l4x.cfg",
+      ],
+    },
+    // {
+    //   "name": "stmFactory",
+    //   "type": "cortex-debug",
+    //   "request": "launch",
+    //   "servertype": "openocd",
+    //   "interface": "swd",
+    //   "device": "STM32L476RG",
+    //   "cwd": "${workspaceFolder}/example/build/stm",
+    //   "loadFiles": [],
+    //   "symbolFiles": [
+    //     "mgt-boot/bootloader.elf",
+    //     "app_offset.elf"
+    //   ],
+    //   "showDevDebugOutput": "raw",
+    //   "configFiles": [
+    //     "interface/stlink.cfg",
+    //     "target/stm32l4x.cfg",
+    //   ],
+    //   "overrideLaunchCommands": [
+    //     "monitor flash write_image ./mgt-boot/factory.bin 0x08000000 bin",
+    //     "monitor reset", // Reset the target after loading
+    //     "continue" // Start execution after reset
+    //   ],
+    // }
     // xmcApp
     {
       "name": "xmcApp",
@@ -40,7 +83,10 @@
       "serverpath": "JLinkGDBServerCLExe",
       "cwd": "${workspaceFolder}/example/build/xmc",
       "loadFiles": [],
-      "symbolFiles": ["mgt-boot/bootloader.elf", "app_offset.elf"],
+      "symbolFiles": [
+        "mgt-boot/bootloader.elf",
+        "app_offset.elf"
+      ],
       "device": "XMC4700-2048",
       "showDevDebugOutput": "vscode",
     },
@@ -53,7 +99,10 @@
       "serverpath": "JLinkGDBServerCLExe",
       "cwd": "${workspaceFolder}/example/build/xmc",
       "loadFiles": [],
-      "symbolFiles": ["mgt-boot/bootloader.elf", "app_offset.elf"],
+      "symbolFiles": [
+        "mgt-boot/bootloader.elf",
+        "app_offset.elf"
+      ],
       "device": "XMC4700-2048",
       "showDevDebugOutput": "vscode",
       "preLaunchCommands": [
@@ -73,16 +122,16 @@
       "externalConsole": false,
       "MIMode": "gdb",
       "setupCommands": [
-          {
-              "description": "Enable pretty-printing for gdb",
-              "text": "-enable-pretty-printing",
-              "ignoreFailures": true
-          },
-          {
-              "description": "Set Disassembly Flavor to Intel",
-              "text": "-gdb-set disassembly-flavor intel",
-              "ignoreFailures": true
-          }
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
       ],
       "preLaunchTask": "build-tests"
     },
@@ -99,33 +148,42 @@
       "externalConsole": true,
       "preLaunchTask": "esp flash-ocd",
       "targetArchitecture": "arm",
-      "sourceFileMap": { "/project": "${workspaceFolder}/esp/mqtt5" },
+      "sourceFileMap": {
+        "/project": "${workspaceFolder}/esp/mqtt5"
+      },
       "pipeTransport": {
-          "debuggerPath": "xtensa-esp32s3-elf-gdb -x gdbinit build/mqtt5.elf",
-          "quoteArgs": false,
-          "pipeProgram": "docker",
-          "pipeArgs": [
-            "run",
-            "--rm",
-            "-i",
-            "--name", "idf-2",
-            "--volume","${workspaceFolder}/esp/mqtt5:/project",
-            "--workdir","/project",
-            "-u", "1000",
-            "-e", "HOME=/tmp",
-            "--add-host", "host.docker.internal:host-gateway",
-            "--privileged",
-            "espressif/idf:v5.2.1"],
-          "pipeCwd": ""
+        "debuggerPath": "xtensa-esp32s3-elf-gdb -x gdbinit build/mqtt5.elf",
+        "quoteArgs": false,
+        "pipeProgram": "docker",
+        "pipeArgs": [
+          "run",
+          "--rm",
+          "-i",
+          "--name",
+          "idf-2",
+          "--volume",
+          "${workspaceFolder}/esp/mqtt5:/project",
+          "--workdir",
+          "/project",
+          "-u",
+          "1000",
+          "-e",
+          "HOME=/tmp",
+          "--add-host",
+          "host.docker.internal:host-gateway",
+          "--privileged",
+          "espressif/idf:v5.2.1"
+        ],
+        "pipeCwd": ""
       },
       "setupCommands": [
-          {
-              "description": "Enable pretty-printing for gdb",
-              "text": "-enable-pretty-printing",
-              "ignoreFailures": true
-          }
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
       ]
-  }
+    }
   ],
   "version": "2.0.0"
 }
