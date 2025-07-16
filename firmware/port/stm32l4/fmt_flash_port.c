@@ -122,7 +122,7 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
   {
     return -1;
   }
-  int page_count = start_page - end_page + 1;
+  int page_count = end_page - start_page + 1;
 
   FLASH_EraseInitTypeDef eraseInit = {
       .TypeErase = FLASH_TYPEERASE_PAGES,
