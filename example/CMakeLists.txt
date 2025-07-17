@@ -42,7 +42,7 @@ add_subdirectory(${PORT_DIR} ${MCU_FAMILY}) # provides MCUPort library.
 # Must come after add_subdirectory() for port or it won't find MCUPort target.
 add_subdirectory(${FIRMENT_DIR} firment)
 
-include(cmFlashLib.cmake) # provides flash_lib library.  Needs FirmentFW lib
+include(bootloaderMcuPort.cmake) # provides mcu_port_lib required by mgt_boot.
 
 add_library(app_lib 
 ${STARTUP_FILE}
