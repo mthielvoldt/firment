@@ -7,11 +7,10 @@ set(PROJECT_CONFIG_DIR ${CMAKE_CURRENT_LIST_DIR}/../example/config)
 include(${PROJECT_CONFIG_DIR}/version.cmake) # -> VERSION_SEM
 project(firment_test  VERSION ${VERSION_SEM} LANGUAGES CXX C)
 
-include(${PROJECT_CONFIG_DIR}/partitions.cmake)
 include(${PROJECT_CONFIG_DIR}/firmentConfig.cmake)
-message(STATUS "PCB: ${PCB}")
+include(mcuCompileOptions.cmake)  # omits cortex-m4 compiler flags for test.
+include(${PROJECT_CONFIG_DIR}/partitions.cmake)
 
-set(PORT_DIR ${FIRMENT_DIR}/firmware/port/host)
 set(CPPUTEST_INC_DIR ${PROJECT_SOURCE_DIR}/cpputest/include)
 
 add_subdirectory(cpputest ../cpputest_build)
