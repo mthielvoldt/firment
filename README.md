@@ -32,7 +32,57 @@ An opinionated firmware framework that uses web interfaces to ease development a
 ## Required Hardware
 Firment's main job is to help you build a web interface to your firmware, which we assume runs on hardware without Wifi/ethernet modules.  To bridge the target <-> web gap, Firment generates code for an [ESP32 dev kit](https://www.amazon.com/dp/B0CNGF6S3F) to shuttle data between your target hardware (SPI, UART, CAN) and MQTT over Wifi.
 
-## Integrating Firment
+## Build Structure
+Firment provides two cmake targets.
+- MCUPort: hardware-specific library
+- FirmentFW: hardware-agnostic library
+
+The project that uses Firment must specify, by way of the PORT_DIR cmake variable, which port for FirmentFW to link against.
+
+# Writing a new Port
+Firment provides drivers for Infineon XMC4000 STM32L4 series MCUs.  If your project isn't one of those, a new port will be required.  This port will be located in `firmware/port/`.  It should feature the following components, each discussed in more depth below: 
+- CMakeLists.txt
+- [Hardware Libraries](#hardware-libraries)
+- Port source files (you write these)
+- config files (.cmake files in config/)
+- [Linker script template](#linker-script-template)
+
+## CMakeLists.txt
+This file lives in the root directory of the port and it's job is to create a library called MCUPort, which glues together the HAL and custom source files and provides the public include directories for targets that consume this library.  
+
+## Hardware Libraries
+Ideally, these are provided as git submodules by the manufacturer.  There are 3 typically used:
+1. Chipmaker's HAL
+2. CMSIS Device Headers
+3. CMSIS SPI Driver for device family.
+See the first three lines of CMakeLists.txt in XMC4 and STM32L4 ports for an example. 
+
+## Custom source files
+These provide adaptations between the manufacturer's HAL and firment.
+ - ioc: Interrupt-on-Change feature
+ - gpio: Initialize, setting, reading, toggling pins. 
+ - flash: Program memory
+ - spi: Any additional requirements of CMSIS SPI driver and IRQ -> ISR hookup
+ - periodic: Timer-driven periodic ISR.
+ - sysInit: Clock config and other startup code.
+ - crc: Cyclic Redundancy check hardware module
+
+## Config files
+To use a port, the PCB details files must point the project to this port, and provide defines and cmake variables the port needs.  See example/config/ 
+- Partition addresses
+- MCU variant compiler define
+- <feat>_pcbDetails.h files.
+
+## Linker Script Template
+In order to facilitate using a bootloader, a pair of linker scripts can be generated from a single template using with separate root and app memory offsets. 
+Procedure:
+- copy the .ld file for the device being used into example/firmware/
+- append ".in" to the filename to indicate this is a template.
+- replace the FLASH ORIGIN value with @CODE_ADDRESS_DIRECT@
+- replace the FLASH LENGTH value with @CODE_SIZE@
+- in `config/mcuCompileOptions.cmake`, set LINKER_SCRIPT_TEMPLATE to point to this file.
+- in `config/partitions.cmake`, create a set of addresses for your flash geometry.
+
 ### CMSIS Drivers
 Firment firmware is middleware that expects a communication driver under it that implements a CMSIS interface.  To integrate CMSIS Drivers in your project: 
 - Download the [CMSIS pack](https://www.keil.arm.com/packs/) for your processor and add the relevant include folders / c files to CMakeLists.txt.  Often you only need a few of the folders in a pack. See `example/firmware/lib`
