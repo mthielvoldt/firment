@@ -27,6 +27,7 @@ add_library(MCUPort
   ${HAL_DIR}/Src/stm32l4xx_hal_spi_ex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_tim.c
   ${HAL_DIR}/Src/stm32l4xx_hal_tim_ex.c
+  ../common/flash_common.c
   fmt_crc_port.c
   fmt_flash_port.c
   fmt_periodic_port.c

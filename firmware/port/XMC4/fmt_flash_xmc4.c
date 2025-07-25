@@ -2,17 +2,10 @@
  * 
  */
 
+#include "fmt_flash_port.h"
 #include <fmt_flash.h>
 #include <stdint.h>
 #include <xmc4_flash.h>
-
-
-#define WRITE_BLOCK_SIZE XMC_FLASH_BYTES_PER_PAGE
-
-#ifndef ARCH_FLASH_OFFSET
-// Access address that bypasses the prefetch cache. Table 7-2
-#define ARCH_FLASH_OFFSET XMC_FLASH_UNCACHED_BASE
-#endif
 
 /* Assembly helpers - Data Memory Barrier */
 // #define DMB() asm volatile ("dmb")
@@ -44,18 +37,16 @@ const uint32_t sector_base[FLASH_SECTOR_COUNT + 1] = {
     FLASH_TOP
 };
 
-static uint32_t getPreceedingWriteBoundary(uint32_t address);
 static int getSectorContainingAddress(uint32_t address);
+static int flash_erase(uint32_t start_address, uint32_t len);
 
 
 int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
   uint8_t page_buffer[WRITE_BLOCK_SIZE] __attribute__((aligned(4)));
-  
-  /* adjust for flash base to allow for both offsets and absolute addresses. */
-  if (address < ARCH_FLASH_OFFSET) {
-    address += ARCH_FLASH_OFFSET;
-  }
+
+  if (!flash_isErased(address, len))
+    flash_erase(address, len);
   
   /* Find the closest page-aligned address preceeding first address to write*/
   uint32_t page_adr = getPreceedingWriteBoundary(address);
@@ -95,27 +86,8 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
   return 0;
 }
 
-static bool isSectorErased(int sector)
+static int flash_erase(uint32_t start_address, uint32_t len)
 {
-  uint32_t *address, *endAddress;
-  address = (uint32_t*)sector_base[sector];
-  endAddress = (uint32_t*)sector_base[sector + 1];
-
-  for (; address < endAddress; address++ ) {
-    if (*address != 0)
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-int fmt_flash_erase(uint32_t start_address, uint32_t len)
-{
-  // Work with absolute addresses. 
-  if (start_address < ARCH_FLASH_OFFSET) {
-    start_address += ARCH_FLASH_OFFSET;
-  }
   if (len == 0) {
     return -1;
   }
@@ -130,20 +102,9 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
 
   for (int sector = start_sector; sector <= end_sector; sector++)
   {
-    if (!isSectorErased(sector))
-    {
-      XMC_FLASH_EraseSector((uint32_t*)sector_base[sector]);
-    }
+    XMC_FLASH_EraseSector((uint32_t*)sector_base[sector]);
   }
   return 0;
-}
-
-/**
- * @param address must be an absolute address, not an offset.
- */
-static uint32_t getPreceedingWriteBoundary(uint32_t address)
-{
-  return (address / WRITE_BLOCK_SIZE) * WRITE_BLOCK_SIZE;
 }
 
 /**

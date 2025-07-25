@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /** fmt_flash_write
  * @param address Either an offset from the program memory base address, or an
@@ -13,12 +14,13 @@
  */
 int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len);
 
-/** fmt_flash_erase
- * Erase all the sectors within the specified range, accounting for flash sector
- * geometries.
- * @param start_address marks the start of the area to erase. start_address is
- * guaranteed to be aligned to WOLFBOOT_SECTOR_SIZE.
- * @param len specifies the size of the area to be erased. Len is guaranteed to 
- * be a multiple of WOLFBOOT_SECTOR_SIZE. 
+/** flash_isErased 
+ * @note This is intended for internal use because fmt_flash_write handles 
+ * checking if an erase is needed before programming.  However, flash_isErased
+ * may be useful for testing, and is a hardware-agnostic.  Implementation is in 
+ * port/common/flash_common.c
+ * 
  */
-int fmt_flash_erase(uint32_t start_address, uint32_t len);
+bool flash_isErased(uint32_t address, uint32_t len);
+
+uint32_t getPreceedingWriteBoundary(uint32_t address);
