@@ -20,6 +20,7 @@ add_library(MCUPort
   ${XMC_LIB}/src/xmc4_flash.c
   ${XMC_LIB}/src/xmc4_gpio.c
   ${XMC_LIB}/src/xmc4_scu.c
+  ../common/flash_common.c
   fmt_crc_xmc4.c
   fmt_flash_xmc4.c
   fmt_sysInit_port.c

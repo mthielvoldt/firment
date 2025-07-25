@@ -15,6 +15,7 @@
  *   will be programmed after this one.  See FLASH_TYPEPROGRAM_FAST in hal_flash
  */
 
+#include "fmt_flash_port.h"
 #include <fmt_flash.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -28,14 +29,10 @@
  * Using fast-programming, 256 bytes (a row) must be programmed as a sequence.
  */
 #define DOUBLEWORDS_PER_WRITE_BLOCK 32
-#define WRITE_BLOCK_SIZE (8 * 32)
-#define ERASED_STATE 0xFFFFFFFF
 
-static bool isErased(uint32_t address, uint32_t len);
-static void conditionalToAbsolute(uint32_t *address);
-static uint32_t getPreceedingWriteBoundary(uint32_t address);
 static unsigned getBankContainingAddress(uint32_t address);
 static int getPageContainingAddress(uint32_t address);
+static int flash_erase(uint32_t start_address, uint32_t len);
 
 /**
  * @param address guaranteed to be aligned to the start of a writable block, but
@@ -46,12 +43,10 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
 {
   static uint64_t buffer[DOUBLEWORDS_PER_WRITE_BLOCK]; // 256B
 
-  conditionalToAbsolute(&address);
-
   HAL_FLASH_Unlock();
 
-  if (!isErased(address, len))
-    fmt_flash_erase(address, len);
+  if (!flash_isErased(address, len))
+    flash_erase(address, len);
 
   /* Find the closest page-aligned address preceeding first address to write*/
   uint32_t page_adr = getPreceedingWriteBoundary(address);
@@ -108,10 +103,8 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
   return 0;
 }
 
-int fmt_flash_erase(uint32_t start_address, uint32_t len)
+static int flash_erase(uint32_t start_address, uint32_t len)
 {
-  conditionalToAbsolute(&start_address);
-
   uint32_t end_address = start_address + len - 1;
 
   int start_page = getPageContainingAddress(start_address);
@@ -134,32 +127,6 @@ int fmt_flash_erase(uint32_t start_address, uint32_t len)
   HAL_FLASHEx_Erase(&eraseInit, &pageError);
 
   return 0;
-}
-
-static bool isErased(uint32_t address, uint32_t len)
-{
-  const uint32_t endAddress = address + len;
-  for (; address < endAddress; address += sizeof(uint32_t))
-  {
-    if (*(uint32_t*)address != ERASED_STATE)
-      return false;
-  }
-  return true;
-}
-
-static void conditionalToAbsolute(uint32_t *address)
-{
-  if (!(*address & 0xFF000000))
-  {
-    *address += FLASH_BASE;
-  }
-}
-/**
- * @param address must be an absolute address, not an offset.
- */
-static uint32_t getPreceedingWriteBoundary(uint32_t address)
-{
-  return (address / WRITE_BLOCK_SIZE) * WRITE_BLOCK_SIZE;
 }
 
 /**
