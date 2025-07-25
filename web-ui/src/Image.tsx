@@ -14,7 +14,7 @@ export default function Image({ }) {
   function handleTimeout() {
     pages = [];
     activePageIndex = 0;
-    setProgress("Upload timed out");
+    setProgress("Failed: timeout");
   }
 
   function sendPage(data: ArrayBuffer, pageIndex: number, pageCount: number) {
@@ -62,7 +62,7 @@ export default function Image({ }) {
       pages = [];
       activePageIndex = 0;
       clearTimeout(timeoutId);
-      setProgress(`Failed at page: ${message.pageIndex}`);
+      setProgress(`Failed: bad message at page: ${message.pageIndex}`);
     }
   };
 
