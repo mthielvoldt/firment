@@ -2,9 +2,9 @@
 #include <crit_section.h>
 #include <memory.h>
 
-#define FAIL_IF_PARAMS_IMPROPER       \
-  if (!queue || !itemsStorage || !length) \
-  return false
+#define NULL_CHECK(x) \
+  if (x == NULL)      \
+    return 0;
 
 bool initQueue(
     size_t itemSize,
@@ -13,7 +13,8 @@ bool initQueue(
     uint8_t *itemsStorage,
     uint32_t highestSenderPriority)
 {
-  FAIL_IF_PARAMS_IMPROPER;
+  if (!queue || !itemsStorage || !length)
+    return false;
   // utilizes auto-zeroing of unspecified elements.
   *queue = (queue_t){
       .highestSenderPriority = highestSenderPriority,
@@ -26,6 +27,8 @@ bool initQueue(
 
 bool enqueueBack(queue_t *queue, const void *src)
 {
+  if (!queue || !src)
+    return false;
   bool success = false;
 
   disableLowPriorityInterrupts(queue->highestSenderPriority);
@@ -34,7 +37,7 @@ bool enqueueBack(queue_t *queue, const void *src)
     success = true;
     uint8_t *dest = queue->items + (queue->back * queue->itemSize);
     memcpy(dest, src, queue->itemSize);
-    
+
     if (++queue->back == queue->maxNumItems)
       queue->back = 0;
     queue->numItemsWaiting++;
@@ -57,6 +60,8 @@ bool peekFront(queue_t *queue, void *result)
 
 bool dequeueFront(queue_t *queue, void *result)
 {
+  if (!queue || !result)
+    return false;
   bool success = false;
   disableLowPriorityInterrupts(queue->highestSenderPriority);
   if (queue->numItemsWaiting > 0)
@@ -83,10 +88,12 @@ bool dequeueBack(queue_t *queue, void *result)
 
 uint32_t numItemsInQueue(queue_t *queue)
 {
+  NULL_CHECK(queue)
   return queue->numItemsWaiting;
 }
 
 uint32_t emptySpacesInQueue(queue_t *queue)
 {
+  NULL_CHECK(queue)
   return queue->maxNumItems - queue->numItemsWaiting;
 }
