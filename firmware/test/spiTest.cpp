@@ -57,7 +57,7 @@ TEST_GROUP(fmt_spi)
     bool success = pb_encode_delimited(&ostream, Top_fields, &msg);
 
     // append CRC
-    uint32_t crcPosition = ((packet[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
+    uint32_t crcPosition = getCRCPosition(packet);
     uint16_t computedCRC;
     int32_t result = Driver_CRC0.ComputeCRC(packet, crcPosition, &computedCRC);
     *(uint16_t *)(&packet[crcPosition]) = computedCRC;
