@@ -30,12 +30,5 @@
 #define CMSIS_device_header <stm32l4xx.h>
 
 #include <comm_pcbDetails.h>  // FMT_USES_<transport>
-#if defined(FMT_USES_SPI)
-#include "spi_pcbDetails.h"
-#elif defined(FMT_USES_UART)
-#include "uart_pcbDetails.h"
-#else
-#error "FIRMENT_USES_<transport> not defined"
-#endif
 
 #endif // MX_DEVICE_H

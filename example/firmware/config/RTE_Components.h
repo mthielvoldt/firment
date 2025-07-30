@@ -1,3 +1,2 @@
-
-#define RTE_Drivers_SPI // turn on the SPI driver
-#include "spi_pcbDetails.h"
+// Remap this to a more intelligible file name, specific to a PCB version.
+#include <comm_pcbDetails.h>

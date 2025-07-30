@@ -1,9 +1,13 @@
-// This is a MFG-specific header file name.
-#include <fmt_spi_port.h>
+#include <comm_pcbDetails.h>
+#ifdef FMT_USES_SPI
+
+// This file's interface
+#include <fmt_spi_port.h>  // port_getSpiEventIRQn
+
+// Dependencies
 #include <fmt_gpio_port.h> // port_initSpiPins()
-#include <fmt_spi.h>       // port_getSpiEventIRQn declaration
 #include <MX_Device.h>     // spi_pcbDetails.h > MX_SPIx
-#include <stm32l476xx.h>
+#include <stm32l4xx.h>
 #include <stm32l4xx_hal_cortex.h> // HAL_NVIC_EnableIRQ()
 #include <stm32l4xx_hal_dma.h> // DMA_HandleTypeDef (needed by _hal_spi.h)
 #include <stm32l4xx_hal_rcc.h>
@@ -17,7 +21,7 @@ typedef struct
   SPI_TypeDef *spiModule;
 } hwInfo_t;
 
-hwInfo_t getHWInfo(uint8_t spiDriverId);
+static hwInfo_t getHWInfo(uint8_t spiDriverId);
 
 /* STM32.c doesn't provide IRQHandlers (you're expected to use CubeMX)*/
 #define SPI_RESOURCES(n)          \
@@ -114,3 +118,5 @@ hwInfo_t getHWInfo(uint8_t spiDriverId)
     return (hwInfo_t){0, NULL};
   }
 }
+
+#endif // FMT_USES_SPI

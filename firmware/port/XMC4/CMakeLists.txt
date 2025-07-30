@@ -10,7 +10,6 @@ endif()
 
 add_library(MCUPort
   ${SYSTEM_FILE}
-  XMC4000_DFP/RTE_Driver/SPI.c
   ${XMC_LIB}/src/xmc_ccu4.c
   ${XMC_LIB}/src/xmc_eru.c
   ${XMC_LIB}/src/xmc_fce.c
@@ -25,10 +24,21 @@ add_library(MCUPort
   fmt_flash_xmc4.c
   fmt_sysInit_port.c
   gpio_xmc4.c
-  ioc_xmc4.c
+  
   fmt_periodic_xmc4.c
-  fmt_spi_xmc4.c
 )
+if(FMT_TRANSPORT STREQUAL "SPI")
+  target_sources(MCUPort PRIVATE
+    XMC4000_DFP/RTE_Driver/SPI.c
+    fmt_spi_xmc4.c
+    ioc_xmc4.c
+  )
+elseif(FMT_TRANSPORT STREQUAL "UART")
+target_sources(MCUPort PRIVATE
+    XMC4000_DFP/RTE_Driver/UART.c
+    fmt_uart_xmc4.c
+  )
+endif()
 
 target_include_directories(MCUPort
   PUBLIC

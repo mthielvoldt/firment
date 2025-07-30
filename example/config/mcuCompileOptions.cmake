@@ -37,4 +37,3 @@ endif()
 
 message(STATUS "PCB: ${PCB}")
 message(STATUS "MCU: ${MCU_VARIANT}")
-message(STATUS "Using ${FMT_TRANSPORT} for Firment messages")
