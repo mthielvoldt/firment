@@ -12,9 +12,10 @@ set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c"
 
 add_library(MCUPort
   ${SYSTEM_FILE}
-  CMSIS-Driver_STM32/Drivers/SPI_STM32.c
   ${HAL_DIR}/Src/stm32l4xx_hal.c
   ${HAL_DIR}/Src/stm32l4xx_hal_cortex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_crc.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_crc_ex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_dma.c
   ${HAL_DIR}/Src/stm32l4xx_hal_exti.c
   ${HAL_DIR}/Src/stm32l4xx_hal_flash.c
@@ -27,15 +28,28 @@ add_library(MCUPort
   ${HAL_DIR}/Src/stm32l4xx_hal_spi_ex.c
   ${HAL_DIR}/Src/stm32l4xx_hal_tim.c
   ${HAL_DIR}/Src/stm32l4xx_hal_tim_ex.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_uart.c
+  ${HAL_DIR}/Src/stm32l4xx_hal_uart_ex.c
   ../common/flash_common.c
   fmt_crc_port.c
   fmt_flash_port.c
   fmt_periodic_port.c
-  fmt_spi_port.c
   fmt_sysInit_port.c
   gpio_port.c
-  ioc_port.c
 )
+
+if(FMT_TRANSPORT STREQUAL "SPI")
+  target_sources(MCUPort PRIVATE
+    CMSIS-Driver_STM32/Drivers/SPI_STM32.c
+    fmt_spi_port.c
+    ioc_port.c
+  )
+elseif(FMT_TRANSPORT STREQUAL "UART")
+target_sources(MCUPort PRIVATE
+    CMSIS-Driver_STM32/Drivers/USART_STM32.c
+    fmt_uart_port.c
+  )
+endif()
 
 target_include_directories(MCUPort
   PUBLIC

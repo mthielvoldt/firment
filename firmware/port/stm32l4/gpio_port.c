@@ -1,5 +1,5 @@
 #include <fmt_gpio_port.h>
-#include <spi_pcbDetails.h>
+#include <comm_pcbDetails.h>
 #define USE_FULL_ASSERT
 #include <stm32l4xx_hal_gpio.h>
 #include <stm32l4xx_hal_rcc.h>
@@ -75,6 +75,7 @@ void port_initOutputPin(void *const port, const uint8_t pin, outputMode_t mode)
  * needed in CMSIS drivers (eg SPI_STM32.c) that don't handle gpio init.
  * @note input and output pins (MOSI, MISO) are inited the same.
  */
+#ifdef FMT_USES_SPI
 void port_initSpiPins(void)
 {
   GPIO_InitTypeDef config = {
@@ -99,6 +100,26 @@ void port_initSpiPins(void)
   enableRelevantClock((uint32_t)FMT_SPI_SCK_GPIOx);
   HAL_GPIO_Init((GPIO_TypeDef *)FMT_SPI_SCK_GPIOx, &config);
 }
+#endif
+
+#ifdef FMT_USES_UART
+void port_initUartPins(void)
+{
+  GPIO_InitTypeDef config = {
+      .Mode = GPIO_MODE_AF_PP,
+      .Pull = GPIO_NOPULL,
+      .Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+      .Alternate = FMT_UART_GPIO_AF,
+  };
+  config.Pin = FMT_UART_TX_GPIO_Pin;
+  enableRelevantClock((uint32_t)FMT_UART_TX_GPIOx);
+  HAL_GPIO_Init((GPIO_TypeDef *)FMT_UART_TX_GPIOx, &config);
+
+  config.Pin = FMT_UART_RX_GPIO_Pin;
+  enableRelevantClock((uint32_t)FMT_UART_RX_GPIOx);
+  HAL_GPIO_Init((GPIO_TypeDef *)FMT_UART_RX_GPIOx, &config);
+}
+#endif
 
 uint32_t port_readPort(void *const port)
 {
