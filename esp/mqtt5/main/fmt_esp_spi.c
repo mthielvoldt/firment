@@ -194,7 +194,7 @@ bool unpackAndSendSPI(uint8_t *packed, int len) {
     success )                             // quit if send buffer fills up. 
   {
     success = sendMessage(packed + pbMsgPos);
-    pbMsgPos += (packed[pbMsgPos] + PREFIX_SIZE_BYTES);
+    pbMsgPos += (packed[pbMsgPos] + LENGTH_SIZE_BYTES);
   }
   return success;
 }

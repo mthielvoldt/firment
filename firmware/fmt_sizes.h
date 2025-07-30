@@ -1,18 +1,20 @@
-#pragma once
+#ifndef fmt_sizes_H
+#define fmt_sizes_H
+
 #include <stdint.h>
 
-#define PREFIX_SIZE_BYTES 1U  // a prefix indicating subsequent message length,
+#define LENGTH_SIZE_BYTES 1U // a prefix indicating subsequent message length
+#define LENGTH_POSITION 0
 #define CRC_SIZE_BYTES 2U
 #define MAX_PACKET_SIZE_BYTES 64U // Must be less than 259; len sent in 1 byte.
+#define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - LENGTH_SIZE_BYTES)
 
-/* in the next line, 14 breaks down as follows: 
+/* in the next line, 14 breaks down as follows:
 4: count, 4 value, 3 for the 3 log types, 2 for top types, 1 prefix.*/
-#define MAX_LOG_TEXT_SIZE (MAX_PACKET_SIZE_BYTES - 17)
+#define MAX_LOG_TEXT_SIZE (MAX_MESSAGE_SIZE_BYTES - 16)
 #define SEND_QUEUE_LENGTH 10U
 #define RX_QUEUE_LENGTH 9U
 #define MAX_SENDER_PRIORITY 16U
-
-#define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - PREFIX_SIZE_BYTES)
 
 /** Get the position of the CRC in bytes from the first element of the packet.
  * CRC position must be 16-bit aligned (even number) for hardware CRC engines.
@@ -21,8 +23,9 @@
  * The value of the padding byte (if present) will be checked by the CRC, but it
  * has no effect on the decoded message.
  */
-// TODO: move.  Feature envy.
-inline static uint32_t getCRCPosition(const uint8_t *lengthPrefixedBuffer)
+inline static uint32_t getCRCPosition(const uint8_t *packet)
 {
-  return ((lengthPrefixedBuffer[0] + PREFIX_SIZE_BYTES + 1) >> 1) << 1;
+  return ((packet[LENGTH_POSITION] + LENGTH_SIZE_BYTES + 1) >> 1) << 1;
 }
+
+#endif // fmt_sizes_H

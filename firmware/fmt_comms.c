@@ -59,13 +59,13 @@ static void acceptMsgIfValid(uint8_t rxPacket[])
 static bool fmt_sendMsg_prod(Top message)
 {
   uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
-  uint8_t *txMsg = txPacket + PREFIX_SIZE_BYTES;
+  uint8_t *txMsg = txPacket + LENGTH_SIZE_BYTES;
   pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
 
   bool success = pb_encode(&ostream, Top_fields, &message);
   if (success)
   {
-    txPacket[0] = ostream.bytes_written;
+    txPacket[LENGTH_POSITION] = ostream.bytes_written;
     addCRC(txPacket);
     bool enqueueSuccess = enqueueBack(sendQueue, txPacket);
     if (!enqueueSuccess)
@@ -93,7 +93,7 @@ static bool fmt_getMsg_prod(Top *message)
   {
     uint8_t packet[MAX_PACKET_SIZE_BYTES];
     dequeueFront(rxQueue, packet);
-    uint8_t messageLen = packet[0];
+    uint8_t messageLen = packet[LENGTH_POSITION];
 
     /* Create a stream that reads from the buffer. */
     pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);

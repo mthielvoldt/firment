@@ -1,19 +1,22 @@
 
-#include <comm_pcbDetails.h>  // FMT_USES_<transport>
-#ifdef FMT_USES_SPI // gates this whole file.
+#include <comm_pcbDetails.h> // FMT_USES_<transport>
+#ifdef FMT_USES_SPI          // gates this whole file.
 
-#include "fmt_spi.h"
-#include "fmt_transport.h"  // startTxChain, linkTransport
-#include <fmt_spi_port.h>   // port_initSpiModule()  port_getSpiEventIRQn()
-#include "fmt_comms.h"      // fmt_sendMsg fmt_getMsg
-#include "fmt_sizes.h"
-#include <core_port.h>      // NVIC_...()
-#include <cmsis_gcc.h>      // __BKPT()
+// This file's interface
+#include "fmt_spi.h"       // SPI-specific interface (for init)
+#include "fmt_transport.h" // startTxChain, linkTransport
 
-#include "fmt_ioc.h" // fmt_initIoc
-#include <pb_encode.h>
-#include <pb_decode.h>
+// Dependencies owned by Firment
 #include "assert.h"
+#include "fmt_ioc.h" // fmt_initIoc
+#include "fmt_sizes.h"
+#include "queue.h"
+#include <fmt_spi_port.h> // port_initSpiModule()  port_getSpiEventIRQn()
+#include <core_port.h>    // NVIC_...()
+#include <cmsis_gcc.h>    // __BKPT()
+
+// Dependencies 3rd party
+#include <string.h> // memset()
 
 static queue_t *sendQueue = NULL;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
@@ -24,6 +27,8 @@ static rxCallback_t rxCallback = NULL;
 
 /* Declarations of private functions */
 static void spiEventHandlerISR(uint32_t event);
+void subMsgWaitingISR(void);
+void subClearToSendISR(void);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
@@ -45,7 +50,6 @@ bool fmt_initSpi(spiCfg_t cfg)
   uint32_t encodedPrio =
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.irqPriority, 0U);
   NVIC_SetPriority(spiEventIRQn, encodedPrio);
-
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -85,7 +89,6 @@ bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
   }
   return false;
 }
-
 
 void fmt_startTxChain(void)
 {
@@ -164,7 +167,7 @@ static void spiEventHandlerISR(uint32_t event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
     spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
-    if (rxPacket[0] && rxCallback)
+    if (rxPacket[LENGTH_POSITION] && rxCallback)
     {
       rxCallback(rxPacket);
     }
@@ -191,8 +194,8 @@ static void spiEventHandlerISR(uint32_t event)
   }
 }
 
-#endif  // FMT_USES_SPI
-/** OPTIMIZATION POSSIBILITIES
- * - Just store the messages (payload) not the whole packet (with header) in Q.
- *
- */
+#endif // FMT_USES_SPI
+       /** OPTIMIZATION POSSIBILITIES
+        * - Just store the messages (payload) not the whole packet (with header) in Q.
+        *
+        */
