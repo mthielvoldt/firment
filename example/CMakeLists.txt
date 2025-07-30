@@ -49,7 +49,7 @@ ${STARTUP_FILE}
 firmware/spi_example.c
 firmware/project_comms.c
 firmware/control.c
-firmware/init_spi_pcb${PCB}.c
+${APP_FW_CONFIG_DIR}/pcb${PCB}/init_transport.c
 )
 target_include_directories(app_lib 
   PRIVATE 

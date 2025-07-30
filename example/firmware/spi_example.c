@@ -1,5 +1,5 @@
 
-#include "init_spi.h"
+#include "init_transport.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic.h>
@@ -17,7 +17,7 @@ int main(void)
 {
   fmt_initSys();
 
-  project_initSpi();
+  project_initTransport();
   
   comm_init();
 

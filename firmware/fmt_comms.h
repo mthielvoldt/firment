@@ -2,11 +2,19 @@
 #define fmt_comms_h
 
 #include <messages.pb.h>
+
+bool fmt_initComms(void);
+
 /** fmt_sendMsg
  * Queues a message for transmit.
  * Should only be called from a single context - not thread-safe.
- * These function pointers find implementations in: 
- * - fmt_spi.c
+ * 
+ * These functions are pointerized to facilitate unit-testing.  There is only
+ * one implementation, but it's easier to test modules that send or receive data
+ * if these can be mocked. 
+ * 
+ * The following files set these pointers to functions defined therein:
+ * - fmt_comms.c
  * - stub_comms.c (test double)
  */
 extern bool (*fmt_sendMsg)(Top message);

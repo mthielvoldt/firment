@@ -12,27 +12,29 @@ set(CMAKE_C_FLAGS_DEBUG "-Og -g")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections")
 # set(COMMON_LINK_OPTIONS "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections")
 
-if(${PCB} STREQUAL "0")
+if(PCB STREQUAL "0")
   set(MCU_FAMILY "XMC4")
   set(MCU_VARIANT "XMC4700")
   set(MCU_SPEED_VARIANT "F144")
   set(MCU_MEM_VARIANT "2048")
+  add_compile_definitions(${MCU_VARIANT}_${MCU_SPEED_VARIANT}x${MCU_MEM_VARIANT})
 
   set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
   set(STARTUP_FILE "${PORT_DIR}/mtb-xmclib-cat3/CMSIS/Infineon/COMPONENT_XMC4700/Source/TOOLCHAIN_GCC_ARM/startup_${MCU_VARIANT}.S")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/XMC4700x2048.ld.in)
-  add_compile_definitions(${MCU_VARIANT}_${MCU_SPEED_VARIANT}x${MCU_MEM_VARIANT})
-elseif(${PCB} STREQUAL "1")
+    
+elseif(PCB STREQUAL "1" OR PCB STREQUAL "2")
   set(MCU_FAMILY "stm32l4")
   set(MCU_VARIANT "stm32l476")
-
+  add_compile_definitions("STM32L476xx")
+  
   set(PORT_DIR ${FIRMENT_DIR}/firmware/port/${MCU_FAMILY})
   set(STARTUP_FILE "${PORT_DIR}/cmsis_device_l4/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32L476XX_FLASH.ld.in)
-  add_compile_definitions("STM32L476xx")
 endif()
 
 message(STATUS "PCB: ${PCB}")
 message(STATUS "MCU: ${MCU_VARIANT}")
+message(STATUS "Using ${FMT_TRANSPORT} for Firment messages")

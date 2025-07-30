@@ -2,7 +2,7 @@
  * Also defines which of those messages are in-use in this project.
  */
 #pragma once
-#include <fmt_comms.h>
+#include <messages.pb.h>
 
 bool comm_init(void);
 
