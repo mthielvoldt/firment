@@ -2,7 +2,7 @@
 
 extern "C"
 {
-  #include <init_spi.h>
+  #include <init_transport.h>
 }
 
 TEST_GROUP(spi_example)
@@ -13,5 +13,5 @@ TEST_GROUP(spi_example)
 TEST(spi_example, initSpi)
 {
   // Tests that the example config's init function succeeds.
-  CHECK_TRUE(project_initSpi());
+  CHECK_TRUE(project_initTransport());
 }

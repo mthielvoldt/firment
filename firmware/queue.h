@@ -1,3 +1,6 @@
+#ifndef queue_H
+#define queue_H
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -30,3 +33,5 @@ bool dequeueBack(queue_t *queue, void *result);
 uint32_t numItemsInQueue(queue_t *queue);
 
 uint32_t emptySpacesInQueue(queue_t *queue);
+
+#endif // queue_H

@@ -44,7 +44,7 @@ TEST_GROUP(fmt_spi)
     messageToValidPacket(validMsg, validPacket);
     spiTest_reset();
     iocTest_setPinState(clearToSendIocId, true);
-    initSuccess = fmt_initSpi(cfg);
+    initSuccess = fmt_initSpi(cfg) && fmt_initComms();
   }
   void teardown()
   {
@@ -99,7 +99,7 @@ TEST(fmt_spi, initClearsPendingMessages)
   iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
   // With a message in rxQueue, re-initialize spi.
-  initSuccess = fmt_initSpi(cfg);
+  initSuccess = fmt_initComms();
 
   CHECK_TRUE(initSuccess);
   // No message should be there.
