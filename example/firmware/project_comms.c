@@ -15,6 +15,7 @@
  */
 #include "project_comms.h"
 #include "control.h"
+#include <fmt_comms.h>
 #include <fmt_log.h>
 #include <fmt_flash.h>
 #include <fmt_gpio.h>
@@ -30,6 +31,8 @@ bool comm_init(void)
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
   success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
+
+  success &= fmt_initComms();
 
   fmt_setBuildIdGetter(getBuildTime);
   return success;

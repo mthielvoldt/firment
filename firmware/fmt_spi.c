@@ -1,56 +1,29 @@
-// TODO: there is an issue where the ESP resets and the XMC gets stuck not
-// sending anything.
-// Oberved 4f56582 (webgl-plot-explore) webgl Plot component showing sin with noise
+
+#include <comm_pcbDetails.h>  // FMT_USES_<transport>
+#ifdef FMT_USES_SPI // gates this whole file.
 
 #include "fmt_spi.h"
+#include "fmt_transport.h"  // startTxChain, linkTransport
 #include <fmt_spi_port.h>   // port_initSpiModule()  port_getSpiEventIRQn()
-#include <spi_mcuDetails.h> // SPI_BUILTIN_CRC
 #include "fmt_comms.h"      // fmt_sendMsg fmt_getMsg
+#include "fmt_sizes.h"
 #include <core_port.h>      // NVIC_...()
 #include <cmsis_gcc.h>      // __BKPT()
-#if !SPI_BUILTIN_CRC
-#include "fmt_crc.h"
-#endif
+
 #include "fmt_ioc.h" // fmt_initIoc
-#include "queue.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
+#include "assert.h"
 
-#define ASSERT_ARM_OK(x)  \
-  if (x != ARM_DRIVER_OK) \
-  return false
-#define ASSERT_SUCCESS(x) \
-  if (!x)                 \
-  return false
-
-// globals for debug
-uint32_t spiTxDropCount = 0;
-uint32_t spiRxDropCount = 0;
-
-// Initialize with the start sequence in header.
-static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
-static queue_t sendQueue;
-
-static uint8_t rxQueueStore[MAX_PACKET_SIZE_BYTES * RX_QUEUE_LENGTH];
-static queue_t rxQueue;
+static queue_t *sendQueue = NULL;
 static uint8_t rxPacket[MAX_PACKET_SIZE_BYTES] = {0};
-
 static ARM_DRIVER_SPI *spi;
 static uint8_t clearToSendIocId; // An Interrupt-on-Change config.
 static uint8_t msgWaitingIocId;
-
-#if !SPI_BUILTIN_CRC
-extern FMT_DRIVER_CRC Driver_CRC0;
-static FMT_DRIVER_CRC *crc = &Driver_CRC0;
-#endif
-
-ARM_SPI_SignalEvent_t callback;
+static rxCallback_t rxCallback = NULL;
 
 /* Declarations of private functions */
-static void SendNextPacket(void);
 static void spiEventHandlerISR(uint32_t event);
-static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]);
-static bool checkCRCMatch(const uint8_t packet[]);
 
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
@@ -73,10 +46,6 @@ bool fmt_initSpi(spiCfg_t cfg)
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), cfg.irqPriority, 0U);
   NVIC_SetPriority(spiEventIRQn, encodedPrio);
 
-#if !SPI_BUILTIN_CRC
-  ASSERT_ARM_OK(crc->Initialize());
-  ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
-#endif
 
   /** Warning:
    * CMSIS says we *may* OR (|) the mode parameters (excluding Miscellaneous
@@ -93,19 +62,6 @@ bool fmt_initSpi(spiCfg_t cfg)
 
   ASSERT_ARM_OK(spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE));
 
-  initQueue(
-      MAX_PACKET_SIZE_BYTES,
-      SEND_QUEUE_LENGTH,
-      &sendQueue,
-      sendQueueStore,
-      MAX_SENDER_PRIORITY);
-  initQueue(
-      MAX_PACKET_SIZE_BYTES,
-      RX_QUEUE_LENGTH,
-      &rxQueue,
-      rxQueueStore,
-      MAX_SENDER_PRIORITY);
-
   ASSERT_SUCCESS(
       fmt_initIoc(cfg.clearToSendIocId, cfg.clearToSendIocOut, EDGE_TYPE_RISING,
                   cfg.irqPriority, subClearToSendISR));
@@ -119,59 +75,19 @@ bool fmt_initSpi(spiCfg_t cfg)
   return true;
 }
 
-static bool fmt_sendMsg_prod(Top message)
+bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
 {
-  uint8_t txPacket[MAX_PACKET_SIZE_BYTES] = {0};
-  uint8_t *txMsg = txPacket + PREFIX_SIZE_BYTES;
-  pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
-
-  bool success = pb_encode(&ostream, Top_fields, &message);
-  if (success)
+  if (_sendQueue && _rxCallback)
   {
-    txPacket[0] = ostream.bytes_written;
-    addCRC(txPacket);
-    bool enqueueSuccess = enqueueBack(&sendQueue, txPacket);
-    if (!enqueueSuccess)
-    {
-      spiTxDropCount++;
-      // __BKPT(4);
-    }
-
-    // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
-    SendNextPacket();
+    sendQueue = _sendQueue;
+    rxCallback = _rxCallback;
+    return true;
   }
-  else // message possibly bigger than PAYLOAD_SIZE_BYTES?
-  {
-    __BKPT(2); // TODO: Increment err counter, Send error message.
-  }
-
-  return success;
+  return false;
 }
-bool (*fmt_sendMsg)(Top message) = fmt_sendMsg_prod;
 
-static bool fmt_getMsg_prod(Top *message)
-{
-  bool success = false;
-  if (numItemsInQueue(&rxQueue) > 0)
-  {
-    uint8_t packet[MAX_PACKET_SIZE_BYTES];
-    dequeueFront(&rxQueue, packet);
-    uint8_t messageLen = packet[0];
 
-    /* Create a stream that reads from the buffer. */
-    pb_istream_t stream = pb_istream_from_buffer(&packet[1], messageLen);
-    /* Now we are ready to decode the message. */
-    success = pb_decode(&stream, Top_fields, message);
-    if (!success)
-    {
-      __BKPT(5);
-    }
-  }
-  return success;
-}
-bool (*fmt_getMsg)(Top *message) = fmt_getMsg_prod;
-
-static void SendNextPacket(void)
+void fmt_startTxChain(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
 
@@ -181,20 +97,20 @@ static void SendNextPacket(void)
 
   // fmt_sendMsg calls this fn at any time, so check spi ready.
   bool spiReady = !spi->GetStatus().busy;
-  if (spiReady)
+  if (spiReady && sendQueue)
   {
     bool clearToSend = fmt_getIocPinState(clearToSendIocId);
 
     if (clearToSend)
     {
-      bool txWaiting = numItemsInQueue(&sendQueue);
+      bool txWaiting = numItemsInQueue(sendQueue);
       bool rxWaiting = fmt_getIocPinState(msgWaitingIocId);
 
       if (txWaiting || rxWaiting)
       {
         if (txWaiting)
         {
-          dequeueFront(&sendQueue, txPacket);
+          dequeueFront(sendQueue, txPacket);
         }
         else // Implies rxWaiting.
         {
@@ -211,17 +127,6 @@ static void SendNextPacket(void)
          * synchronized in the presence of data corruption.
          * Note: this call only starts the transfer, it doesn't block.*/
         spi->Transfer(txPacket, rxPacket, MAX_PACKET_SIZE_BYTES);
-
-        /* Some test code for counting bytes that get through.*/
-        // static uint8_t substitutePacket[] = {
-        //     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        //     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-        //     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-        //     30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-        //     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-        //     50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
-        //     60, 61, 62, 63, 64, 65, 66, 67, 68, 69};
-        // spi->Send(substitutePacket, MAX_PACKET_SIZE_BYTES);
       }
     }
     else // not clear to send.  Enable cts ISR to restart when cts re-asserted.
@@ -233,7 +138,7 @@ static void SendNextPacket(void)
 
 void subMsgWaitingISR(void)
 {
-  SendNextPacket();
+  fmt_startTxChain();
 }
 
 void subClearToSendISR(void)
@@ -242,37 +147,10 @@ void subClearToSendISR(void)
   fmt_disableIoc(clearToSendIocId);
 
   // Re-start the transaction chain.
-  SendNextPacket();
+  fmt_startTxChain();
 }
 
 /* PRIVATE (static) functions */
-
-#if SPI_BUILTIN_CRC
-static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]) {}
-static bool checkCRCMatch(const uint8_t packet[]) { return true; }
-
-#else
-static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
-{
-  uint32_t crcPosition = getCRCPosition(packet);
-  uint16_t computedCRC;
-  int32_t result = crc->ComputeCRC(packet, crcPosition, &computedCRC);
-  *(uint16_t *)(&packet[crcPosition]) = computedCRC;
-  if (result != ARM_DRIVER_OK)
-  {
-    __BKPT(0);
-  }
-}
-
-static bool checkCRCMatch(const uint8_t packet[])
-{
-  uint32_t crcPosition = getCRCPosition(packet);
-  uint16_t result;
-  int32_t status = crc->ComputeCRC(packet, crcPosition, &result);
-  return status == ARM_DRIVER_OK &&
-         result == *(uint16_t *)(&packet[crcPosition]);
-}
-#endif
 
 /** Event Handler ISR
  * Runs when the SPI module detects one of the following events:
@@ -286,23 +164,12 @@ static void spiEventHandlerISR(uint32_t event)
   {
   case ARM_SPI_EVENT_TRANSFER_COMPLETE:
     spi->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
-    if (rxPacket[0])
+    if (rxPacket[0] && rxCallback)
     {
-      // check CRC here so we don't consume Rx queue with errors.
-      bool crcMatch = checkCRCMatch(rxPacket);
-
-      if (crcMatch)
-      {
-        bool success = enqueueBack(&rxQueue, rxPacket);
-        if (!success)
-        {
-          spiRxDropCount++;
-          __BKPT(6);
-        }
-      }
+      rxCallback(rxPacket);
     }
     /* This will trigger a Send as soon as CTS pin has a rising edge.
-    We do this instead of calling SendNextPacket() because the ESP doesn't lower
+    We do this instead of calling fmt_startTxChain() because the ESP doesn't lower
     CTS until a few us AFTER a transaction completes, so this event handler gets
     there too early, while CTS is still high, but the ESP isn't actually ready.
     One consequence is that we now depend on the CTS signal pulsing low between
@@ -324,6 +191,7 @@ static void spiEventHandlerISR(uint32_t event)
   }
 }
 
+#endif  // FMT_USES_SPI
 /** OPTIMIZATION POSSIBILITIES
  * - Just store the messages (payload) not the whole packet (with header) in Q.
  *

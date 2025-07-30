@@ -2,7 +2,6 @@
 #define fmt_spi_H
 
 #include <Driver_SPI.h>
-#include "fmt_sizes.h"
 
 typedef enum {
   BUS_MODE_MAIN,
