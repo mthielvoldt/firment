@@ -2,13 +2,28 @@
   "configurations": [
     // stmApp
     {
-      "name": "stmApp",
+      "name": "pcb1_App",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "openocd",
       "interface": "swd",
       "device": "STM32L476RG",
-      "cwd": "${workspaceFolder}/example/build/stm",
+      "cwd": "${workspaceFolder}/example/build/pcb1",
+      "executable": "app_root.elf",
+      "showDevDebugOutput": "raw",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32l4x.cfg",
+      ]
+    },
+    {
+      "name": "pcb2_App",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "interface": "swd",
+      "device": "STM32L476RG",
+      "cwd": "${workspaceFolder}/example/build/pcb2",
       "executable": "app_root.elf",
       "showDevDebugOutput": "raw",
       "configFiles": [
@@ -59,9 +74,9 @@
     //     "continue" // Start execution after reset
     //   ],
     // }
-    // xmcApp
+    // pcb0_App
     {
-      "name": "xmcApp",
+      "name": "pcb0_App",
       "type": "cortex-debug",
       "servertype": "jlink",
       "request": "launch",
