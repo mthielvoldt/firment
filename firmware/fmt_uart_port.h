@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-bool port_initUartModule(uartCfg_t *config);
+bool port_initUartModule(const uartCfg_t *config);
 
 uint32_t port_getUartEventIRQn(uint8_t fmtUartId);
 

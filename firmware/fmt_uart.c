@@ -55,7 +55,7 @@ static void getStartCode(void);
 static void getLengthPrefix(void);
 static void getPayload(void);
 
-bool fmt_initUart(uartCfg_t *config)
+bool fmt_initUart(const uartCfg_t *config)
 {
   uart = config->driver;
   uint32_t uartEventIRQn = port_getUartEventIRQn(config->driverId);

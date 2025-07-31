@@ -13,7 +13,7 @@ typedef struct
   uint32_t irqPriority;
 } uartCfg_t;
 
-bool fmt_initUart(uartCfg_t *config);
+bool fmt_initUart(const uartCfg_t *config);
 
 
 #endif

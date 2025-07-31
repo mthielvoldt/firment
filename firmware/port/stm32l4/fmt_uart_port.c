@@ -42,7 +42,7 @@ UART_RESOURCES(3)
 #error "One of the macros MX_UART{1,2,3} must be defined as 1."
 #endif
 
-bool port_initUartModule(uartCfg_t *config)
+bool port_initUartModule(const uartCfg_t *config)
 {
   hwInfo_t info = getHWInfo(config->driverId);
   UART_HandleTypeDef *huart = info.huart;
