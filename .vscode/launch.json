@@ -1,6 +1,6 @@
 {
   "configurations": [
-    // stmApp
+    // pcb1_App
     {
       "name": "pcb1_App",
       "type": "cortex-debug",
@@ -16,6 +16,7 @@
         "target/stm32l4x.cfg",
       ]
     },
+    // pcb2_App
     {
       "name": "pcb2_App",
       "type": "cortex-debug",

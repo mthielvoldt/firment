@@ -70,13 +70,14 @@ bool fmt_initUart(const uartCfg_t *config)
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), config->irqPriority, 0U);
   NVIC_SetPriority(uartEventIRQn, encodedPrio);
 
-  // The following are default.
-  // ARM_USART_DATA_BITS_8
-  // ARM_USART_FLOW_CONTROL_NONE
-  // ARM_USART_PARITY_NONE
-  // ARM_USART_STOP_BITS_1
-  ASSERT_ARM_OK(uart->Control(ARM_USART_MODE_ASYNCHRONOUS, 0));
-
+  uint32_t modeControl =
+      ARM_USART_MODE_ASYNCHRONOUS |
+      ARM_USART_DATA_BITS_8 |
+      ARM_USART_FLOW_CONTROL_NONE |
+      ARM_USART_PARITY_NONE |
+      ARM_USART_STOP_BITS_1;
+  ASSERT_ARM_OK(uart->Control(modeControl, config->baudHz));
+  
   return true;
 }
 
@@ -108,33 +109,40 @@ void fmt_startTxChain(void)
 }
 
 /**
- * Called by the ARM_DRIVER for several reasons, indicated by event.
- *
- * RECEIVE_COMPLETE:
+ * Called by the ARM_DRIVER.
+ * @arg event is a bitfield of flags indicating what event(s) happened.
  *
  */
 void uartEventHandlerISR(uint32_t event)
 {
-  switch (event)
+  bool eventHandled = false;
+  if (event & ARM_USART_EVENT_RECEIVE_COMPLETE)
   {
-  case ARM_USART_EVENT_RECEIVE_COMPLETE:
+    eventHandled = true;
     handleRx();
-    break;
-  case ARM_USART_EVENT_TX_COMPLETE:
+  }
+
+  if (event & ARM_USART_EVENT_SEND_COMPLETE)
+  {
+    eventHandled = true;
     fmt_startTxChain();
-    break;
-  case ARM_USART_EVENT_RX_BREAK:
-  case ARM_USART_EVENT_RX_FRAMING_ERROR:
-  case ARM_USART_EVENT_RX_OVERFLOW:
-  case ARM_USART_EVENT_RX_PARITY_ERROR:
-  case ARM_USART_EVENT_RX_TIMEOUT:
+  }
+
+  if (event & (ARM_USART_EVENT_RX_BREAK |
+               ARM_USART_EVENT_RX_FRAMING_ERROR |
+               ARM_USART_EVENT_RX_OVERFLOW |
+               ARM_USART_EVENT_RX_PARITY_ERROR |
+               ARM_USART_EVENT_RX_TIMEOUT))
+  {
+    eventHandled = true;
     rxErrorCount++;
     getStartCode();
     __BKPT(0);
-    break;
-  default:
-    __BKPT(1);
   }
+
+  // If this function was called for an unhandled reason, let's learn about it.
+  if (!eventHandled)
+    __BKPT(1);
 }
 
 static enum {
