@@ -70,6 +70,9 @@ static int32_t PowerControl(ARM_POWER_STATE state)
   int32_t ret = ARM_DRIVER_ERROR;
   switch (state)
   {
+  case ARM_POWER_FULL:
+    ret = ARM_DRIVER_OK;
+    break;
   default:
   {
     ret = ARM_DRIVER_ERROR_UNSUPPORTED;
