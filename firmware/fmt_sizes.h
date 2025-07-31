@@ -5,6 +5,7 @@
 
 #define LENGTH_SIZE_BYTES 1U // a prefix indicating subsequent message length
 #define LENGTH_POSITION 0
+#define PAYLOAD_POSITION (LENGTH_POSITION + LENGTH_SIZE_BYTES)
 #define CRC_SIZE_BYTES 2U
 #define MAX_PACKET_SIZE_BYTES 64U // Must be less than 259; len sent in 1 byte.
 #define MAX_MESSAGE_SIZE_BYTES (MAX_PACKET_SIZE_BYTES - LENGTH_SIZE_BYTES)
@@ -25,7 +26,7 @@
  */
 inline static uint32_t getCRCPosition(const uint8_t *packet)
 {
-  return ((packet[LENGTH_POSITION] + LENGTH_SIZE_BYTES + 1) >> 1) << 1;
+  return ((packet[LENGTH_POSITION] + PAYLOAD_POSITION + 1) >> 1) << 1;
 }
 
 #endif // fmt_sizes_H

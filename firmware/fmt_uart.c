@@ -37,9 +37,12 @@
 #define START_CODE 0xBE
 #define START_CODE_POSITION 0
 
-// Must come after #include "fmt_sizes.h"
+// Must come after #include "fmt_sizes.h"  start code is a special uart feature.
 #undef LENGTH_POSITION
 #define LENGTH_POSITION (0 + START_CODE_SIZE)
+#undef PAYLOAD_POSITION
+#define PAYLOAD_POSITION (LENGTH_POSITION + LENGTH_SIZE_BYTES)
+
 #define UART_PACKET_SIZE (MAX_PACKET_SIZE_BYTES + START_CODE_SIZE)
 
 static queue_t *sendQueue = NULL;
@@ -54,6 +57,7 @@ static bool lengthValid(void);
 static void getStartCode(void);
 static void getLengthPrefix(void);
 static void getPayload(void);
+static inline uint32_t getPacketLength(const uint8_t *packet);
 
 bool fmt_initUart(const uartCfg_t *config)
 {
@@ -77,7 +81,7 @@ bool fmt_initUart(const uartCfg_t *config)
       ARM_USART_PARITY_NONE |
       ARM_USART_STOP_BITS_1;
   ASSERT_ARM_OK(uart->Control(modeControl, config->baudHz));
-  
+
   return true;
 }
 
@@ -101,7 +105,7 @@ void fmt_startTxChain(void)
   {
     if (sendQueue && dequeueFront(sendQueue, &txPacket[LENGTH_POSITION]))
     {
-      uart->Send(txPacket, txPacket[LENGTH_POSITION]);
+      uart->Send(txPacket, getPacketLength(txPacket));
     }
   }
   // If uart is busy, EVENT_TX_COMPLETE will call this again when uart is ready.
@@ -192,18 +196,29 @@ inline bool lengthValid(void)
 
 void getStartCode(void)
 {
-  uart->Receive(rxPacket, START_CODE_SIZE);
+  uart->Receive(&rxPacket[START_CODE_POSITION], START_CODE_SIZE);
   rxState = AWAITING_START_CODE;
 }
 void getLengthPrefix(void)
 {
-  uart->Receive(rxPacket + START_CODE_SIZE, LENGTH_SIZE_BYTES);
+  uart->Receive(&rxPacket[LENGTH_POSITION], LENGTH_SIZE_BYTES);
   rxState = AWAITING_LENGTH_BYTE;
 }
 void getPayload(void)
 {
-  uart->Receive(rxPacket + START_CODE_SIZE, LENGTH_SIZE_BYTES);
+  uint32_t payloadLen = getPacketLength(rxPacket) - PAYLOAD_POSITION;
+  uart->Receive(&rxPacket[PAYLOAD_POSITION], payloadLen);
   rxState = AWAITING_PAYLOAD;
+}
+
+static inline uint32_t getPacketLength(const uint8_t *packet)
+{
+  // Immediately convert to start-code aware reference frame.
+  uint32_t crcPosition =
+      getCRCPosition(&packet[LENGTH_POSITION]) + LENGTH_POSITION;
+  
+  // crcPosition is another name for the length of everything before the CRC.
+  return (crcPosition + CRC_SIZE_BYTES);
 }
 
 #endif // FMT_USES_UART
