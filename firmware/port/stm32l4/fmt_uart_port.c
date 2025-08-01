@@ -47,21 +47,18 @@ bool port_initUartModule(const uartCfg_t *config)
   hwInfo_t info = getHWInfo(config->driverId);
   UART_HandleTypeDef *huart = info.huart;
 
+  /*
+  Initialize huart->Init with a minimal valid config because the CMSIS
+  driver calls HAL_UART_Init() several times, only setting a couple settings at
+  at time, so if these huart elements start out invalid, the first CMSIS Init, 
+  (or Control) call will fail early and not do its job.
+  NOTE this sets all non-designated elements to 0 (defaults) */
   huart->Instance = info.module;
   huart->Init = (UART_InitTypeDef){
       .BaudRate = config->baudHz,
-      .WordLength = UART_WORDLENGTH_8B,
-      .StopBits = UART_STOPBITS_1,
-      .Parity = UART_PARITY_NONE,
       .Mode = UART_MODE_TX_RX,
-      .HwFlowCtl = UART_HWCONTROL_NONE,
-      .OverSampling = UART_OVERSAMPLING_16,
-      .OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE,
   };
-
-  huart->AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(huart) != HAL_OK)
-    return false;
+  huart->AdvancedInit = (UART_AdvFeatureInitTypeDef){};
 
   port_initUartPins();
 
