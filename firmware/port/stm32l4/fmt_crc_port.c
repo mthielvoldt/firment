@@ -1,5 +1,6 @@
 #include "fmt_crc.h"
 #include <stm32l4xx_hal_crc.h>
+#include <stm32l4xx_hal_rcc.h>
 
 #define FMT_CRC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(0, 0)
 
@@ -22,7 +23,8 @@ static const FMT_CRC_CAPABILITIES_t DriverCapabilities = {
 static CRC_HandleTypeDef crcHandle[1] = {{
     .Init = {
         .CRCLength = CRC_POLYLENGTH_16B,
-        .DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE, // 0xFFFFFFFF
+        .DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE, // default: 0
+        .InitValue = 0xFFFFFFFF,
         .DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE,
         .GeneratingPolynomial = 0x1021, // crc16_ccitt
         .InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE,
@@ -46,6 +48,15 @@ static bool isInitialized = false;
 static ARM_DRIVER_VERSION_t GetVersion(void) { return DriverVersion; }
 
 static FMT_CRC_CAPABILITIES_t GetCapabilities(void) { return DriverCapabilities; }
+
+/**
+ * This overrides a weak definition that does nothing.  The _MspInit functions
+ * are the place STM enables the peripheral clocks.
+ */
+void HAL_CRC_MspInit(CRC_HandleTypeDef* hcrc)
+{
+  __HAL_RCC_CRC_CLK_ENABLE();
+}
 
 static int32_t Initialize(void)
 {
