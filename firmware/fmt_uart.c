@@ -50,6 +50,7 @@ static rxCallback_t rxCallback = NULL;
 static ARM_DRIVER_USART *uart = NULL;
 static uint8_t rxPacket[UART_PACKET_SIZE] = {0};
 static uint32_t rxErrorCount = 0;
+static bool initialized = false;
 
 static void uartEventHandlerISR(uint32_t event);
 static void handleRx(void);
@@ -61,6 +62,7 @@ static inline uint32_t getPacketLength(const uint8_t *packet);
 
 bool fmt_initUart(const uartCfg_t *config)
 {
+  initialized = false;
   uart = config->driver;
   uint32_t uartEventIRQn = port_getUartEventIRQn(config->driverId);
 
@@ -69,11 +71,6 @@ bool fmt_initUart(const uartCfg_t *config)
 
   ASSERT_ARM_OK(uart->Initialize(uartEventHandlerISR));
   ASSERT_ARM_OK(uart->PowerControl(ARM_POWER_FULL));
-
-  uint32_t encodedPrio =
-      NVIC_EncodePriority(NVIC_GetPriorityGrouping(), config->irqPriority, 0U);
-  NVIC_SetPriority(uartEventIRQn, encodedPrio);
-
   uint32_t modeControl =
       ARM_USART_MODE_ASYNCHRONOUS |
       ARM_USART_DATA_BITS_8 |
@@ -82,6 +79,11 @@ bool fmt_initUart(const uartCfg_t *config)
       ARM_USART_STOP_BITS_1;
   ASSERT_ARM_OK(uart->Control(modeControl, config->baudHz));
 
+  uint32_t encodedPrio =
+      NVIC_EncodePriority(NVIC_GetPriorityGrouping(), config->irqPriority, 0U);
+  NVIC_SetPriority(uartEventIRQn, encodedPrio);
+
+  initialized = true;
   return true;
 }
 
@@ -216,7 +218,7 @@ static inline uint32_t getPacketLength(const uint8_t *packet)
   // Immediately convert to start-code aware reference frame.
   uint32_t crcPosition =
       getCRCPosition(&packet[LENGTH_POSITION]) + LENGTH_POSITION;
-  
+
   // crcPosition is another name for the length of everything before the CRC.
   return (crcPosition + CRC_SIZE_BYTES);
 }
