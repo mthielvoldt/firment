@@ -67,17 +67,21 @@ bool sendPacketUart(uint8_t *packet, size_t size)
 
 esp_err_t waitForUartRx(uint8_t *buffer, uint32_t timeout_ms)
 {
+  uint8_t startCodeBuff;
+  uint8_t *dest;
   rxParams_t nextRx = getStartCode();
   packetReady = false;
 
   while (!packetReady)
   {
-    int result = uart_read_bytes(FMT_UART_NUM, &buffer[nextRx.position],
+    dest = (!nextRx.position) ? &startCodeBuff : buffer - START_CODE_SIZE;
+
+    int result = uart_read_bytes(FMT_UART_NUM, dest + nextRx.position,
                                  nextRx.length, pdMS_TO_TICKS(timeout_ms));
 
     if (result == nextRx.length)
     {
-      nextRx = handleRxSegment(buffer); // calls setPacketReady when packet done.
+      nextRx = handleRxSegment(dest); // calls setPacketReady when packet done.
     }
     else
     {
