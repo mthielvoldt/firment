@@ -27,23 +27,11 @@
 
 // Dependencies in Firment
 #include "assert.h"
-#include "fmt_sizes.h"
+#include "fmt_uart_frame.h" // this replaces fmt_sizes.h
 #include "queue.h"
 #include <fmt_uart_port.h> // port_initUart() port_getUartEventIRQn()
 #include <core_port.h>
 #include <cmsis_gcc.h>
-
-#define START_CODE_SIZE 1U
-#define START_CODE 0xBE
-#define START_CODE_POSITION 0
-
-// Must come after #include "fmt_sizes.h"  start code is a special uart feature.
-#undef LENGTH_POSITION
-#define LENGTH_POSITION (0 + START_CODE_SIZE)
-#undef PAYLOAD_POSITION
-#define PAYLOAD_POSITION (LENGTH_POSITION + LENGTH_SIZE_BYTES)
-
-#define UART_PACKET_SIZE (MAX_PACKET_SIZE_BYTES + START_CODE_SIZE)
 
 static queue_t *sendQueue = NULL;
 static rxCallback_t rxCallback = NULL;
@@ -53,12 +41,13 @@ static uint32_t rxErrorCount = 0;
 static bool initialized = false;
 
 static void uartEventHandlerISR(uint32_t event);
-static void handleRx(void);
-static bool lengthValid(void);
-static void getStartCode(void);
-static void getLengthPrefix(void);
-static void getPayload(void);
-static inline uint32_t getPacketLength(const uint8_t *packet);
+static inline bool rxErrors(uint32_t event);
+// static void handleRx(void);
+// static bool lengthValid(void);
+// static void getStartCode(void);
+// static void getLengthPrefix(void);
+// static void getPayload(void);
+// static inline uint32_t getPacketLength(const uint8_t *packet);
 
 bool fmt_initUart(const uartCfg_t *config)
 {
@@ -122,10 +111,22 @@ void fmt_startTxChain(void)
 void uartEventHandlerISR(uint32_t event)
 {
   bool eventHandled = false;
-  if (event & ARM_USART_EVENT_RECEIVE_COMPLETE)
+
+  if ((event & ARM_USART_EVENT_RECEIVE_COMPLETE) || rxErrors(event))
   {
+    rxParams_t nextSegment;
+    if (rxErrors(event))
+    {
+      rxErrorCount++;
+      nextSegment = handleRxError();
+      __BKPT(0);
+    }
+    else
+    {
+      nextSegment = handleRxSegment(rxPacket);
+    }
     eventHandled = true;
-    handleRx();
+    uart->Receive(&rxPacket[nextSegment.position], nextSegment.length);
   }
 
   if (event & ARM_USART_EVENT_SEND_COMPLETE)
@@ -134,32 +135,29 @@ void uartEventHandlerISR(uint32_t event)
     fmt_startTxChain();
   }
 
-  if (event & (ARM_USART_EVENT_RX_BREAK |
-               ARM_USART_EVENT_RX_FRAMING_ERROR |
-               ARM_USART_EVENT_RX_OVERFLOW |
-               ARM_USART_EVENT_RX_PARITY_ERROR |
-               ARM_USART_EVENT_RX_TIMEOUT))
-  {
-    eventHandled = true;
-    rxErrorCount++;
-    getStartCode();
-    __BKPT(0);
-  }
 
   // If this function was called for an unhandled reason, let's learn about it.
   if (!eventHandled)
     __BKPT(1);
 }
 
+static inline bool rxErrors(uint32_t event)
+{
+  return event & (ARM_USART_EVENT_RX_BREAK |
+                  ARM_USART_EVENT_RX_FRAMING_ERROR |
+                  ARM_USART_EVENT_RX_OVERFLOW |
+                  ARM_USART_EVENT_RX_PARITY_ERROR |
+                  ARM_USART_EVENT_RX_TIMEOUT);
+}
+
+/*
 static enum {
   AWAITING_START_CODE,
   AWAITING_LENGTH_BYTE,
   AWAITING_PAYLOAD,
 } rxState = AWAITING_START_CODE;
-/** @fn handleRx()
- *
- *
- */
+
+
 void handleRx(void)
 {
   switch (rxState)
@@ -222,5 +220,6 @@ static inline uint32_t getPacketLength(const uint8_t *packet)
   // crcPosition is another name for the length of everything before the CRC.
   return (crcPosition + CRC_SIZE_BYTES);
 }
+   */
 
 #endif // FMT_USES_UART

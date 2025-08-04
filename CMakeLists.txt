@@ -19,6 +19,7 @@ add_library(FirmentFW
   firmware/fmt_log.c
   firmware/fmt_spi.c
   firmware/fmt_uart.c
+  firmware/fmt_uart_frame.c
   firmware/fmt_update.c
   firmware/fmt_version.c
   firmware/fmt_waveform.c

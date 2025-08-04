@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include "queue.h"
 
-typedef void(*rxCallback_t)(uint8_t *rxData);
+typedef void(*rxCallback_t)(const uint8_t *rxData);
 
 void fmt_startTxChain(void);
 

@@ -37,7 +37,7 @@ static bool checkCRCMatch(const uint8_t packet[]);
  *
  *
  */
-static void acceptMsgIfValid(uint8_t rxPacket[])
+static void acceptMsgIfValid(const uint8_t rxPacket[])
 {
   // check CRC here so we don't consume Rx queue with errors.
   bool crcMatch = checkCRCMatch(rxPacket);
