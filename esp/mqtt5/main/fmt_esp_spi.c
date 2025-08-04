@@ -254,15 +254,10 @@ esp_err_t waitForSpiRx(uint8_t *packet, uint32_t msTimeout)
     // Regardless of CRC/Length, we lost an item from the transaction queue.
     numTransactionsQueued--;
 
-    bool crcGood = true; // placeholder.
     /* Fmt SPI uses a fixed-length scheme that always transmits the max length*/
     bool lenGood = rxdTransaction->trans_len == EXPECTED_TRANS_LEN_BITS;
     if (!lenGood)
       ret = ESP_ERR_INVALID_SIZE;
-    else if (!crcGood)
-      ret = ESP_ERR_INVALID_CRC;
-    else if (rxdTransaction->rx_buffer < &rxBufs || rxdTransaction->rx_buffer > &rxBufs[TRANSACTION_QUEUE_LEN - 1])
-      ret = ESP_ERR_INVALID_RESPONSE;
     else // All good.
     {
       spiTxCount++;
