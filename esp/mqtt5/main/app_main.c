@@ -13,6 +13,7 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
+#include "esp32s3/rom/crc.h"
 #include "protocol_examples_common.h"
 #include "esp_log.h"
 #include "esp_timer.h"
@@ -20,6 +21,7 @@
 #include "freertos/task.h"
 
 #include "fmt_esp_spi.h"
+#include "fmt_esp_uart.h"
 
 #define MAX_PAYLOAD_BYTES 64
 #define MQTT_BUFFER_SIZE (100 * MAX_PAYLOAD_BYTES)
@@ -27,11 +29,23 @@
 #define MSG_TIMEOUT_MS 2000
 #define MQTT_PUB_PERIOD_US 500000U
 
+static enum fmtTransport_e {
+  FMT_UNKNOWN,
+  FMT_SPI,
+  FMT_UART,
+} fmtTransport = FMT_UNKNOWN;
+
 static uint8_t mqttBuffer[MQTT_BUFFER_SIZE];
 static uint32_t mqttWritePos = 0;
 static uint32_t lastResetTimeUs = 0;
 
 static const char *TAG = "mqtt5_example";
+
+static bool unpackAndSendToEdge(uint8_t *packed, int len);
+static size_t appendCRC(uint8_t *packet);
+static bool sendToActiveTransport(uint8_t *packet, size_t packetSize);
+enum fmtTransport_e checkForTransportChange(esp_err_t *rxStatus, uint8_t *rxPacket);
+
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -147,10 +161,11 @@ static void delete_users(void)
   disconnect_property.user_property = NULL;
 }
 
-static void subscribe(esp_mqtt_client_handle_t client, char *topic, int qos)
+static int subscribe(esp_mqtt_client_handle_t client, char *topic, int qos)
 {
   int msg_id = esp_mqtt_client_subscribe(client, topic, qos);
   ESP_LOGI(TAG, "requested subscribe to '%s'", topic);
+  return msg_id;
 }
 
 /*
@@ -195,7 +210,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     break;
   case MQTT_EVENT_DATA:
     print_data(event);
-    unpackAndSendSPI((uint8_t *)event->data, event->data_len);
+    unpackAndSendToEdge((uint8_t *)(event->data), event->data_len);
     break;
   case MQTT_EVENT_ERROR:
     ESP_LOGI(TAG, "MQTT_EVENT_ERROR, return code %d", event->error_handle->connect_return_code);
@@ -211,6 +226,52 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     ESP_LOGI(TAG, "Other event id:%d", event->event_id);
     break;
   }
+}
+
+static bool unpackAndSendToEdge(uint8_t *packed, int len)
+{
+  bool success = true;
+  size_t packetSize;
+  uint8_t packet[MAX_PACKET_SIZE_BYTES];
+
+  // needs revision if max message length set > 255.
+  int msgPos = 0;
+  uint8_t msgSize = packed[msgPos + LENGTH_POSITION] + LENGTH_SIZE_BYTES;
+
+  while (
+      msgPos + msgSize <= len && // prevent reading past buffer.
+      msgSize > 1 &&             // quit if we encounter 0-length msg.
+      success)                             // quit if send buffer fills up.
+  {
+    memcpy(packet, &packed[msgPos], msgSize);
+    packetSize = appendCRC(packet);
+    success = sendToActiveTransport(packet, packetSize);
+    msgPos += msgSize;
+    msgSize = packed[msgPos + LENGTH_POSITION] + LENGTH_SIZE_BYTES;
+  }
+  return success;
+}
+
+/** appendCRC
+ * @brief calculates and appends a 16-bit CRC to the provided buffer.
+ * @return the finished packet size, with CRC appended.
+ */
+static size_t appendCRC(uint8_t *packet)
+{
+  // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
+    uint32_t crcPosition = getCRCPosition(packet);
+    uint16_t crc = crc16_le(0x00, packet, crcPosition);
+    *(uint16_t *)(&packet[crcPosition]) = crc;
+    return crcPosition + CRC_SIZE_BYTES;
+}
+
+static bool sendToActiveTransport(uint8_t *packet, size_t packetSize)
+{
+  if (fmtTransport == FMT_SPI)
+    return sendPacketSpi(packet, packetSize);
+  else if (fmtTransport == FMT_UART)
+    return sendPacketUart(packet, packetSize);
+  return false;
 }
 
 static void mqtt5_app_start(void)
@@ -323,54 +384,28 @@ void logMsgContents(uint8_t msg[])
   }
 }
 
-uint32_t usSinceTx(void) {
-  return esp_timer_get_time() - lastResetTimeUs;
-}
+uint32_t usSinceTx(void) { return esp_timer_get_time() - lastResetTimeUs; }
 void resetTxTimer(void) { lastResetTimeUs = esp_timer_get_time(); }
 
-void handleSpiMsg(esp_err_t spiResult, uint8_t pbMsg[])
+void handleEdgeMsg(uint8_t rxPacket[])
 {
-  switch (spiResult)
-  {
-  case ESP_OK:
-  {
-    // Assumes length < 127. TODO: permit larger.
-    int msgLength = pbMsg[0] + 1; // +1 is for the message size prefix.
 
-    // Empty messages will have msgLength == 1 for prefix => Drop these.
-    if (msgLength > 1 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
-    {
-      memcpy(mqttBuffer + mqttWritePos, pbMsg, msgLength);
-      mqttWritePos += msgLength;
-      // logMsgContents(pbMsg);
-    }
-    if (usSinceTx() > MQTT_PUB_PERIOD_US  && (mqttWritePos > 0)) {
-      esp_mqtt_client_publish(
-          client, "hq-bound", (char *)mqttBuffer, mqttWritePos, 1, 1);
-      mqttWritePos = 0;
-      resetTxTimer();
-    }
-    break;
-  }
-  case ESP_ERR_TIMEOUT:
+  // Assumes length < 127. TODO: permit larger.
+  int msgLength = rxPacket[0] + 1; // +1 is for the message size prefix.
+
+  // Empty messages will have msgLength == 1 for prefix => Drop these.
+  if (msgLength > 1 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
   {
-    ESP_LOGE(TAG, "timed out %dms", MSG_TIMEOUT_MS);
-    break;
+    memcpy(mqttBuffer + mqttWritePos, rxPacket, msgLength);
+    mqttWritePos += msgLength;
+    // logMsgContents(rxPacket);
   }
-  case ESP_ERR_INVALID_SIZE:
+  if (usSinceTx() > MQTT_PUB_PERIOD_US && (mqttWritePos > 0))
   {
-    ESP_LOGE(TAG, "invalid size");
-    break;
-  }
-  case ESP_ERR_INVALID_CRC:
-  {
-    ESP_LOGE(TAG, "invalid CRC");
-    break;
-  }
-  default:
-  {
-    ESP_LOGE(TAG, "unknown error: %d", spiResult);
-  }
+    esp_mqtt_client_publish(
+        client, "hq-bound", (char *)mqttBuffer, mqttWritePos, 1, 1);
+    mqttWritePos = 0;
+    resetTxTimer();
   }
 }
 
@@ -394,6 +429,7 @@ void app_main(void)
   esp_log_level_set("outbox", ESP_LOG_VERBOSE);
 
   ESP_ERROR_CHECK(initSpi());
+  ESP_ERROR_CHECK(initUart());
 
   ESP_ERROR_CHECK(nvs_flash_init());
   ESP_ERROR_CHECK(esp_netif_init());
@@ -409,10 +445,60 @@ void app_main(void)
 
   for (;;)
   {
-    uint8_t pbMsg[MAX_PAYLOAD_BYTES];
-    esp_err_t ret = waitForSpiRx(pbMsg, MSG_TIMEOUT_MS);
-    handleSpiMsg(ret, pbMsg);
+    uint8_t rxPacket[MAX_PAYLOAD_BYTES];
+    esp_err_t rxStatus;
 
-    // vTaskDelay(pdMS_TO_TICKS(2000));
+    if (fmtTransport == FMT_SPI)
+    {
+      rxStatus = waitForSpiRx(rxPacket, MSG_TIMEOUT_MS);
+    }
+    else if (fmtTransport == FMT_SPI)
+    {
+      rxStatus = waitForUartRx(rxPacket, MSG_TIMEOUT_MS);
+    }
+    else if (fmtTransport == FMT_UNKNOWN)
+    {
+      /* If neither transport had data, yeild to unstarve other tasks */
+      vTaskDelay(pdMS_TO_TICKS(MSG_TIMEOUT_MS));
+      rxStatus = ESP_ERR_TIMEOUT;
+    }
+
+    /* If we timed out waiting for a message, it could be that the edge is now
+    transmitting on a different transport. */
+    if (rxStatus == ESP_ERR_TIMEOUT)
+    {
+      fmtTransport = checkForTransportChange(&rxStatus, rxPacket);
+    }
+
+    /* This is not an else if because chackForTransportChange tries to read from
+    SPI and if it succeeds, a new packet will be available and need handling
+    before the next pass through the loop.*/
+    if (rxStatus == ESP_OK)
+    {
+      handleEdgeMsg(rxPacket);
+    }
+    else if (rxStatus != ESP_ERR_TIMEOUT)
+    {
+      ESP_LOGE(TAG, "unknown error: %d", rxStatus);
+    }
   }
+}
+
+enum fmtTransport_e checkForTransportChange(esp_err_t *rxStatus, uint8_t *rxPacket)
+{
+  enum fmtTransport_e ret = FMT_UNKNOWN;
+  /* The only way to check for data presence on SPI is to try reading it. If rx
+  succeeds, there will be data that needs handling => *rxStatus = ESP_OK. */
+  if (waitForSpiRx(rxPacket, 0) == ESP_OK)
+  {
+    *rxStatus = ESP_OK;
+    ret = FMT_SPI;
+  }
+
+  /* UART can check for data presence while leaving it in FIFO.*/
+  else if (uart_hasData())
+  {
+    ret = FMT_UART;
+  }
+  return ret;
 }

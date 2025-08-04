@@ -8,7 +8,6 @@ static enum {
 } rxState = AWAITING_START_CODE;
 
 static inline bool lengthValid(const uint8_t *packet);
-static rxParams_t getStartCode(void);
 static rxParams_t getLengthPrefix(void);
 static rxParams_t getPayload(const uint8_t *rxPacket);
 
@@ -36,7 +35,8 @@ rxParams_t handleRxSegment(const uint8_t *packet)
   case AWAITING_PAYLOAD:
   {
     // Message fully present now, hand off.
-    packetReady_cb(&packet[LENGTH_POSITION]);
+    if (packetReady_cb)
+      packetReady_cb(&packet[LENGTH_POSITION]);
     break;
   }
   }
@@ -45,7 +45,7 @@ rxParams_t handleRxSegment(const uint8_t *packet)
 
 /* private functions */
 
-static rxParams_t getStartCode(void)
+rxParams_t getStartCode(void)
 {
   rxState = AWAITING_START_CODE;
   return (rxParams_t){START_CODE_POSITION, START_CODE_SIZE};

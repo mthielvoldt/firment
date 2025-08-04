@@ -11,13 +11,9 @@
 #include "driver/spi_slave.h"
 #include "driver/gpio.h"
 #include "driver/gpio_filter.h"
-#include "esp32s3/rom/crc.h"
 
 #include "fmt_esp_spi.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////// Please update the following configuration according to your HardWare spec /////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef CONFIG_IDF_TARGET_ESP32
 #define RCV_HOST HSPI_HOST
 #else
@@ -27,13 +23,17 @@
 static int lastRealMessagePosition = 0;
 static unsigned int droppedSpiTxCount = 0;  // TODO: look into adding Rx dropped count.
 
-// Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
+/**
+ * @brief Called after a transaction is queued and ready for pickup by master. 
+ * We use this to set the handshake line high.
+ */
 void my_post_setup_cb(spi_slave_transaction_t *trans)
 {
   gpio_set_level(GPIO_CLEAR_TO_SEND, 1);
 }
 
-// Called after transaction is sent/received. We use this to set the handshake line low.
+/** Called after transaction is sent/received. We use this to set the handshake 
+ * line low. */
 void my_post_trans_cb(spi_slave_transaction_t *trans)
 {
   if (--lastRealMessagePosition <= 0)
@@ -152,23 +152,22 @@ esp_err_t initSpi(void)
   return ret;
 }
 
-// TODO: unit test this.  In particular, cover garbage data. 
-bool sendMessage(uint8_t *toSend)
+/** 
+ * @brief Enqueues the packet to txPreQ and sets msg waiting bit high. 
+ */
+bool sendPacketSpi(const uint8_t *packet, size_t size)
 {
+  if (size > MAX_PACKET_SIZE_BYTES || !packet)
+    return false;
+
   bool success = false;
   if (txPreQ.numWaiting < TX_PREQUEUE_LEN)
   {
-    // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
-    uint32_t crcPosition = getCRCPosition(toSend);
-    uint16_t crc = crc16_le(0x00, (uint8_t *)toSend, crcPosition);
-
     uint32_t writeIdx = txPreQ.readIdx + txPreQ.numWaiting;
     if (writeIdx >= NUM_TX_BUFFERS)
       writeIdx -= NUM_TX_BUFFERS;
 
-    *(uint16_t *)(&txBufs[writeIdx].data[crcPosition]) = crc;
-    // why is this not copying to &txBufs[writeIdx].data?  
-    memcpy(&txBufs[writeIdx], toSend, crcPosition);
+    memcpy(&txBufs[writeIdx], packet, size);
     txPreQ.numWaiting++;
 
     lastRealMessagePosition = txPreQ.numWaiting + TRANSACTION_QUEUE_LEN;
@@ -184,21 +183,10 @@ bool sendMessage(uint8_t *toSend)
   return success;
 }
 
-bool unpackAndSendSPI(uint8_t *packed, int len) {
-  bool success = true;
-  // needs revision if max message length set > 255.
-  int pbMsgPos = 0;
-  while ( 
-    pbMsgPos + packed[pbMsgPos] < len &&  // prevent reading past buffer. 
-    packed[pbMsgPos] != 0 &&              // quit if we encounter 0-length msg.
-    success )                             // quit if send buffer fills up. 
-  {
-    success = sendMessage(packed + pbMsgPos);
-    pbMsgPos += (packed[pbMsgPos] + LENGTH_SIZE_BYTES);
-  }
-  return success;
-}
-
+/**
+ * dequeue the next txBuffer from the pre-queue.
+ * If nothing in queue, returns pointer to empty packet. 
+ */
 const void *getNextTxBuffer(void)
 {
   const void *nextTxBuffer;
@@ -217,6 +205,12 @@ const void *getNextTxBuffer(void)
   return nextTxBuffer;
 }
 
+/**
+ * @brief 
+ * - Gets a new Tx packet from getNextTxBuffer()
+ * - copies that data to the next available transactions slot (circular buffer or queue?).
+ * - Tells slave driver to enqueue this transaction (slave driver just keeps a reference)
+ */
 esp_err_t addToTransactionQueue(void)
 {
   static uint32_t nextTransIndex = 0;
@@ -238,7 +232,7 @@ esp_err_t addToTransactionQueue(void)
 /** Enables the SPI slave interface to send the txBufs and receive into rxBufs.
  * However, it will not actually happen until the main device starts a hardware
  * transaction by pulling CS low and pulsing the clock. */
-esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
+esp_err_t waitForSpiRx(uint8_t *packet, uint32_t msTimeout)
 {
   spi_slave_transaction_t *rxdTransaction;
   static uint32_t numTransactionsQueued = 0;
@@ -272,7 +266,7 @@ esp_err_t waitForSpiRx(uint8_t *rxMsg, uint32_t msTimeout)
     else // All good.
     {
       spiTxCount++;
-      memcpy(rxMsg, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
+      memcpy(packet, rxdTransaction->rx_buffer, rxdTransaction->trans_len >> 3);
     }
   }
   return ret;

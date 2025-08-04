@@ -7,6 +7,7 @@
           "compilerArgs": [],
           "intelliSenseMode": "gcc-arm",
           "includePath": [
+            "esp/mqtt5/main",
             "example/firmware",
             "example/firmware/config",
             "example/firmware/config/pcb0",

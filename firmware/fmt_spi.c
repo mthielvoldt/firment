@@ -7,7 +7,7 @@
 #include "fmt_transport.h" // startTxChain, linkTransport
 
 // Dependencies owned by Firment
-#include "assert.h"
+#include "fmt_assert.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_sizes.h"
 #include "queue.h"

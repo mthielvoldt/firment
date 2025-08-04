@@ -26,7 +26,7 @@
 #include "fmt_transport.h" // This file's transport-generic interface
 
 // Dependencies in Firment
-#include "assert.h"
+#include "fmt_assert.h"
 #include "fmt_uart_frame.h" // this replaces fmt_sizes.h
 #include "queue.h"
 #include <fmt_uart_port.h> // port_initUart() port_getUartEventIRQn()
@@ -118,7 +118,7 @@ void uartEventHandlerISR(uint32_t event)
     if (rxErrors(event))
     {
       rxErrorCount++;
-      nextSegment = handleRxError();
+      nextSegment = getStartCode();
       __BKPT(0);
     }
     else
@@ -149,77 +149,5 @@ static inline bool rxErrors(uint32_t event)
                   ARM_USART_EVENT_RX_PARITY_ERROR |
                   ARM_USART_EVENT_RX_TIMEOUT);
 }
-
-/*
-static enum {
-  AWAITING_START_CODE,
-  AWAITING_LENGTH_BYTE,
-  AWAITING_PAYLOAD,
-} rxState = AWAITING_START_CODE;
-
-
-void handleRx(void)
-{
-  switch (rxState)
-  {
-  case AWAITING_START_CODE:
-  {
-    if (rxPacket[START_CODE_POSITION] == START_CODE)
-      getLengthPrefix();
-    else
-      getStartCode();
-    break;
-  }
-  case AWAITING_LENGTH_BYTE:
-  {
-    if (lengthValid())
-      getPayload();
-    else
-      getStartCode();
-    break;
-  }
-  case AWAITING_PAYLOAD:
-  {
-    // Message fully present now, hand off.
-    rxCallback(&rxPacket[LENGTH_POSITION]);
-    getStartCode();
-    break;
-  }
-  }
-}
-
-inline bool lengthValid(void)
-{
-  uint8_t length = rxPacket[LENGTH_POSITION];
-  return (length > 0) && (length <= MAX_MESSAGE_SIZE_BYTES);
-}
-
-void getStartCode(void)
-{
-  uart->Receive(&rxPacket[START_CODE_POSITION], START_CODE_SIZE);
-  rxState = AWAITING_START_CODE;
-}
-void getLengthPrefix(void)
-{
-  uart->Receive(&rxPacket[LENGTH_POSITION], LENGTH_SIZE_BYTES);
-  rxState = AWAITING_LENGTH_BYTE;
-}
-void getPayload(void)
-{
-  uint32_t payloadLen = getPacketLength(rxPacket) - PAYLOAD_POSITION;
-  uart->Receive(&rxPacket[PAYLOAD_POSITION], payloadLen);
-  rxState = AWAITING_PAYLOAD;
-}
-
-static inline uint32_t getPacketLength(const uint8_t *packet)
-{
-  // Immediately convert to start-code aware reference frame.
-  uint32_t crcPosition =
-      getCRCPosition(&packet[LENGTH_POSITION]) + LENGTH_POSITION;
-
-  // crcPosition is another name for the length of everything before the CRC.
-  return (crcPosition + CRC_SIZE_BYTES);
-}
-   */
 
 #endif // FMT_USES_UART
