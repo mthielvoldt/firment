@@ -42,13 +42,7 @@ This application uses two hardware flow-control pins:
 
 esp_err_t initSpi(void);
 
-/** Copies toSend buffer to an outbound Tx queue, appending a CRC suffix.
- * @param toSend toSend[0] must indicate the length of the subsequent data.*/
-bool sendMessage(uint8_t *toSend);
+/** Copies packet to an outbound Tx queue.*/
+bool sendPacketSpi(const uint8_t *packet, size_t size);
 
-/** Takes a buffer of packed length-prefixed messages and calls sendMessage()
- * on each.
- */
-bool unpackAndSendSPI(uint8_t *packed, int len);
-
-esp_err_t waitForSpiRx(uint8_t *rxWord, uint32_t msTimeout);
+esp_err_t waitForSpiRx(uint8_t *packet, uint32_t msTimeout);

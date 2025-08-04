@@ -1,5 +1,5 @@
-#ifndef assert_H
-#define assert_H
+#ifndef fmt_assert_H
+#define fmt_assert_H
 
 #define ASSERT_ARM_OK(x)  \
   if (x != ARM_DRIVER_OK) \

@@ -29,10 +29,7 @@ void setPacketReadyCallback(rxCallback_t rxCallback);
 
 rxParams_t handleRxSegment(const uint8_t *packet);
 
-inline rxParams_t handleRxError(void)
-{
-  return (const rxParams_t){START_CODE_POSITION, START_CODE_SIZE};
-}
+rxParams_t getStartCode(void);
 
 inline static uint32_t getPacketLength(const uint8_t *packet)
 {

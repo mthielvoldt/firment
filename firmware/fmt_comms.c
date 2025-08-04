@@ -1,7 +1,7 @@
 #include "fmt_comms.h"
 #include "fmt_sizes.h"
 #include "fmt_transport.h" // transport_sendNext(), FMT_BUILTIN_CRC
-#include "assert.h"
+#include "fmt_assert.h"
 #include "queue.h"
 
 #include <crc_mcuDetails.h> // FMT_BUILTIN_CRC
