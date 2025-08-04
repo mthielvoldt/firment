@@ -451,7 +451,7 @@ void app_main(void)
     {
       rxStatus = waitForSpiRx(rxPacket, MSG_TIMEOUT_MS);
     }
-    else if (fmtTransport == FMT_SPI)
+    else if (fmtTransport == FMT_UART)
     {
       rxStatus = waitForUartRx(rxPacket, MSG_TIMEOUT_MS);
     }
