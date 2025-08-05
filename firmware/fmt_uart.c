@@ -18,17 +18,13 @@
  * When no packet is already in reception, we
  *
  */
-#include <comm_pcbDetails.h> // FMT_USES_<transport>
-#ifdef FMT_USES_UART         // gates this whole file.
 
 // This file's interfaces
-#include "fmt_uart.h"      // UART-specifc interface for init.
-#include "fmt_transport.h" // This file's transport-generic interface
+#include "fmt_uart.h"
 
 // Dependencies in Firment
 #include "fmt_assert.h"
 #include "fmt_uart_frame.h" // this replaces fmt_sizes.h
-#include "queue.h"
 #include <fmt_uart_port.h> // port_initUart() port_getUartEventIRQn()
 #include <core_port.h>
 #include <cmsis_gcc.h>
@@ -45,6 +41,7 @@ static inline bool rxErrors(uint32_t event);
 bool fmt_initUart(const uartCfg_t *config)
 {
   initialized = false;
+  // This init starts transactions, so queue needs to be already initialized.
   if (!sendQueue)
     return false;
 
@@ -75,7 +72,7 @@ bool fmt_initUart(const uartCfg_t *config)
   return true;
 }
 
-bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
+bool uart_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
 {
   if (_sendQueue && rxCallback)
   {
@@ -86,7 +83,7 @@ bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
   return false;
 }
 
-void fmt_startTxChain(void)
+void uart_startTxChain(void)
 {
   static uint8_t txPacket[UART_PACKET_SIZE] = START_CODE;
 
@@ -147,5 +144,3 @@ static inline bool rxErrors(uint32_t event)
                   ARM_USART_EVENT_RX_PARITY_ERROR |
                   ARM_USART_EVENT_RX_TIMEOUT);
 }
-
-#endif // FMT_USES_UART

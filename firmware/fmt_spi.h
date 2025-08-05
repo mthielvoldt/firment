@@ -2,6 +2,8 @@
 #define fmt_spi_H
 
 #include <Driver_SPI.h>
+#include "fmt_transport.h"
+#include "queue.h"
 
 typedef enum {
   BUS_MODE_MAIN,
@@ -29,5 +31,7 @@ typedef struct
  * passes project-specific pin and peripheral selections.
  */
 bool fmt_initSpi(spiCfg_t config);
+bool spi_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback);
+void spi_startTxChain(void);
 
 #endif // fmt_spi_H

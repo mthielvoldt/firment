@@ -1,16 +1,10 @@
-
-#include <comm_pcbDetails.h> // FMT_USES_<transport>
-#ifdef FMT_USES_SPI          // gates this whole file.
-
 // This file's interface
 #include "fmt_spi.h"       // SPI-specific interface (for init)
-#include "fmt_transport.h" // startTxChain, linkTransport
 
 // Dependencies owned by Firment
 #include "fmt_assert.h"
 #include "fmt_ioc.h" // fmt_initIoc
 #include "fmt_sizes.h"
-#include "queue.h"
 #include <fmt_spi_port.h> // port_initSpiModule()  port_getSpiEventIRQn()
 #include <core_port.h>    // NVIC_...()
 #include <cmsis_gcc.h>    // __BKPT()
@@ -33,6 +27,10 @@ void subClearToSendISR(void);
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
 {
+  // This init starts transactions, so queue needs to be already initialized.
+  if (!sendQueue)
+    return false;
+
   spi = cfg.spiModule;
   clearToSendIocId = cfg.clearToSendIocId;
   msgWaitingIocId = cfg.msgWaitingIocId;
@@ -79,7 +77,7 @@ bool fmt_initSpi(spiCfg_t cfg)
   return true;
 }
 
-bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
+bool spi_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
 {
   if (_sendQueue && _rxCallback)
   {
@@ -90,7 +88,7 @@ bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
   return false;
 }
 
-void fmt_startTxChain(void)
+void spi_startTxChain(void)
 {
   static uint8_t txPacket[MAX_PACKET_SIZE_BYTES];
 
@@ -193,9 +191,3 @@ static void spiEventHandlerISR(uint32_t event)
     break;
   }
 }
-
-#endif // FMT_USES_SPI
-       /** OPTIMIZATION POSSIBILITIES
-        * - Just store the messages (payload) not the whole packet (with header) in Q.
-        *
-        */

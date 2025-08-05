@@ -18,6 +18,7 @@ add_library(FirmentFW
   firmware/fmt_hardfault.c
   firmware/fmt_log.c
   firmware/fmt_spi.c
+  firmware/fmt_transport.c
   firmware/fmt_uart.c
   firmware/fmt_uart_frame.c
   firmware/fmt_update.c

@@ -7,6 +7,7 @@
  * These are function pointers for two reasons: 
  * 1. Several communication transports (spi, uart, can...) may implement this interface.
  * 2. Unit tests can cover fmt_comms.c using spys at the transport layer.
+ * 3. Unit tests can compile all transports and switch which one is active.
  * 
  */
 #ifndef fmt_transport_H
@@ -17,8 +18,7 @@
 
 typedef void(*rxCallback_t)(const uint8_t *rxData);
 
-void fmt_startTxChain(void);
-
-bool fmt_linkTransport(queue_t *sendQueue, rxCallback_t rxCallback);
+extern void (*fmt_startTxChain)(void);
+extern bool (*fmt_linkTransport)(queue_t *sendQueue, rxCallback_t rxCallback);
 
 #endif  // fmt_transport_H

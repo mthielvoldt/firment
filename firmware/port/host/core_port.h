@@ -1,6 +1,6 @@
 
-
-#pragma once
+#ifndef core_port_H
+#define core_port_H
 
 // TODO: (4) Make these spies.  Understand requirements for proper use.
 #include <stdint.h>
@@ -31,7 +31,7 @@ static inline uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t Pre
   \details Reads the priority grouping field from the NVIC Interrupt Controller.
   \return                Priority grouping field (SCB->AIRCR [10:8] PRIGROUP field).
  */
-uint32_t NVIC_GetPriorityGrouping(void)
+static inline uint32_t NVIC_GetPriorityGrouping(void)
 {
   return 0;
 }
@@ -45,5 +45,6 @@ uint32_t NVIC_GetPriorityGrouping(void)
   \param [in]  priority  Priority to set.
   \note    The priority cannot be set for every processor exception.
  */
-void NVIC_SetPriority(int32_t IRQn, uint32_t priority) {}
+static inline void NVIC_SetPriority(int32_t IRQn, uint32_t priority) {}
 
+#endif
