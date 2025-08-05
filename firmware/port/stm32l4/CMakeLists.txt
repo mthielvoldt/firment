@@ -1,7 +1,7 @@
 
 set(HAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/stm32l4xx-hal-driver")
 set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
-set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMSIS-Driver_STM32/Drivers")
+set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
 
 set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
 
@@ -40,13 +40,13 @@ add_library(MCUPort
 
 if(FMT_TRANSPORT STREQUAL "SPI")
   target_sources(MCUPort PRIVATE
-    CMSIS-Driver_STM32/Drivers/SPI_STM32.c
+    ${CMSIS_DRIVER_DIR}/SPI_STM32.c
     fmt_spi_port.c
     ioc_port.c
   )
 elseif(FMT_TRANSPORT STREQUAL "UART")
 target_sources(MCUPort PRIVATE
-    CMSIS-Driver_STM32/Drivers/USART_STM32.c
+    ${CMSIS_DRIVER_DIR}/USART_STM32.c
     fmt_uart_port.c
   )
 endif()
