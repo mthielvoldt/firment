@@ -33,7 +33,7 @@ if(${MCU_VARIANT} STREQUAL "XMC4700")
   set(PARTITION_BACKUP_ADDRESS        0x0C0C0000) # sector 11
   set(TEST_RESULT_ADDRESS             0x0C01C000) # sector 7 (last 16kB sector)
   set(IMAGE_HEADER_SIZE 1024)
-elseif(${MCU_VARIANT} STREQUAL "stm32l476")
+elseif(${MCU_VARIANT} STREQUAL "stm32l476") # Total: 1M in 2 banks
   set(PARTITION_SIZE              0x40000) # 256kB
   set(SECTOR_SIZE                 0x800) # 2kB (sector = erase block)
   set(PMEM_ROOT_ADDRESS_DIRECT        0x08000000) # bank 1
@@ -43,5 +43,16 @@ elseif(${MCU_VARIANT} STREQUAL "stm32l476")
   set(PARTITION_UPDATE_ADDRESS        0x08080000) # bank 2
   set(PARTITION_BACKUP_ADDRESS        0x080C0000) # bank 2
   set(TEST_RESULT_ADDRESS             0x080FF800) # last page of flash
+  set(IMAGE_HEADER_SIZE 512)
+elseif(${MCU_VARIANT} STREQUAL "stm32g431") # Flash total: 128k
+  set(PARTITION_SIZE              0x8000) # 32kB (1/4 of total = 128*256, 16 erase-blocks)
+  set(SECTOR_SIZE                 0x800) # 2kB (erase block - STM nomen: "page")
+  set(PMEM_ROOT_ADDRESS_DIRECT        0x08000000) # bank 1
+  set(PMEM_ROOT_ADDRESS_CACHED        0x08000000) # no cache; same as prev.
+  set(TEST_RESULT_ADDRESS             0x08007800) # last page of root partition
+  set(PARTITION_ACTIVE_ADDRESS_DIRECT 0x08008000) # 
+  set(PARTITION_ACTIVE_ADDRESS_CACHED 0x08008000) # no cache; same as prev.
+  set(PARTITION_UPDATE_ADDRESS        0x08010000) # 
+  set(PARTITION_BACKUP_ADDRESS        0x08018000) # 
   set(IMAGE_HEADER_SIZE 512)
 endif()
