@@ -23,7 +23,7 @@ static const FMT_CRC_CAPABILITIES_t DriverCapabilities = {
 static CRC_HandleTypeDef crcHandle[1] = {{
     .Init = {
         .CRCLength = CRC_POLYLENGTH_16B,
-        .DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE, // default: 0
+        .DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE, // default 0xFFFFFFFF
         .InitValue = 0xFFFFFFFF,
         .DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE,
         .GeneratingPolynomial = 0x1021, // crc16_ccitt
@@ -95,6 +95,7 @@ static int32_t PowerControl(ARM_POWER_STATE state)
 static int32_t ComputeCRC(const uint8_t *data, uint32_t length, uint16_t *result)
 {
   // HAL_CRC_Calculate doesn't mutate data (type should be const).
+  length /= sizeof(*result);
   *result = HAL_CRC_Calculate(crcHandle, (uint32_t *)data, length);
   return ARM_DRIVER_OK;
 }
