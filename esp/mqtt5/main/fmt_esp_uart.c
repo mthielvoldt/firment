@@ -59,7 +59,7 @@ bool uart_hasData(void)
 
 bool sendPacketUart(uint8_t *packet, size_t size)
 {
-  const uint8_t startCode = START_CODE;
+  const uint8_t startCode[] = START_CODE;
   int ret0 = uart_write_bytes(FMT_UART_NUM, &startCode, START_CODE_SIZE);
   int ret1 = uart_write_bytes(FMT_UART_NUM, packet, size);
   return ((ret0 > 0) && (ret1 > 0));
@@ -67,14 +67,14 @@ bool sendPacketUart(uint8_t *packet, size_t size)
 
 esp_err_t waitForUartRx(uint8_t *buffer, uint32_t timeout_ms)
 {
-  uint8_t startCodeBuff;
+  uint8_t startCodeBuff[START_CODE_SIZE];
   uint8_t *dest;
   rxParams_t nextRx = getStartCode();
   packetReady = false;
 
   while (!packetReady)
   {
-    dest = (!nextRx.position) ? &startCodeBuff : buffer - START_CODE_SIZE;
+    dest = (!nextRx.position) ? startCodeBuff : buffer - START_CODE_SIZE;
 
     int result = uart_read_bytes(FMT_UART_NUM, dest + nextRx.position,
                                  nextRx.length, pdMS_TO_TICKS(timeout_ms));

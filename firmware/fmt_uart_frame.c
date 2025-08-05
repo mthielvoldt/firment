@@ -1,4 +1,5 @@
 #include "fmt_uart_frame.h"
+#include <string.h>
 
 static rxCallback_t packetReady_cb = NULL;
 static enum {
@@ -22,7 +23,7 @@ rxParams_t handleRxSegment(const uint8_t *packet)
   {
   case AWAITING_START_CODE:
   {
-    if (packet[START_CODE_POSITION] == START_CODE)
+    if (memcmp(packet, (const uint8_t[])START_CODE, START_CODE_SIZE) == 0)
       return getLengthPrefix();
     break;
   }
