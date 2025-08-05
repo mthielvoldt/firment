@@ -19,3 +19,6 @@
 [submodule "firmware/port/STM32L4/CMSIS-Driver_STM32"]
 	path = firmware/port/stm32/CMSIS-Driver_STM32
 	url = https://github.com/Open-CMSIS-Pack/CMSIS-Driver_STM32.git
+[submodule "firmware/port/stm32g4/cmsis-device-g4"]
+	path = firmware/port/stm32g4/cmsis-device-g4
+	url = https://github.com/STMicroelectronics/cmsis-device-g4.git
