@@ -22,3 +22,6 @@
 [submodule "firmware/port/stm32g4/cmsis-device-g4"]
 	path = firmware/port/stm32g4/cmsis-device-g4
 	url = https://github.com/STMicroelectronics/cmsis-device-g4.git
+[submodule "firmware/port/stm32g4/stm32g4xx-hal-driver"]
+	path = firmware/port/stm32g4/stm32g4xx-hal-driver
+	url = https://github.com/STMicroelectronics/stm32g4xx-hal-driver.git
