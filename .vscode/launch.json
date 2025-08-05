@@ -82,10 +82,10 @@
       "servertype": "jlink",
       "request": "launch",
       "serverpath": "JLinkGDBServerCLExe",
-      "executable": "example/build/xmc/app_root.elf",
+      "executable": "example/build/pcb0/app_root.elf",
       "interface": "swd",
       "device": "XMC4700-2048",
-      "preLaunchTask": "cmake build xmc",
+      "preLaunchTask": "build pcb0",
       "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
       "showDevDebugOutput": "raw",
       // "runToEntryPoint": "main"
