@@ -1,10 +1,11 @@
 
 ### This line needs modification when adding a new STM32 family
-set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
+# set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
 
-set(HAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${MCU_FAMILY}xx-hal-driver")
+set(FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${MCU_FAMILY}")
+set(HAL_DIR "${FAMILY_DIR}/${MCU_FAMILY}xx-hal-driver")
 set(HAL_SRC_PREFIX "${HAL_DIR}/Src/${MCU_FAMILY}xx_hal")
-set(CMSIS_DRIVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
+set(CMSIS_DRIVER_DIR "${FAMILY_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
 set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
 set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
 
@@ -34,29 +35,29 @@ add_library(MCUPort
   ${HAL_SRC_PREFIX}_uart.c
   ${HAL_SRC_PREFIX}_uart_ex.c
   ../common/flash_common.c
-  fmt_crc_port.c
-  fmt_flash_port.c
-  fmt_periodic_port.c
-  fmt_sysInit_port.c
-  gpio_port.c
+  ${FAMILY_DIR}/fmt_crc_port.c
+  ${FAMILY_DIR}/fmt_flash_port.c
+  ${FAMILY_DIR}/fmt_periodic_port.c
+  ${FAMILY_DIR}/fmt_sysInit_port.c
+  ${FAMILY_DIR}/gpio_port.c
 )
 
 if(FMT_TRANSPORT STREQUAL "SPI")
   target_sources(MCUPort PRIVATE
     ${CMSIS_DRIVER_DIR}/SPI_STM32.c
-    fmt_spi_port.c
-    ioc_port.c
+    ${FAMILY_DIR}/fmt_spi_port.c
+    ${FAMILY_DIR}/ioc_port.c
   )
 elseif(FMT_TRANSPORT STREQUAL "UART")
 target_sources(MCUPort PRIVATE
     ${CMSIS_DRIVER_DIR}/USART_STM32.c
-    fmt_uart_port.c
+    ${FAMILY_DIR}/fmt_uart_port.c
   )
 endif()
 
 target_include_directories(MCUPort
   PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${FAMILY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../arm_generic
   PRIVATE
     ../..   # fmt headers.
