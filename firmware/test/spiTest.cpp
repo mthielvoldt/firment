@@ -6,7 +6,7 @@ extern "C"
 #include <fmt_spi.h>
 #include <fmt_crc.h>
 #include <ioc_spy.h>
-#include <spi_test.h>
+#include <comm_test.h>
 #include <pb_encode.h>
 }
 
@@ -42,9 +42,11 @@ TEST_GROUP(fmt_spi)
 
     memset(validPacket, 0, sizeof(validPacket));
     messageToValidPacket(validMsg, validPacket);
-    spiTest_reset();
+    commTest_reset();
     iocTest_setPinState(clearToSendIocId, true);
-    initSuccess = fmt_initSpi(cfg) && fmt_initComms();
+    fmt_startTxChain = spi_startTxChain;
+    fmt_linkTransport = spi_linkTransport;
+    initSuccess = fmt_initComms() && fmt_initSpi(cfg);
   }
   void teardown()
   {
@@ -71,6 +73,11 @@ TEST(fmt_spi, init)
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
+TEST(fmt_spi, outOfOrderInit_NoCrash)
+{
+  FAIL("spi will crash if used uninitialized.");
+}
+
 TEST(fmt_spi, msgWaitingTriggersTransfer)
 {
   // Trigger msg-waiting
@@ -82,7 +89,7 @@ TEST(fmt_spi, msgWaitingTriggersTransfer)
 TEST(fmt_spi, getMsgHappy)
 {
   // Stage this packet as incoming data
-  spiTest_queueIncoming(validPacket);
+  commTest_queueIncoming(validPacket);
 
   // Trigger msg-waiting
   iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
@@ -95,7 +102,7 @@ TEST(fmt_spi, getMsgHappy)
 TEST(fmt_spi, initClearsPendingMessages)
 {
   // Thest two actions put a message in the rxQueue (see getMsgHappy)
-  spiTest_queueIncoming(validPacket);
+  commTest_queueIncoming(validPacket);
   iocTest_sendPinPulse(msgWaitingIocId, true, MAINTAIN_INDEFINITELY);
 
   // With a message in rxQueue, re-initialize spi.
@@ -109,7 +116,7 @@ TEST(fmt_spi, initClearsPendingMessages)
 TEST(fmt_spi, sendMsgHappy)
 {
   CHECK_TRUE(fmt_sendMsg(validMsg));
-  const uint8_t *sentData = spiTest_getLastSent();
+  const uint8_t *sentData = commTest_getLastSent();
   MEMCMP_EQUAL(validPacket, sentData, sizeof(validPacket));
 }
 
@@ -138,7 +145,7 @@ TEST(fmt_spi, transfersContinueUntilMsgWaitingDrops)
   iocTest_sendPinPulse(msgWaitingIocId, true, COUNT_SOME);
 
   // Pulse CTS pin plenty of times
-  for (int i=0; i < COUNT_MORE_THAN_SOME; i++)
+  for (int i = 0; i < COUNT_MORE_THAN_SOME; i++)
     iocTest_sendPinPulse(clearToSendIocId, true, MAINTAIN_INDEFINITELY);
 
   CHECK_EQUAL(COUNT_SOME, getCallCount(TRANSFER));
@@ -149,9 +156,9 @@ TEST(fmt_spi, transfersContinueUntilCTSStopsPulsing)
   iocTest_sendPinPulse(msgWaitingIocId, true, COUNT_MORE_THAN_SOME);
 
   // Pulse CTS pin plenty of times
-  for (int i=0; i < COUNT_SOME; i++)
+  for (int i = 0; i < COUNT_SOME; i++)
     iocTest_sendPinPulse(clearToSendIocId, true, MAINTAIN_INDEFINITELY);
-    
+
   CHECK_EQUAL(COUNT_SOME + 1, getCallCount(TRANSFER));
 }
 /*
