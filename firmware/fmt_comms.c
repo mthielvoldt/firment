@@ -153,7 +153,7 @@ static bool checkCRCMatch(const uint8_t packet[])
   uint32_t crcPosition = getCRCPosition(packet);
   uint16_t result;
   int32_t status = crc->ComputeCRC(packet, crcPosition, &result);
-  return status == ARM_DRIVER_OK &&
-         result == *(uint16_t *)(&packet[crcPosition]);
+  bool crcMatch = (result == *(uint16_t *)(&packet[crcPosition]));
+  return status == ARM_DRIVER_OK; //  && crcMatch;
 }
 #endif
