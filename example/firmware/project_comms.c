@@ -23,6 +23,7 @@
 #include <gpio_pcbDetails.h>
 #include <core_port.h> // NVIC_SystemReset()
 #include <build_time.h>
+#include "init_transport.h"
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
@@ -32,7 +33,9 @@ bool comm_init(void)
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
   success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
 
-  success &= fmt_initComms();
+  success &= fmt_initComms(); // links generic comm structs to HW transport.
+
+  success &= project_initTransport(); // Starts comm hardware. After initComms()
 
   fmt_setBuildIdGetter(getBuildTime);
   return success;

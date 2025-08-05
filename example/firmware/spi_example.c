@@ -1,5 +1,4 @@
 
-#include "init_transport.h"
 #include <fmt_rx.h>
 #include <ghostProbe.h>
 #include <fmt_periodic.h>
@@ -16,8 +15,6 @@ static void periodicA(void);
 int main(void)
 {
   fmt_initSys();
-
-  project_initTransport();
   
   comm_init();
 

@@ -34,7 +34,6 @@
 #include <cmsis_gcc.h>
 
 static queue_t *sendQueue = NULL;
-static rxCallback_t rxCallback = NULL;
 static ARM_DRIVER_USART *uart = NULL;
 static uint8_t rxPacket[UART_PACKET_SIZE] = {0};
 static uint32_t rxErrorCount = 0;
@@ -42,16 +41,13 @@ static bool initialized = false;
 
 static void uartEventHandlerISR(uint32_t event);
 static inline bool rxErrors(uint32_t event);
-// static void handleRx(void);
-// static bool lengthValid(void);
-// static void getStartCode(void);
-// static void getLengthPrefix(void);
-// static void getPayload(void);
-// static inline uint32_t getPacketLength(const uint8_t *packet);
 
 bool fmt_initUart(const uartCfg_t *config)
 {
   initialized = false;
+  if (!sendQueue)
+    return false;
+
   uart = config->driver;
   uint32_t uartEventIRQn = port_getUartEventIRQn(config->driverId);
 
@@ -72,16 +68,19 @@ bool fmt_initUart(const uartCfg_t *config)
       NVIC_EncodePriority(NVIC_GetPriorityGrouping(), config->irqPriority, 0U);
   NVIC_SetPriority(uartEventIRQn, encodedPrio);
 
+  rxParams_t rxParams = getStartCode();
+  uart->Receive(&rxPacket[rxParams.position], rxParams.length);
+
   initialized = true;
   return true;
 }
 
-bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
+bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
 {
-  if (_sendQueue && _rxCallback)
+  if (_sendQueue && rxCallback)
   {
     sendQueue = _sendQueue;
-    rxCallback = _rxCallback;
+    setPacketReadyCallback(rxCallback);
     return true;
   }
   return false;
@@ -89,7 +88,7 @@ bool fmt_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
 
 void fmt_startTxChain(void)
 {
-  static uint8_t txPacket[UART_PACKET_SIZE] = {START_CODE};
+  static uint8_t txPacket[UART_PACKET_SIZE] = START_CODE;
 
   bool ready = !uart->GetStatus().tx_busy;
   if (ready)
@@ -119,7 +118,7 @@ void uartEventHandlerISR(uint32_t event)
     {
       rxErrorCount++;
       nextSegment = getStartCode();
-      __BKPT(0);
+      // __BKPT(0);
     }
     else
     {
@@ -134,7 +133,6 @@ void uartEventHandlerISR(uint32_t event)
     eventHandled = true;
     fmt_startTxChain();
   }
-
 
   // If this function was called for an unhandled reason, let's learn about it.
   if (!eventHandled)
