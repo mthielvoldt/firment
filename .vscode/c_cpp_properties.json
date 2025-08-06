@@ -1,6 +1,7 @@
 {
     "version": 4,
     "configurations": [
+      //esp32s3
         {
           "name": "esp32s3-xmc4700",
           "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
@@ -68,6 +69,7 @@
               "XMC4700_F144x2048"
           ]
         },
+        //PCB0
         {
           "name": "PCB0",
           "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
@@ -106,6 +108,7 @@
               "XMC4700_F144x2048"
           ]
         },
+        //PCB1
         {
           "name": "PCB1",
           "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
@@ -131,7 +134,7 @@
             "firmware/port/stm32l4",
             "firmware/port/stm32l4/stm32l4xx-hal-driver/Inc",
             "firmware/port/stm32l4/cmsis_device_l4/Include", // system.h, device.h
-            "firmware/port/stm32l4/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
+            "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
             "protocol/nanopb",
@@ -143,6 +146,7 @@
               "STM32L476xx"
           ]
         },
+        //PCB2
         {
           "name": "PCB2",
           "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
@@ -168,7 +172,7 @@
             "firmware/port/stm32l4",
             "firmware/port/stm32l4/stm32l4xx-hal-driver/Inc",
             "firmware/port/stm32l4/cmsis_device_l4/Include", // system.h, device.h
-            "firmware/port/stm32l4/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
+            "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
             "protocol/nanopb",
@@ -180,6 +184,45 @@
               "STM32L476xx"
           ]
         },
+        //PCB3
+        {
+          "name": "PCB3",
+          "compilerPath": "/home/rileyt/compilers/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
+          "compilerArgs": [
+              "-w",
+              "-std=gnu++11",
+              "-fpermissive",
+              "-fno-exceptions",
+              "-ffunction-sections",
+              "-fdata-sections",
+              "-fno-threadsafe-statics",
+              "-Wno-error=narrowing"
+          ],
+          "intelliSenseMode": "gcc-arm",          
+          "includePath": [
+            "example/firmware",
+            "example/firmware/config",
+            "example/firmware/config/pcb3",
+            "example/build/stm",
+            "example/build/stm/firment",
+            "example/mgt-boot/inc",
+            "firmware",
+            "firmware/port/stm32g4",
+            "firmware/port/stm32g4/stm32g4xx-hal-driver/Inc",
+            "firmware/port/stm32g4/cmsis-device-g4/Include", // system.h, device.h
+            "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
+            "firmware/lib/CMSIS-6.1.0/Core/Include",
+            "firmware/lib/CMSIS-6.1.0/Driver/Include",
+            "protocol/nanopb",
+            "test/cpputest/include"
+          ],
+          "cStandard": "c11",
+          "cppStandard": "c++11",
+          "defines": [
+              "STM32L476xx"
+          ]
+        },
+        //HOST
         {
           "name": "host-lin",
           "compilerPath": "/usr/bin/g++",
