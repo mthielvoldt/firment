@@ -1,6 +1,7 @@
 #include "fmt_crc.h"
-#include <stm32l4xx_hal_crc.h>
-#include <stm32l4xx_hal_rcc.h>
+#define HAL_CRC_ENABLED
+#define HAL_RCC_ENABLED
+#include <stm32_hal_dispatch.h>
 
 #define FMT_CRC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(0, 0)
 

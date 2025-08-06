@@ -1,9 +1,11 @@
 
 #include <fmt_periodic.h>
 #include <timer_pcbDetails.h>
-#include <stm32l4xx_hal.h> // NVIC
-#include <stm32l4xx_hal_tim.h>
-#include <stm32l4xx_hal_tim_ex.h>
+
+#define HAL_BASE_ENABLED
+#define HAL_TIM_ENABLED
+#include <stm32_hal_dispatch.h> // NVIC
+
 
 const timerResource_t timerConfigs[] = AVAILABLE_TIMERS;
 

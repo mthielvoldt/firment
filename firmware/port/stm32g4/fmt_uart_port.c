@@ -1,3 +1,8 @@
+#define HAL_FAMILY_ENABLED
+#define HAL_CORTEX_ENABLED // HAL_NVIC_EnableIRQ()
+#define HAL_DMA_ENABLED // DMA_HandleTypeDef (needed by _hal_uart.h)
+#define HAL_RCC_ENABLED
+#define HAL_UART_ENABLED
 #include <comm_pcbDetails.h>
 #ifdef FMT_USES_UART
 
@@ -7,12 +12,6 @@
 // Dependencies
 #include <fmt_gpio_port.h> // port_initUartPins()
 #include <MX_Device.h>     // uart_pcbDetails.h > MX_UARTx
-#include <stm32l4xx.h>
-#include <stm32l4xx_hal_cortex.h> // HAL_NVIC_EnableIRQ()
-#include <stm32l4xx_hal_dma.h>    // DMA_HandleTypeDef (needed by _hal_uart.h)
-#include <stm32l4xx_hal_rcc.h>
-#include <stm32l4xx_hal_uart.h>
-#include <stm32l4xx_hal_uart_ex.h>
 
 typedef struct
 {

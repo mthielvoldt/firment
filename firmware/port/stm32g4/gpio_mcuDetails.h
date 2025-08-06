@@ -17,7 +17,8 @@
 #ifndef gpio_mcuDetails_h
 #define gpio_mcuDetails_h
 
-#include <stm32l4xx_hal_gpio.h>
+#define HAL_GPIO_ENABLED
+#include <stm32_hal_dispatch.h>
 
 typedef struct portPin_s
 {

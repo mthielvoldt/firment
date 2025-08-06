@@ -13,9 +13,10 @@
 #ifndef timer_mcuDetails_h
 #define timer_mcuDetails_h
 
-#include <stm32l4xx.h>
-#include <stm32l4xx_hal_dma.h>
-#include <stm32l4xx_hal_tim.h>
+#define HAL_BASE_ENABLED
+#define HAL_DMA_ENABLED
+#define HAL_TIM_ENABLED
+#include <stm32_hal_dispatch.h>
 
 
 typedef struct timerResource_s {
