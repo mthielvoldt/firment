@@ -1,8 +1,9 @@
 #include <fmt_sysInit.h>
-#include <stm32l4xx_hal.h>  // HAL_Init()
-#include <stm32l4xx_hal_rcc.h>
-#include <stm32l4xx_hal_pwr_ex.h>
 
+#define HAL_BASE_ENABLED
+#define HAL_RCC_ENABLED
+#define HAL_PWR_ENABLED
+#include <stm32_hal_dispatch.h>
 
 void SystemClock_Config(void);
 void Error_Handler(void);

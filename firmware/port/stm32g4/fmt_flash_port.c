@@ -20,7 +20,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <stm32l4xx_hal_flash.h>
+#define HAL_FLASH_ENABLED
+#include <stm32_hal_dispatch.h>
 
 /**
  * STM32L4 Flash is organized into 2 banks of 512kB each, (256X 2kB pages).
@@ -30,7 +31,6 @@
  */
 #define DOUBLEWORDS_PER_WRITE_BLOCK 32
 
-static unsigned getBankContainingAddress(uint32_t address);
 static int getPageContainingAddress(uint32_t address);
 static int flash_erase(uint32_t start_address, uint32_t len);
 
@@ -109,9 +109,7 @@ static int flash_erase(uint32_t start_address, uint32_t len)
 
   int start_page = getPageContainingAddress(start_address);
   int end_page = getPageContainingAddress(end_address);
-  int start_bank = getBankContainingAddress(start_address);
-  int end_bank = getBankContainingAddress(end_address);
-  if (start_page < 0 || end_page < 0 || start_bank != end_bank || len == 0)
+  if (start_page < 0 || end_page < 0 || len == 0)
   {
     return -1;
   }
@@ -119,7 +117,7 @@ static int flash_erase(uint32_t start_address, uint32_t len)
 
   FLASH_EraseInitTypeDef eraseInit = {
       .TypeErase = FLASH_TYPEERASE_PAGES,
-      .Banks = start_bank,
+      .Banks = FLASH_BANK_1,
       .NbPages = page_count,
       .Page = start_page, // is page zero at bottom of this bank, or absolute number?
   };
@@ -129,36 +127,7 @@ static int flash_erase(uint32_t start_address, uint32_t len)
   return 0;
 }
 
-/**
- * @param address must be an absolute address (not an offset).
- *
- */
-static unsigned getBankContainingAddress(uint32_t address)
-{
-  unsigned bank = 0;
-  if (address >= FLASH_BASE && address <= FLASH_BANK1_END)
-  {
-    bank = 1;
-  }
-  if (address > FLASH_BANK1_END && address <= FLASH_BANK2_END)
-  {
-    bank = 2;
-  }
-  return bank;
-}
-
 static int getPageContainingAddress(uint32_t address)
 {
-  int page = -1;
-  int bank = getBankContainingAddress(address);
-
-  if (bank == 1)
-  {
-    page = (address - FLASH_BASE) / FLASH_PAGE_SIZE;
-  }
-  if (bank == 2)
-  {
-    page = (address - (FLASH_BANK1_END + 1)) / FLASH_PAGE_SIZE;
-  }
-  return page;
+  return (address - FLASH_BASE) / FLASH_PAGE_SIZE;
 }

@@ -39,12 +39,11 @@
 #ifndef uart_pcbDetails_h
 #define uart_pcbDetails_h
 
-#include <stm32l4xx_hal_dma.h>  // DMA_HandleTypeDef (needed by _hal_spi.h)
-#include <stm32l4xx_hal_uart.h>
-#include <stm32l4xx_hal_uart_ex.h>
-#include <stm32l4xx.h>
-#include <stm32l4xx_hal_gpio.h>
-#include <stm32l4xx_hal_gpio_ex.h>
+#define HAL_DMA_ENABLED
+#define HAL_UART_ENABLED
+#define HAL_GPIO_ENABLED
+#define HAL_FAMILY_ENABLED
+#include <stm32_hal_dispatch.h>
 
 #define MX_UART3 1
 // #define MX_UART3_PERIPH_CLOCK_FREQ               80000000

@@ -1,8 +1,9 @@
+#define HAL_GPIO_ENABLED
+#define HAL_RCC_ENABLED
 #include <fmt_gpio_port.h>
 #include <comm_pcbDetails.h>
 #define USE_FULL_ASSERT
-#include <stm32l4xx_hal_gpio.h>
-#include <stm32l4xx_hal_rcc.h>
+#include <stm32_hal_dispatch.h>
 
 const uint32_t stmInputMode[] = {
     [INPUT_MODE_TRISTATE] = GPIO_NOPULL,
@@ -41,9 +42,6 @@ void enableRelevantClock(uint32_t const port)
     break;
   case (uint32_t)GPIOG:
     __HAL_RCC_GPIOG_CLK_ENABLE();
-    break;
-  case (uint32_t)GPIOH:
-    __HAL_RCC_GPIOH_CLK_ENABLE();
     break;
   }
 }

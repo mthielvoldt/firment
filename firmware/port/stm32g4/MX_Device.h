@@ -24,10 +24,7 @@
 
 #define MX_DEVICE_VERSION 0x01000000U
 
-#include <stm32l4xx_hal_gpio.h>
-#include <stm32l4xx_hal_gpio_ex.h>
-#include <stm32l4xx_hal_dma.h>
-#define CMSIS_device_header <stm32l4xx.h>
+#define CMSIS_device_header <stm32g4xx.h>
 
 #include <comm_pcbDetails.h>  // FMT_USES_<transport>
 
