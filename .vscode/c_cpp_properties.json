@@ -219,7 +219,7 @@
           "cStandard": "c11",
           "cppStandard": "c++11",
           "defines": [
-              "STM32L476xx"
+              "STM32G431xx"
           ]
         },
         //HOST
