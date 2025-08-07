@@ -27,10 +27,6 @@ void subClearToSendISR(void);
 /* Public function definitions */
 bool fmt_initSpi(spiCfg_t cfg)
 {
-  // This init starts transactions, so queue needs to be already initialized.
-  if (!sendQueue)
-    return false;
-
   spi = cfg.spiModule;
   clearToSendIocId = cfg.clearToSendIocId;
   msgWaitingIocId = cfg.msgWaitingIocId;

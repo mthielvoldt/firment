@@ -41,9 +41,6 @@ static inline bool rxErrors(uint32_t event);
 bool fmt_initUart(const uartCfg_t *config)
 {
   initialized = false;
-  // This init starts transactions, so queue needs to be already initialized.
-  if (!sendQueue)
-    return false;
 
   uart = config->driver;
   uint32_t uartEventIRQn = port_getUartEventIRQn(config->driverId);

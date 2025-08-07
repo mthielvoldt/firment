@@ -127,7 +127,8 @@ bool fmt_initComms(void)
   ASSERT_ARM_OK(crc->Initialize());
   ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
 #endif
-  ASSERT_SUCCESS(fmt_linkTransport(sendQueue, acceptMsgIfValid));
+  ASSERT_SUCCESS(
+    fmt_linkTransport && fmt_linkTransport(sendQueue, acceptMsgIfValid));
   return true;
 }
 

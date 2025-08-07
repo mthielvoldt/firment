@@ -31,11 +31,11 @@ bool comm_init(void)
 {
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
-  success &= fmt_initGpioOutPin(LED_1_PIN_ID, OUTPUT_MODE_PUSH_PULL);
 
-  success &= fmt_initComms(); // links generic comm structs to HW transport.
-
-  success &= project_initTransport(); // Starts comm hardware. After initComms()
+  /* Starts Transport HW listening for Rx, but this data will be dropped until
+  comms is linked in fmt_initComms().*/
+  success &= project_initTransport(); 
+  success &= fmt_initComms(); // links queues transport that must be initialized.
 
   fmt_setBuildIdGetter(getBuildTime);
   return success;
@@ -52,7 +52,7 @@ void comm_handleTelemetry(void)
   case 0:
   {
     rotations++;
-    fmt_setPin(LED_1_PIN_ID, OUTPUT_TOGGLE);
+    fmt_setPin(LED_0_PIN_ID, OUTPUT_TOGGLE);
 
     telem_t telem = ctl_getTelem();
     fmt_sendMsg((const Top){
@@ -85,7 +85,6 @@ void handleWaveformCtl(WaveformCtl msg)
 {
   static float count = 0;
   count++;
-  // fmt_setPin(LED_0_PIN_ID, OUTPUT_TOGGLE);
   fmt_sendLog(LOG_INFO, "WaveformCtl rx cnt: ", count);
 
   const waveShape_t toControlShape[] = {
