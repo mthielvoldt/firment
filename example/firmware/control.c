@@ -1,4 +1,6 @@
 #include "control.h"
+#include <fmt_gpio.h>
+#include <gpio_pcbDetails.h>
 #include <ghostProbe.h>
 
 wave_t channelA = {
@@ -42,6 +44,15 @@ void ctl_init(float waveformUpdateFreq)
   gp_initTestPoint(TestPointId_CHAN_A_PLUS_INV, &chanAOffsetInv, SRC_TYPE_FLOAT);
   gp_initTestPoint(TestPointId_CHAN_B, &chanBOut, SRC_TYPE_FLOAT);
 
+  // Init pins that drive phase gates in a way that they won't turn things on
+  #ifdef PHASE_U_HI_ID
+  fmt_initGpioInPin(PHASE_U_HI_ID, INPUT_MODE_PULL_DOWN);
+  fmt_initGpioInPin(PHASE_U_LO_ID, INPUT_MODE_PULL_DOWN);
+  fmt_initGpioInPin(PHASE_V_HI_ID, INPUT_MODE_PULL_DOWN);
+  fmt_initGpioInPin(PHASE_V_LO_ID, INPUT_MODE_PULL_DOWN);
+  fmt_initGpioInPin(PHASE_W_HI_ID, INPUT_MODE_PULL_DOWN);
+  fmt_initGpioInPin(PHASE_W_LO_ID, INPUT_MODE_PULL_DOWN);
+  #endif
 }
 
 void ctl_setWaveform(waveCfg_t cfg) {
