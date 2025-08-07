@@ -60,7 +60,7 @@ bool uart_hasData(void)
 bool sendPacketUart(uint8_t *packet, size_t size)
 {
   const uint8_t startCode[] = START_CODE;
-  int ret0 = uart_write_bytes(FMT_UART_NUM, &startCode, START_CODE_SIZE);
+  int ret0 = uart_write_bytes(FMT_UART_NUM, startCode, START_CODE_SIZE);
   int ret1 = uart_write_bytes(FMT_UART_NUM, packet, size);
   return ((ret0 > 0) && (ret1 > 0));
 }
