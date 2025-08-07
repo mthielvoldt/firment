@@ -50,7 +50,7 @@
 // #define MX_UART3_PERIPH_CLOCK_FREQ               80000000
 
 
-#define FMT_UART UART3  // NEEDED? 
+#define FMT_DRIVER Driver_USART3
 
 // Following used in port/stm32/gpio_port.c
 #define FMT_UART_GPIO_AF                    GPIO_AF7_USART3

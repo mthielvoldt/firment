@@ -9,13 +9,13 @@
 #include "uart_pcbDetails.h" // replaces RTEDevice.h for ARM SPI driver
 #include <priority.h>
 
-extern ARM_DRIVER_USART Driver_USART3;
+extern ARM_DRIVER_USART FMT_DRIVER;
 
 const uartCfg_t config = {
-    .driverId = 3,
-    .driver = &Driver_USART3,
-    .baudHz = 115200,
-    .irqPriority = spiTxBuf_priority,
+    .driverId = FMT_DRIVER_ID,
+    .driver = &FMT_DRIVER,
+    .baudHz = FMT_BAUD_HZ,
+    .irqPriority = FMT_TRANSPORT_PRIORITY,
 };
 
 bool project_initTransport(void)
