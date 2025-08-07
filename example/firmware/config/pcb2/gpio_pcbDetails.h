@@ -14,9 +14,9 @@
 #define LED_0_PIN_ID 0
 #define LED_1_PIN_ID 1
 
-#define AVAILABLE_GPIOs {           \
-    [LED_0_PIN_ID] = {GPIOC, 10},   \
-    [LED_1_PIN_ID] = {GPIOA, 5},    \
+#define AVAILABLE_GPIOs {         \
+    [LED_0_PIN_ID] = {GPIOA, 5},  \
+    [LED_1_PIN_ID] = {GPIOC, 10}, \
 }
 
 #endif // gpio_pcbDetails_h
