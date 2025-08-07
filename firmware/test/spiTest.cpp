@@ -20,7 +20,7 @@ extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
 
 TEST_GROUP(fmt_spi)
 {
-  bool initSuccess = false;
+  bool initSuccess;
   uint8_t msgWaitingIocId = 0, clearToSendIocId = 1;
   Top emptyMsg, validMsg;
   uint8_t validPacket[MAX_PACKET_SIZE_BYTES];
@@ -39,6 +39,7 @@ TEST_GROUP(fmt_spi)
     validMsg = (const Top){
         .which_sub = Top_Log_tag,
         .sub = {.Log = {.count = 1, .text = "Hey.", .value = 500}}};
+    initSuccess = true;
 
     memset(validPacket, 0, sizeof(validPacket));
     messageToValidPacket(validMsg, validPacket);
@@ -46,7 +47,8 @@ TEST_GROUP(fmt_spi)
     iocTest_setPinState(clearToSendIocId, true);
     fmt_startTxChain = spi_startTxChain;
     fmt_linkTransport = spi_linkTransport;
-    initSuccess = fmt_initComms() && fmt_initSpi(cfg);
+    initSuccess = fmt_initSpi(cfg);
+    initSuccess = initSuccess && fmt_initComms();
   }
   void teardown()
   {
