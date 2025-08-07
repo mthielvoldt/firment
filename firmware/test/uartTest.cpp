@@ -19,7 +19,7 @@ extern FMT_DRIVER_CRC Driver_CRC0; // Need to worry about concurrent access?
 
 TEST_GROUP(fmt_uart)
 {
-  bool initSuccess = false;
+  bool initSuccess = true;
   const uartCfg_t cfg = {
       .driverId = 0,
       .driver = &Driver_UART0, // provided by comm_test_helper.h
@@ -30,7 +30,8 @@ TEST_GROUP(fmt_uart)
   {
     fmt_startTxChain = uart_startTxChain;
     fmt_linkTransport = uart_linkTransport;
-    initSuccess = fmt_initComms() && fmt_initUart(&cfg);
+    initSuccess = fmt_initUart(&cfg);
+    initSuccess = initSuccess && fmt_initComms();
   }
 };
 
