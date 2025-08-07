@@ -11,8 +11,14 @@ endif()
 
 set(HAL_SRC_PREFIX "${HAL_DIR}/Src/${MCU_FAMILY}xx_hal")
 set(CMSIS_DRIVER_DIR "${FAMILY_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
-set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
-set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
+
+if(NOT DEFINED STARTUP_FILE)
+  set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
+endif
+
+if(NOT DEFINED SYSTEM_FILE)
+  set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
+endif()
 
 # Note: In the STM32 ecosystem, there is no equivalent of RTE_Device.h in XMC
 # ecosystem, which combines MCU-wiring information for several peripherals. 
