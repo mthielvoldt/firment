@@ -9,7 +9,7 @@ set(ASSEMBLER_FLAGS "-Wa,-mcpu=cortex-m4")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-declarations")
 set(CMAKE_C_FLAGS_DEBUG "-Og -g")
 
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections,--print-memory-usage")
 # set(COMMON_LINK_OPTIONS "-Wl,-Map=${PROJECT_NAME}.map,--cref,--gc-sections")
 
 if(PCB STREQUAL "0")

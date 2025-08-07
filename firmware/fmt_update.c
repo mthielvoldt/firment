@@ -5,6 +5,25 @@
 #include <stdbool.h>
 #include <cmsis_gcc.h>
 
+static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
+{
+  fmt_sendMsg((const Top){
+      .which_sub = Top_PageStatus_tag,
+      .sub = {
+          .PageStatus = {
+              .pageIndex = pageIndex,
+              .status = status}}});
+}
+
+#if !FMT_UPDATE_SUPPORTED
+bool handleImageData(ImageData msg)
+{
+  sendPageStatus(msg.pageIndex, PageStatusEnum_WRITE_FAIL);
+  return false;
+}
+
+#else // FW update is supported.
+
 #define CHUNKS_PER_PAGE_MAX (UPDATE_PAGE_SIZE / DATA_MSG_PAYLOAD_SIZE_MAX)
 #define PAGES_COUNT_MAX (FMT_IMAGE_DOWNLOAD_PARTITION_SIZE / UPDATE_PAGE_SIZE)
 #define NO_CHUNKS_PROCESSED ((1 << CHUNKS_PER_PAGE_MAX) - 1)
@@ -16,7 +35,6 @@ static callback_t downloadStartCb = NULL;
 static callback_t downloadCompleteCb = NULL;
 
 // Static function prototypes.
-static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status);
 static bool imageDataMsgValid(ImageData *msg);
 static bool allChunksProcessed(void);
 static void prepForNewPage(PageStatusEnum thisPageStatus);
@@ -53,16 +71,6 @@ bool handleImageData(ImageData msg)
     prepForNewPage(PageStatusEnum_WRITE_FAIL);
     return false;
   }
-}
-
-static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
-{
-  fmt_sendMsg((const Top){
-      .which_sub = Top_PageStatus_tag,
-      .sub = {
-          .PageStatus = {
-              .pageIndex = pageIndex,
-              .status = status}}});
 }
 
 /** imageDataMsgValid enforces the following policy on ImageData messages:
@@ -153,3 +161,5 @@ static void processPage(void)
 
   fmt_flash_write(writeAddress, pageBuffer, UPDATE_PAGE_SIZE);
 }
+
+#endif // FMT_UPDATE_SUPPORTED

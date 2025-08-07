@@ -81,14 +81,16 @@ target_link_options(app_root.elf PRIVATE "-T${ROOT_PARTITION_LINKER_FILE}")
 ## Uncomment to see full linker command.
 # target_link_options(app_root.elf PRIVATE "-v")
 
-add_executable(app_offset.elf ${BUILD_TIME_C})
-target_link_libraries(app_offset.elf app_lib)
-target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
-
-add_custom_target(app_elfs DEPENDS app_root.elf app_offset.elf)
-
 # Invoke bootloader build
-add_subdirectory(${MGTBOOT_DIR} mgt-boot)
+if (NOT DEFINED UPDATE_SUPPORTED OR UPDATE_SUPPORTED)
+  add_executable(app_offset.elf ${BUILD_TIME_C})
+  target_link_libraries(app_offset.elf app_lib)
+  target_link_options(app_offset.elf PRIVATE "-T${APP_PARTITION_LINKER_FILE}")
+
+  add_custom_target(app_elfs DEPENDS app_root.elf app_offset.elf)
+
+  add_subdirectory(${MGTBOOT_DIR} mgt-boot)
+endif()
 
 # Example UI
 set(EXAMPLE_UI_DIR ${PROJECT_SOURCE_DIR}/web-ui)

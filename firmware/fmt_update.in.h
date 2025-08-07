@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 // Source: project-level .cmake (these values shared with bootloader).
+#define FMT_UPDATE_SUPPORTED @UPDATE_SUPPORTED@
 #define FMT_IMAGE_DOWNLOAD_ADDRESS @PARTITION_UPDATE_ADDRESS@
 #define FMT_IMAGE_DOWNLOAD_PARTITION_SIZE @PARTITION_SIZE@
 
