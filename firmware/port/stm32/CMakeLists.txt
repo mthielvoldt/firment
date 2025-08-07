@@ -14,7 +14,7 @@ set(CMSIS_DRIVER_DIR "${FAMILY_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
 
 if(NOT DEFINED STARTUP_FILE)
   set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
-endif
+endif()
 
 if(NOT DEFINED SYSTEM_FILE)
   set(SYSTEM_FILE  "${CMSIS_FAMILY_DIR}/Source/Templates/system_${MCU_FAMILY}xx.c")
