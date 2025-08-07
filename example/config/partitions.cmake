@@ -23,6 +23,7 @@
 # Regardless of VT alignment requirement, the minimum IMAGE_HEADER_SIZE is 256.
 
 if(${MCU_VARIANT} STREQUAL "XMC4700")
+  set(UPDATE_SUPPORTED 1)
   set(PARTITION_SIZE              0x40000) # 256kB
   set(SECTOR_SIZE                 0x40000) # 256kB (5.5s erases)
   set(PMEM_ROOT_ADDRESS_DIRECT        0x0C000000) # ARCH_FLASH_OFFSET_DIRECT
@@ -34,6 +35,7 @@ if(${MCU_VARIANT} STREQUAL "XMC4700")
   set(TEST_RESULT_ADDRESS             0x0C01C000) # sector 7 (last 16kB sector)
   set(IMAGE_HEADER_SIZE 1024)
 elseif(${MCU_VARIANT} STREQUAL "stm32l476") # Total: 1M in 2 banks
+  set(UPDATE_SUPPORTED 1)
   set(PARTITION_SIZE              0x40000) # 256kB
   set(SECTOR_SIZE                 0x800) # 2kB (sector = erase block)
   set(PMEM_ROOT_ADDRESS_DIRECT        0x08000000) # bank 1
@@ -44,15 +46,12 @@ elseif(${MCU_VARIANT} STREQUAL "stm32l476") # Total: 1M in 2 banks
   set(PARTITION_BACKUP_ADDRESS        0x080C0000) # bank 2
   set(TEST_RESULT_ADDRESS             0x080FF800) # last page of flash
   set(IMAGE_HEADER_SIZE 512)
-elseif(${MCU_VARIANT} STREQUAL "stm32g431") # Flash total: 128k
-  set(PARTITION_SIZE              0x8000) # 32kB (1/4 of total = 128*256, 16 erase-blocks)
+elseif(${MCU_VARIANT} STREQUAL "stm32g431")
+# Total: 0x20000 (128kB) in 1 bank
+# This is too small to support FW update.
+  set(UPDATE_SUPPORTED 0)
+  set(PARTITION_SIZE              0x20000) # Full flash
   set(SECTOR_SIZE                 0x800) # 2kB (erase block - STM nomen: "page")
   set(PMEM_ROOT_ADDRESS_DIRECT        0x08000000) # bank 1
   set(PMEM_ROOT_ADDRESS_CACHED        0x08000000) # no cache; same as prev.
-  set(TEST_RESULT_ADDRESS             0x08007800) # last page of root partition
-  set(PARTITION_ACTIVE_ADDRESS_DIRECT 0x08008000) # 
-  set(PARTITION_ACTIVE_ADDRESS_CACHED 0x08008000) # no cache; same as prev.
-  set(PARTITION_UPDATE_ADDRESS        0x08010000) # 
-  set(PARTITION_BACKUP_ADDRESS        0x08018000) # 
-  set(IMAGE_HEADER_SIZE 512)
 endif()
