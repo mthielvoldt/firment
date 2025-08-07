@@ -15,7 +15,7 @@ const uartCfg_t config = {
     .driverId = 3,
     .driver = &Driver_USART3,
     .baudHz = 115200,
-    .irqPriority = spiTxBuf_priority,
+    .irqPriority = FMT_TRANSPORT_PRIORITY,
 };
 
 bool project_initTransport(void)

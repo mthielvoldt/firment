@@ -23,7 +23,7 @@ spiCfg_t spiConfig = {
     .baudHz = 1000000,
     .busMode = BUS_MODE_MAIN,
     .ssActiveLow = true,
-    .irqPriority = spiTxBuf_priority,
+    .irqPriority = FMT_TRANSPORT_PRIORITY,
 };
 
 bool project_initTransport(void)
