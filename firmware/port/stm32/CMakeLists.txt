@@ -1,9 +1,14 @@
 
-### This line needs modification when adding a new STM32 family
-# set(CMSIS_FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmsis_device_l4")
+### This File requires:
+# - CMSIS_FAMILY_DIR to be set
 
 set(FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${MCU_FAMILY}")
-set(HAL_DIR "${FAMILY_DIR}/${MCU_FAMILY}xx-hal-driver")
+
+# Allow project to define HAL_DIR if it already has this.
+if(NOT DEFINED HAL_DIR)
+  set(HAL_DIR "${FAMILY_DIR}/${MCU_FAMILY}xx-hal-driver")
+endif()
+
 set(HAL_SRC_PREFIX "${HAL_DIR}/Src/${MCU_FAMILY}xx_hal")
 set(CMSIS_DRIVER_DIR "${FAMILY_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
 set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
