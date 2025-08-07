@@ -20,7 +20,7 @@ int main(void)
 
   // Set periodicA to 1kHz frequency.
   fmt_initPeriodic(PERIODIC_A_TIMER_ID, PERIODIC_A_PERIOD_US, 
-    periodicA_priority, periodicA);
+    PERIODIC_A_PRIORITY, periodicA);
 
 
   ctl_init(WAVE_UPDATE_FREQ);
