@@ -30,7 +30,7 @@
  * - All _PuPd are GPIO_NOPULL.  No pull resistors connected.
  * - All _Speed are GPIO_SPEED_FREQ_LOW. **Not sure why**
  * - Look up the proper _AF value in stm32<fam>xx_hal_gpio_ex.h.  Here's how: 
- *   - Assuming you're using UART3, Search for regex: "GPIO_AF[0-9]_UART3".
+ *   - Assuming you're using UART3, Search for regex: "GPIO_AF[0-9]_US?ART3".
  *   - Inspect each result to find the one that applies to your device.  This 
  *     can be made obvious by defining your device in c_cpp_properties.json
  *     eg: "defines": ["STM32L476xx"].  The right value will be the one search
@@ -45,22 +45,21 @@
 #define HAL_FAMILY_ENABLED
 #include <stm32_hal_dispatch.h>
 
-#define MX_UART3 1
-// #define MX_UART3_PERIPH_CLOCK_FREQ               80000000
-
-
-#define FMT_UART UART3  // NEEDED? 
+#define MX_UART2 1
+#define FMT_DRIVER Driver_USART2
+#define FMT_DRIVER_ID 2
+#define FMT_BAUD_HZ 115200
 
 // Following used in port/stm32/gpio_port.c
-#define FMT_UART_GPIO_AF                    GPIO_AF7_USART3
+#define FMT_UART_GPIO_AF                    GPIO_AF7_USART2
 
-#define FMT_UART_RX_Pin                        PC5
-#define FMT_UART_RX_GPIO_Pin                   GPIO_PIN_5
-#define FMT_UART_RX_GPIOx                      GPIOC
+#define FMT_UART_RX_Pin                        PB4
+#define FMT_UART_RX_GPIO_Pin                   GPIO_PIN_4
+#define FMT_UART_RX_GPIOx                      GPIOB
 
-#define FMT_UART_TX_Pin                        PC4
-#define FMT_UART_TX_GPIO_Pin                   GPIO_PIN_4
-#define FMT_UART_TX_GPIOx                      GPIOC
+#define FMT_UART_TX_Pin                        PB3
+#define FMT_UART_TX_GPIO_Pin                   GPIO_PIN_3
+#define FMT_UART_TX_GPIOx                      GPIOB
 
 
 

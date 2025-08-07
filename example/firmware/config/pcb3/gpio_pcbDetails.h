@@ -12,11 +12,21 @@
 #include <gpio_mcuDetails.h>
 
 #define LED_0_PIN_ID 0
-#define LED_1_PIN_ID 1
+#define PHASE_U_HI_ID 1
+#define PHASE_U_LO_ID 2
+#define PHASE_V_HI_ID 3
+#define PHASE_V_LO_ID 4
+#define PHASE_W_HI_ID 5
+#define PHASE_W_LO_ID 6
 
-#define AVAILABLE_GPIOs {           \
-    [LED_0_PIN_ID] = {GPIOC, 10},   \
-    [LED_1_PIN_ID] = {GPIOA, 5},    \
+#define AVAILABLE_GPIOs {          \
+    [LED_0_PIN_ID] = {GPIOC, 6},   \
+    [PHASE_U_HI_ID] = {GPIOA, 8},  \
+    [PHASE_U_LO_ID] = {GPIOC, 13}, \
+    [PHASE_V_HI_ID] = {GPIOA, 9},  \
+    [PHASE_V_LO_ID] = {GPIOA, 12}, \
+    [PHASE_W_HI_ID] = {GPIOA, 10}, \
+    [PHASE_W_LO_ID] = {GPIOB, 15}, \
 }
 
 #endif // gpio_pcbDetails_h
