@@ -1,5 +1,20 @@
 {
   "configurations": [
+    // pcb0_App
+    {
+      "name": "pcb0_App",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "request": "launch",
+      "serverpath": "JLinkGDBServerCLExe",
+      "executable": "example/build/pcb0/app_root.elf",
+      "interface": "swd",
+      "device": "XMC4700-2048",
+      "preLaunchTask": "build pcb0",
+      "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
+      "showDevDebugOutput": "raw",
+      // "runToEntryPoint": "main"
+    },
     // pcb1_App
     {
       "name": "pcb1_App",
@@ -32,14 +47,31 @@
         "target/stm32l4x.cfg",
       ]
     },
+    // pcb3_App
     {
-      "name": "stmFact-noFlash",
+      "name": "pcb3_App",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "interface": "swd",
+      "device": "STM32G431CB",
+      "cwd": "${workspaceFolder}/example/build/pcb3",
+      "executable": "app_root.elf",
+      "showDevDebugOutput": "raw",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32g4x.cfg",
+      ]
+    },
+    // pcb1_fact_NF
+    {
+      "name": "pcb1_fact_NF",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "openocd",
       "interface": "swd",
       "device": "STM32L476RG",
-      "cwd": "${workspaceFolder}/example/build/stm",
+      "cwd": "${workspaceFolder}/example/build/pcb1",
       "loadFiles": [],
       "symbolFiles": [
         "mgt-boot/bootloader.elf",
@@ -75,21 +107,6 @@
     //     "continue" // Start execution after reset
     //   ],
     // }
-    // pcb0_App
-    {
-      "name": "pcb0_App",
-      "type": "cortex-debug",
-      "servertype": "jlink",
-      "request": "launch",
-      "serverpath": "JLinkGDBServerCLExe",
-      "executable": "example/build/pcb0/app_root.elf",
-      "interface": "swd",
-      "device": "XMC4700-2048",
-      "preLaunchTask": "build pcb0",
-      "svdFile": "firmware/port/XMC4/mtb-xmclib-cat3/CMSIS/Infineon/SVD/XMC4700.svd",
-      "showDevDebugOutput": "raw",
-      // "runToEntryPoint": "main"
-    },
     // xmcFact_noFlash
     {
       "name": "xmcFact_noFlash",
