@@ -23,8 +23,8 @@ add_library(FirmentFW
   firmware/fmt_uart_frame.c
   firmware/fmt_update.c
   firmware/fmt_version.c
-  firmware/fmt_waveform.c
-  firmware/ghostProbe.c
+  $<$<BOOL:${ENABLE_WAVEFORM}>:firmware/fmt_waveform.c>
+  $<$<BOOL:${ENABLE_GHOST_PROBE}>:firmware/ghostProbe.c>
   firmware/queue.c
   ${NANOPB_DIR}/pb_encode.c
   ${NANOPB_DIR}/pb_decode.c
