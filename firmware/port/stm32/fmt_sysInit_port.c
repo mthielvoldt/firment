@@ -3,6 +3,7 @@
 #define HAL_BASE_ENABLED
 #define HAL_RCC_ENABLED
 #define HAL_PWR_ENABLED
+#define HAL_FLASH_ENABLED
 #include <stm32_hal_dispatch.h>
 
 void SystemClock_Config(void);

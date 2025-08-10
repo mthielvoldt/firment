@@ -24,7 +24,11 @@
 
 #define MX_DEVICE_VERSION 0x01000000U
 
+#if defined(stm32g4)
 #define CMSIS_device_header <stm32g4xx.h>
+#elif defined(stm32l4)
+#define CMSIS_device_header <stm32l4xx.h>
+#endif
 
 #include <comm_pcbDetails.h>  // FMT_USES_<transport>
 
