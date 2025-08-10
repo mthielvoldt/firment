@@ -2,14 +2,14 @@
 #ifdef FMT_USES_SPI
 
 // This file's interface
-#include <fmt_spi_port.h>  // port_getSpiEventIRQn
+#include <fmt_spi_port.h> // port_getSpiEventIRQn
 
 // Dependencies
 #include <fmt_gpio_port.h> // port_initSpiPins()
 #include <MX_Device.h>     // spi_pcbDetails.h > MX_SPIx
 #include <stm32l4xx.h>
 #include <stm32l4xx_hal_cortex.h> // HAL_NVIC_EnableIRQ()
-#include <stm32l4xx_hal_dma.h> // DMA_HandleTypeDef (needed by _hal_spi.h)
+#include <stm32l4xx_hal_dma.h>    // DMA_HandleTypeDef (needed by _hal_spi.h)
 #include <stm32l4xx_hal_rcc.h>
 #include <stm32l4xx_hal_spi.h>
 #include <stm32l4xx_hal_spi_ex.h>
@@ -41,6 +41,16 @@ SPI_RESOURCES(3)
 #else
 #error "One of the macros MX_SPI{1,2,3} must be defined as 1."
 #endif
+
+/**
+ * Provided so firment's port library can be used to fully replace a different
+ * lib's init of SPI.  This would be done with link ordering in CMakeLists
+ * Note this function's prototype is in _hal_spi.h
+ */
+void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
+{
+  (void)hspi;
+}
 
 bool port_initSpiModule(spiCfg_t *cfg)
 {

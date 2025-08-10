@@ -1,6 +1,6 @@
 #define HAL_FAMILY_ENABLED
 #define HAL_CORTEX_ENABLED // HAL_NVIC_EnableIRQ()
-#define HAL_DMA_ENABLED // DMA_HandleTypeDef (needed by _hal_uart.h)
+#define HAL_DMA_ENABLED    // DMA_HandleTypeDef (needed by _hal_uart.h)
 #define HAL_RCC_ENABLED
 #define HAL_UART_ENABLED
 #include <comm_pcbDetails.h>
@@ -23,11 +23,11 @@ typedef struct
 static hwInfo_t getHWInfo(uint8_t driverId);
 
 /* STM32.c doesn't provide IRQHandlers (you're expected to use CubeMX)*/
-#define UART_RESOURCES(n)          \
+#define UART_RESOURCES(n)           \
   UART_HandleTypeDef huart##n;      \
   void USART##n##_IRQHandler(void); \
   void USART##n##_IRQHandler(void)  \
-  {                               \
+  {                                 \
     HAL_UART_IRQHandler(&huart##n); \
   }
 
@@ -41,6 +41,16 @@ UART_RESOURCES(3)
 #error "One of the macros MX_UART{1,2,3} must be defined as 1."
 #endif
 
+/**
+ * Provided so firment's port library can be used to fully replace a different
+ * lib's use of the UART.  This would be done with link ordering in CMakeLists
+ * Note this function's prototype is in _hal_uart.h
+ */
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+  (void)huart;
+}
+
 bool port_initUartModule(const uartCfg_t *config)
 {
   hwInfo_t info = getHWInfo(config->driverId);
@@ -49,7 +59,7 @@ bool port_initUartModule(const uartCfg_t *config)
   /*
   Initialize huart->Init with a minimal valid config because the CMSIS
   driver calls HAL_UART_Init() several times, only setting a couple settings at
-  at time, so if these huart elements start out invalid, the first CMSIS Init, 
+  at time, so if these huart elements start out invalid, the first CMSIS Init,
   (or Control) call will fail early and not do its job.
   NOTE this sets all non-designated elements to 0 (defaults) */
   huart->Instance = info.module;
@@ -81,12 +91,12 @@ uint32_t port_getUartEventIRQn(uint8_t fmtUartId)
 
 hwInfo_t getHWInfo(uint8_t driverId)
 {
-#define CASE_UART(n)                 \
-  case n:                           \
-    return (hwInfo_t){              \
+#define CASE_UART(n)                  \
+  case n:                             \
+    return (hwInfo_t){                \
         .irqNumber = USART##n##_IRQn, \
         .huart = &huart##n,           \
-        .module = USART##n,        \
+        .module = USART##n,           \
     };
 
   switch (driverId)
