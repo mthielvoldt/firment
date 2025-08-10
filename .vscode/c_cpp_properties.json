@@ -105,7 +105,7 @@
           "cStandard": "c11",
           "cppStandard": "c++11",
           "defines": [
-              "XMC4700_F144x2048"
+              "XMC4700_F144x2048", "XMC4",
           ]
         },
         //PCB1
@@ -143,7 +143,7 @@
           "cStandard": "c11",
           "cppStandard": "c++11",
           "defines": [
-              "STM32L476xx"
+              "STM32L476xx", "stm32l4"
           ]
         },
         //PCB2
@@ -181,7 +181,7 @@
           "cStandard": "c11",
           "cppStandard": "c++11",
           "defines": [
-              "STM32L476xx"
+              "STM32L476xx", "stm32l4"
           ]
         },
         //PCB3
@@ -219,7 +219,7 @@
           "cStandard": "c11",
           "cppStandard": "c++11",
           "defines": [
-              "STM32G431xx"
+              "STM32G431xx", "stm32g4"
           ]
         },
         //HOST

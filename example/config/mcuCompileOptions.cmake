@@ -30,7 +30,7 @@ elseif(PCB STREQUAL "1" OR PCB STREQUAL "2")
   add_compile_definitions("STM32L476xx")
   
   set(PORT_DIR ${FIRMENT_DIR}/firmware/port/stm32)
-  set(CMSIS_FAMILY_DIR "${PORT_DIR}/../stm32l4/cmsis_device_l4")
+  set(CMSIS_FAMILY_DIR "${PORT_DIR}/../stm32/cmsis_device_l4")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32L476XX_FLASH.ld.in)
 
@@ -40,10 +40,12 @@ elseif(PCB STREQUAL "3")
   add_compile_definitions("STM32G431xx")
   
   set(PORT_DIR ${FIRMENT_DIR}/firmware/port/stm32)
-  set(CMSIS_FAMILY_DIR "${PORT_DIR}/../stm32g4/cmsis-device-g4")
+  set(CMSIS_FAMILY_DIR "${PORT_DIR}/../stm32/cmsis-device-g4")
   set(LINKER_SCRIPT_TEMPLATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32G431XX_FLASH.ld.in)
 endif()
+
+add_compile_definitions("${MCU_FAMILY}")
 
 message(STATUS "PCB: ${PCB}")
 message(STATUS "MCU: ${MCU_VARIANT}")

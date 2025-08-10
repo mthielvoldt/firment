@@ -2,15 +2,13 @@
 ### This File requires:
 # - CMSIS_FAMILY_DIR to be set
 
-set(FAMILY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${MCU_FAMILY}")
-
 # Allow project to define HAL_DIR if it already has this.
 if(NOT DEFINED HAL_DIR)
-  set(HAL_DIR "${FAMILY_DIR}/${MCU_FAMILY}xx-hal-driver")
+  set(HAL_DIR "${MCU_FAMILY}xx-hal-driver")
 endif()
 
 set(HAL_SRC_PREFIX "${HAL_DIR}/Src/${MCU_FAMILY}xx_hal")
-set(CMSIS_DRIVER_DIR "${FAMILY_DIR}/../stm32/CMSIS-Driver_STM32/Drivers")
+set(CMSIS_DRIVER_DIR "CMSIS-Driver_STM32/Drivers")
 
 if(NOT DEFINED STARTUP_FILE)
   set(STARTUP_FILE "${CMSIS_FAMILY_DIR}/Source/Templates/gcc/startup_${MCU_VARIANT}xx.s" PARENT_SCOPE)
@@ -46,29 +44,29 @@ add_library(MCUPort
   ${HAL_SRC_PREFIX}_uart.c
   ${HAL_SRC_PREFIX}_uart_ex.c
   ../common/flash_common.c
-  ${FAMILY_DIR}/fmt_crc_port.c
-  ${FAMILY_DIR}/fmt_flash_port.c
-  ${FAMILY_DIR}/fmt_periodic_port.c
-  ${FAMILY_DIR}/fmt_sysInit_port.c
-  ${FAMILY_DIR}/gpio_port.c
+  fmt_crc_port.c
+  fmt_flash_port.c
+  fmt_periodic_port.c
+  fmt_sysInit_port.c
+  gpio_port.c
 )
 
 if(FMT_TRANSPORT STREQUAL "SPI")
   target_sources(MCUPort PRIVATE
     ${CMSIS_DRIVER_DIR}/SPI_STM32.c
-    ${FAMILY_DIR}/fmt_spi_port.c
-    ${FAMILY_DIR}/ioc_port.c
+    fmt_spi_port.c
+    ioc_port.c
   )
 elseif(FMT_TRANSPORT STREQUAL "UART")
 target_sources(MCUPort PRIVATE
     ${CMSIS_DRIVER_DIR}/USART_STM32.c
-    ${FAMILY_DIR}/fmt_uart_port.c
+    fmt_uart_port.c
   )
 endif()
 
 target_include_directories(MCUPort
   PUBLIC
-    ${FAMILY_DIR}
+    .
     ${CMAKE_CURRENT_SOURCE_DIR}/../arm_generic
   PRIVATE
     ../..   # fmt headers.
