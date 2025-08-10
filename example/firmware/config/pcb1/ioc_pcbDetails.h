@@ -11,7 +11,10 @@
 /* Interrupt-on-Change pins.  See ioc_mcuDetails.h for your target hardware.*/
 /* Note: IOC_n_RTE_INDEX should match position of IOC_n in AVAILABLE_IOCs */
 #define MSG_WAIT_IOC_ID 0
+#define MSG_WAIT_IOC_OUT 0
+
 #define CTS_IOC_ID 1
+#define CTS_IOC_OUT 0
 
 #define AVAILABLE_IOCs {        \
     [MSG_WAIT_IOC_ID] = IOC_B11, \

@@ -14,11 +14,14 @@
 #define fmt_transport_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "queue.h"
 
 typedef void(*rxCallback_t)(const uint8_t *rxData);
 
 extern void (*fmt_startTxChain)(void);
 extern bool (*fmt_linkTransport)(queue_t *sendQueue, rxCallback_t rxCallback);
+
+bool fmt_initTransport(void);
 
 #endif  // fmt_transport_H

@@ -47,10 +47,9 @@
 #include <stm32l4xx_hal_gpio_ex.h>
 
 #define MX_UART3 1
-// #define MX_UART3_PERIPH_CLOCK_FREQ               80000000
-
-
 #define FMT_DRIVER Driver_USART3
+#define FMT_DRIVER_ID 3
+#define FMT_BAUD_HZ 115200
 
 // Following used in port/stm32/gpio_port.c
 #define FMT_UART_GPIO_AF                    GPIO_AF7_USART3

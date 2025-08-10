@@ -49,8 +49,11 @@
 #define MX_SPI2 1
 #define MX_SPI2_PERIPH_CLOCK_FREQ               80000000
 
+#define FMT_DRIVER Driver_SPI2
+#define FMT_DRIVER_ID 2
+#define FMT_BAUD_HZ 1000000
 
-#define FMT_SPI SPI2  // NEEDED? 
+
 #define FMT_SPI_GPIO_AF                    GPIO_AF5_SPI2
 
 #define FMT_SPI_MISO_Pin                        PB14
