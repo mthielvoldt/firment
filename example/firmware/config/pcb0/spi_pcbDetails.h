@@ -30,6 +30,10 @@
 #define RTE_SPI4 1 // XMC_SPI2_CH0
 #define RTE_SPI5 0 // XMC_SPI2_CH1
 
+#define FMT_DRIVER Driver_SPI4
+#define FMT_DRIVER_ID 4
+#define FMT_BAUD_HZ 1000000
+
 /** SPI sub-config.
  * RTE_SPIm_TX_ID  select Tx pin (MOSI when main, MISO when sub).
  * RTE_SPIm_RX_ID  select Rx pin (MISO when main, MOSI when sub).

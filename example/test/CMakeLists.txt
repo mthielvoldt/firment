@@ -3,7 +3,7 @@
 add_executable(testExample
   testExample.cpp
   initSpiTest.cpp
-  ../firmware/config/pcb${PCB}/init_transport.c
+  ../../firmware/fmt_transport.c
 )
 
 target_include_directories(testExample PRIVATE 
