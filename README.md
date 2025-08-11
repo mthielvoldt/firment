@@ -165,6 +165,20 @@ The steps are as follows:
  - Add a symlink hack to get gdb back to working. \
  `cd /usr/lib/x86_64-linux-gnu && sudo ln -s libncursesw.so.6 libncursesw.so.5`
 
+# Integrating Firment into a project
+This workflow assumes there is a port that covers the MCU family your project uses.
+The example in firment/example is a good reference.
+
+## CMakeLists.txt
+
+## Cmake Config
+
+## Optional Firment Components
+
+## PCB Details
+
+## Firmware
+
 # Using Firment
 This assumes you are making changes to your message definitions in the .proto files, which requires:
 - Regenerating code for Target, ESP, and Web interface
