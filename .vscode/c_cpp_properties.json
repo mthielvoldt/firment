@@ -131,9 +131,9 @@
             "example/build/pcb1/firment",
             "example/mgt-boot/inc",
             "firmware",
-            "firmware/port/stm32l4",
-            "firmware/port/stm32l4/stm32l4xx-hal-driver/Inc",
-            "firmware/port/stm32l4/cmsis_device_l4/Include", // system.h, device.h
+            "firmware/port/stm32",
+            "firmware/port/stm32/stm32l4xx-hal-driver/Inc",
+            "firmware/port/stm32/cmsis_device_l4/Include", // system.h, device.h
             "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
@@ -169,9 +169,9 @@
             "example/build/pcb2/firment",
             "example/mgt-boot/inc",
             "firmware",
-            "firmware/port/stm32l4",
-            "firmware/port/stm32l4/stm32l4xx-hal-driver/Inc",
-            "firmware/port/stm32l4/cmsis_device_l4/Include", // system.h, device.h
+            "firmware/port/stm32",
+            "firmware/port/stm32/stm32l4xx-hal-driver/Inc",
+            "firmware/port/stm32/cmsis_device_l4/Include", // system.h, device.h
             "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
@@ -207,9 +207,9 @@
             "example/build/pcb3/firment",
             "example/mgt-boot/inc",
             "firmware",
-            "firmware/port/stm32g4",
-            "firmware/port/stm32g4/stm32g4xx-hal-driver/Inc",
-            "firmware/port/stm32g4/cmsis-device-g4/Include", // system.h, device.h
+            "firmware/port/stm32",
+            "firmware/port/stm32/stm32g4xx-hal-driver/Inc",
+            "firmware/port/stm32/cmsis-device-g4/Include", // system.h, device.h
             "firmware/port/stm32/CMSIS-Driver_STM32/Drivers", // CMSIS SPI driver
             "firmware/lib/CMSIS-6.1.0/Core/Include",
             "firmware/lib/CMSIS-6.1.0/Driver/Include",
