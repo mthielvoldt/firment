@@ -131,7 +131,13 @@ static void print_data(esp_mqtt_event_t *event)
   // ESP_LOGI(TAG, "content_type is %.*s", event->property->content_type_len, event->property->content_type);
   // ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
   // ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
-  ESP_LOGI(TAG, "DATA, len=%d Dat=%02x %02x %02x %02x",
+  char *transportMsg[] = {
+    [FMT_UNKNOWN] = "UNKNOWN",
+    [FMT_SPI] = "SPI", 
+    [FMT_UART] = "UART", 
+  };
+  ESP_LOGI(TAG, "Edge-bound via %s, len=%d Dat=%02x %02x %02x %02x",
+          transportMsg[fmtTransport],
            event->data_len,
            event->data[0], event->data[1], event->data[2], event->data[3]);
 }
