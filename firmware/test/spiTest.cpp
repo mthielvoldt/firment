@@ -75,11 +75,6 @@ TEST(fmt_spi, init)
   CHECK_FALSE(fmt_getMsg(&emptyMsg));
 }
 
-TEST(fmt_spi, outOfOrderInit_NoCrash)
-{
-  FAIL("spi will crash if used uninitialized.");
-}
-
 TEST(fmt_spi, msgWaitingTriggersTransfer)
 {
   // Trigger msg-waiting
@@ -162,6 +157,20 @@ TEST(fmt_spi, transfersContinueUntilCTSStopsPulsing)
     iocTest_sendPinPulse(clearToSendIocId, true, MAINTAIN_INDEFINITELY);
 
   CHECK_EQUAL(COUNT_SOME + 1, getCallCount(TRANSFER));
+}
+
+TEST_GROUP(fmt_spi_no_setup) {
+
+};
+TEST(fmt_spi_no_setup, outOfOrderInit_NoCrash)
+{
+  spiCfg_t cfg = {
+    .spiDriverId = 3,
+    .spiModule = &Driver_SPI3,
+    .baudHz = 1000000,
+  };
+  fmt_initComms();
+  fmt_initSpi(cfg);
 }
 /*
 
