@@ -23,7 +23,7 @@ rxParams_t handleRxSegment(const uint8_t *packet)
   {
   case AWAITING_START_CODE:
   {
-    if (memcmp(packet, (const uint8_t[])START_CODE, START_CODE_SIZE) == 0)
+    if (memcmp(packet, (const uint8_t[]){START_CODE}, START_CODE_SIZE) == 0)
       return getLengthPrefix();
     break;
   }

@@ -82,7 +82,7 @@ bool uart_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
 
 void uart_startTxChain(void)
 {
-  static uint8_t txPacket[UART_PACKET_SIZE] = START_CODE;
+  static uint8_t txPacket[UART_PACKET_SIZE] = {START_CODE};
 
   bool ready = !uart->GetStatus().tx_busy;
   if (ready)
