@@ -2,12 +2,20 @@
 An opinionated firmware framework that uses web interfaces to ease development and testing.
 
 ## Guiding Principles
-- GUIs are important, firmware customers need something graphical.
-- Use a web interface to avoid constantly building and distributing native GUI versions.
+### GUIs
+- Support GUIs for FW stakeholders that advertise the FW's capabilities.
+- Use a web GUIs to avoid constantly building and distributing native GUI versions.
+### Testing
 - Facilitate end-to-end testing early in the project to exercise and stabilize interfaces.
-- Make a reasonable effort to containerize tools.
+- Let unit testing inform the project's structure.
+### Adaptability
+- Developers should be free to choose the OS for their dev machines.
+- Be able to support a variety of MCUs from different manufacturers.
+### Data Interfaces
 - Be declarative about messages; generate message-handling code.
-- Use existing abstractions (CMSIS) to generalize this project.
+- Use DRY comms to keep data volume down; send messages only when things change.
+- Receivers should respond quickly to commands.
+- It's ok if the protocol has features in all transports that only some need - extra bytes are ok.
 
 ## Firment-assisted workflow
 1. Start services:
