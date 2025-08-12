@@ -37,6 +37,7 @@ add_executable(testFirment
   ../firmware/test/queueTest.cpp
   ../firmware/test/spiTest.cpp
   ../firmware/test/uartTest.cpp
+  ../firmware/test/uartFrameTest.cpp
   ../firmware/test/stub_comms.c
   ../firmware/test/updateTest.cpp
   ../firmware/test/versionTest.cpp
