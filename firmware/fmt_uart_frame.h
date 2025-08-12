@@ -5,8 +5,8 @@
 #include "fmt_sizes.h"
 #include <stdint.h>
 
-#define START_CODE_SIZE 2U
-#define START_CODE 0xBE, 0xAD
+#define START_CODE_SIZE 1U
+#define START_CODE 0xBE
 #define START_CODE_POSITION 0
 
 // Must come after #include "fmt_sizes.h"  start code is a special uart feature.
