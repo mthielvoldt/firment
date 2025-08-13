@@ -131,6 +131,11 @@ def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
         <p>{field.name + " "}<span>{{{message_name}State.{field.name}.toPrecision(4)}}</span></p>
       </div>
       '''
+    if field.type == FieldDescriptor.TYPE_BOOL:
+      initial_state[field.name] = False
+      field_strings += f'''
+      {{{message_name}State.{field.name} && <p>{field.name}</p>}}
+      '''
     if field.type == FieldDescriptor.TYPE_ENUM:
       initial_state[field.name] = 0   
       field_strings += f'''
@@ -140,10 +145,11 @@ def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       '''
   # enum_name = ""
   # enum = next(enum for enum in proto.enum_type if enum.name == enum_name)
+  initial_state_str = str(initial_state).replace("True", "true").replace("False","false")
   
   return f'''
 export function {message_name}({{}}) {{
-  const [{message_name}State, {setState}] = useState({initial_state});
+  const [{message_name}State, {setState}] = useState({initial_state_str});
   useEffect( () => {{
     setMessageHandler("{message_name}", {setState});
   }}, []);

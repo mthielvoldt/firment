@@ -30,6 +30,8 @@ message WaveformTlm {
   WaveShape shape = 3;
   float voltageV = 1;
   sint32 currentMa = 2;
+  bool ChannelAFault = 4;
+  bool ChannelBFault = 5;
 }
 
 
