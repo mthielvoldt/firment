@@ -1,7 +1,6 @@
-#pragma once
+#ifndef ghostProbe_H
+#define ghostProbe_H
 
-#include <gp_config.h>
-// TODO: rename mcu_1 to something like projectMessages.proto
 #include <messages.pb.h>
 
 #include <stdint.h>
@@ -37,3 +36,5 @@ void gp_initTestPoint(TestPointId id, void *src, srcType_t type);
 void handleRunScanCtl(RunScanCtl scanCtl);
 
 void gp_periodic(void);
+
+#endif // ghostProbe_H
