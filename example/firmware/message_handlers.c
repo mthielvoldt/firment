@@ -57,7 +57,9 @@ void comm_handleTelemetry(void)
             .WaveformTlm = {
                 .shape = WaveShape_SINE,
                 .currentMa = telem.currentMa,
-                .voltageV = telem.voltage}}});
+                .voltageV = telem.voltage,
+                .ChannelBFault = true,
+            }}});
 
     break;
   }
