@@ -89,7 +89,7 @@ configure_file(web-ui/src/updatePage.ts.in
 
 target_include_directories(FirmentFW 
   PRIVATE
-    ${APP_FW_CONFIG_DIR} # fmt_rx.pb.c > project_comms.h
+    ${APP_FW_CONFIG_DIR} # fmt_rx.pb.c > message_handlers.h
     ${APP_FW_CONFIG_DIR}/pcb${PCB}  # <feat>pcbDetails.h
   PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR} #  fmt_rx_pb.c > fmt_spi.h > messages.pb.h
