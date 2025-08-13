@@ -13,7 +13,7 @@
  * - periodic telemetry (unrequested)
  * - conditional-triggered alerts
  */
-#include "project_comms.h"
+#include "message_handlers.h"
 #include "control.h"
 #include <fmt_comms.h>
 #include <fmt_log.h>

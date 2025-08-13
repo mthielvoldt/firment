@@ -7,7 +7,7 @@
 #include <fmt_comms.h>       // fmt_getMsg()
 #include <fmt_log.h>       // fmt_sendLog()
 #include <ghostProbe.h>    // handleRunScanCtl()
-#include <project_comms.h> // all project-specific handlers
+#include <message_handlers.h> // all project-specific handlers
 
 void fmt_handleRx(void)
 {

@@ -47,7 +47,7 @@ include(bootloaderMcuPort.cmake) # provides mcu_port_lib required by mgt_boot.
 add_library(app_lib 
 ${STARTUP_FILE}
 firmware/spi_example.c
-firmware/project_comms.c
+firmware/message_handlers.c
 firmware/control.c
 )
 target_include_directories(app_lib 
