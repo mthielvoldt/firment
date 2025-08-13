@@ -3,7 +3,7 @@
 import sys
 from typing import Dict
 from google.protobuf.compiler.plugin_pb2 import CodeGeneratorResponse, CodeGeneratorRequest
-from google.protobuf.descriptor_pb2 import FileDescriptorProto, DescriptorProto, EnumDescriptorProto
+from google.protobuf.descriptor_pb2 import FileDescriptorProto, DescriptorProto, EnumDescriptorProto, FieldDescriptorProto
 from google.protobuf.descriptor import FieldDescriptor
 
 
@@ -34,7 +34,7 @@ def get_message_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptor
   if message.name.endswith("Ctl"):
     return get_ctl_widget(message, enums)
   elif message.name.endswith("Tlm"):
-    return get_tlm_widget(message)
+    return get_tlm_widget(message, enums)
   else:
     return "" # Perhaps an error?
 
@@ -74,12 +74,7 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       <br/>'''
     if field.type == FieldDescriptor.TYPE_ENUM:
       initial_state[field.name] = 0
-
-      # TODO: extract next 4 to a function
-      options = ""
-      for value in enums[field.type_name[1:]].value:
-        options += f'''
-          <option value="{value.number}">{value.name}</option>'''
+      options = get_options_from_enum(enums, field)
         
       field_strings += f'''
       <label>
@@ -113,7 +108,7 @@ export function {message.name}({{}}) {{
 }}
 '''
 
-def get_tlm_widget(message: DescriptorProto):
+def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProto]):
   # spec a div with a name
   message_name = message.name
   field_strings = ""
@@ -136,6 +131,13 @@ def get_tlm_widget(message: DescriptorProto):
         <p>{field.name + " "}<span>{{{message_name}State.{field.name}.toPrecision(4)}}</span></p>
       </div>
       '''
+    if field.type == FieldDescriptor.TYPE_ENUM:
+      initial_state[field.name] = 0   
+      field_strings += f'''
+      <div className="field">
+        <p>{field.name + " "}<span>{{{message_name}State.{field.name}}}</span></p>
+      </div>
+      '''
   # enum_name = ""
   # enum = next(enum for enum in proto.enum_type if enum.name == enum_name)
   
@@ -154,6 +156,13 @@ export function {message_name}({{}}) {{
   );
 }}
 '''
+
+def get_options_from_enum(enums, field: FieldDescriptorProto):
+  options = ""
+  for value in enums[field.type_name[1:]].value:
+    options += f'''
+      <option value="{value.number}">{value.name}</option>'''
+  return options
   
 def digest_proto(proto: FileDescriptorProto):
   ret = ""
