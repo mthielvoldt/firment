@@ -23,7 +23,6 @@
 #include <gpio_pcbDetails.h>
 #include <core_port.h> // NVIC_SystemReset()
 #include <build_time.h>
-#include "fmt_transport.h"
 
 #define CALLS_PER_FULL_ROTATION 1000U
 
@@ -32,9 +31,6 @@ bool comm_init(void)
   bool success = true;
   success &= fmt_initGpioOutPin(LED_0_PIN_ID, OUTPUT_MODE_PUSH_PULL);
 
-  /* Starts Transport HW listening for Rx, but this data will be dropped until
-  comms is linked in fmt_initComms().*/
-  success &= fmt_initTransport(); 
   success &= fmt_initComms(); // links queues transport that must be initialized.
 
   fmt_setBuildIdGetter(getBuildTime);
