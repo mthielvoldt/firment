@@ -147,6 +147,16 @@ For code-following (intellisense) to work well, you need to add a few items:
   - "USE_FIRMENT_COMMS"
   - ${MCU_FAMILY} (from mcuCompileOptions.cmake)
 
+## Add a Web-UI
+- Copy firment/example/web-ui to your project
+- Edit src/App.tsx
+  - Change the h1 to something project appropriate
+  - Replace the irrelevant (Waveform) widgets with relevant ones.
+- Edit title and icon in `index.html`
+- Edit `package.json` to correct the relative path to "firment-ui" dependency (eg. '../firment/web-ui')
+- npm install 
+- npm run dev
+
 
 # Writing a new Port
 Firment provides drivers for Infineon XMC4000 STM32L4 series MCUs.  If your project isn't one of those, a new port will be required.  This port will be located in `firmware/port/`.  It should feature the following components, each discussed in more depth below: 
