@@ -47,6 +47,107 @@ Firment provides two cmake targets.
 
 The project that uses Firment must specify, by way of the PORT_DIR cmake variable, which port for FirmentFW to link against.
 
+
+# Integrating Firment into a project
+====================================
+This workflow assumes there is a port that covers the MCU family your project uses.
+The example in firment/example is a good reference.
+
+## CMakeLists.txt
+1. __Set `PROJECT_CONFIG_DIR`__  This is where firmentConfig.cmake, mcuCompileOptions.cmake... live.  Use an absolute path here, as this variable is used in subdirectories. 
+2. __Set the project version__  This is necessary because firment generates code for transmitting this version from the firmware.  This must be a major.minor.patch form (1.2.3).  If you do it before the `project()` call you can specify it in that call.  config/version.cmake will read a text file into a variable named VERSION_SEM for you.  
+3. __Include the needed config files__ The minimum is `firmentConfig.cmake` and `mcuCompileOptions.cmake`.
+4. __`add_subdirectory()` port, firment__ Firment comprises two library targets: a "port" that provides code specific to the MCU family (STM32L4, XMC4000...) and the "FirmentFW" that is hardware-agnostic logic.
+5. __Add soruce(s) to executable__: You are free to name your file(s) as desired, but I suggest starting with just `message_handlers.c` as message handler functions is most of what will be in there.
+6. __Link project against firment__: Use `target_link_libraries(<project target> FirmentFW MCUPort`.
+7. __Define USE_FIRMENT_COMMS__: This is a macro for turning firment on and off in your code.`target_compile_definitions()`.
+
+## Configuring Firment
+Firment is configured by the files in PROJECT_CONFIG_DIR that you set above.
+1. __firmentConfig.cmake__: 
+  - Paths to various directories that live outside firment in your project.  *Note* PORT specifies which MCU family is supported.
+  - Optional Firment modules: you can turn off certain firment parts.
+  - Sizes of protocol items
+2. mcuCompileOptions.cmake: 
+3. __priority.h__ This should be a full-project-aware file so NVIC priorities can be understood at a glance in the context of all others.  It is nominally located in PROJECT_CONFIG_DIR/.  Macro `FMT_TRANSPORT_PRIORITY` sets the priority of IRQs that firment handles. 
+
+## Add PCB Details
+- __Vendor Hal Configs__ some vendor HALs need headers of specific names to be includable with specific content.  For example, `stm32g4xx_hal_conf.h`.  You can either copy it to PCB_DIR/ or add `target_include_directories()` to add the path to the existing file in your project to MCUPort target.
+- __`comm_pcbDetails.h`__ specifies which type of transport {spi, uart} firment will use, and includes the relevant pcbDetails file (see next).
+- __Transport Details__ `uart_pcbDetails.h` or `spi_pcbDetails.h` must be provided, and aligned with the transport selected in the previous step.
+- __`timer_pcbDetails.h`__ (optional) Add if your project uses firment's periodic lib.
+- __`gpio_pcbDetails.h`__  (optional) Add if your project uses firments GPIO lib.
+
+## Modify Project Sources
+The following assumes Firment will take over hardware resources that your project had been previously using.  In the examples, Firment is taking over USART2.  This is the compex case - if firment is not stealing HW modules from other code, you only need steps 1,2 in main.c
+
+### main.c (top level file)
+1. Include message_handlers.h from APP_FW_CONFIG_DIR (specified in firmentConfig.cmake)
+2. Call your comms init function (you name this, it lives in your message_handlers.c).
+3. #ifndef-guard global declarations of handles to HW resources firment will use.  For example: 
+```
+#ifndef USE_FIRMENT_COMMS
+UART_HandleTypeDef huart2;
+#endif
+```
+4. #ifndef-guard any initialization code referencing resources firment is taking over.
+
+### IRQHandlers
+Firment needs to have its code run when the IRQ from the transport HW happens.  In most cases, you also want to prevent the original IRQHandler code from running.  A targeted way to do this is to re-name the original IRQHandler with a #define.  This will prevent the linker from finding the original function. 
+```
+// In the .c file where USART2_IRQHandler() is defined.
+#ifdef USE_FIRMENT_COMMS
+#define USART2_IRQHandler static __attribute__((unused)) overriddenFunction
+#endif
+```
+
+### Init functions called by Vendor's HAL
+Some vendors (STM32 for example) expect you to use their BSP to generate init code, and their HAL calls the generated init functions.  This is a similar situation as with the IRQHandlers: the original init must be prevented from running, or it will likely clobber Firment's HW configuration.  I recommend the same technique as above to unlink the original function.
+```
+// In the .c file where HAL_UART_MspInit() is defined.
+#ifdef USE_FIRMENT_COMMS
+#define HAL_UART_MspInit static __attribute__((unused)) overriddenFunction
+#endif
+```
+
+## Add Messages and Handlers
+Messages are defined in PROJECT_CONFIG_DIR/messages.proto.  
+
+### Control Messages 
+Messages that end with "Ctl" are built in the web-UI and are received and decoded by the device.  Each control message needs the following to be handled by the firmware:
+```
+// message_handlers.h
+#define USE_ExampleCtl
+void handleExampleCtl(ExampleCtl msg);
+```
+```
+// message_handlers.c
+void handleExampleCtl(ExampleCtl msg)
+{
+  // your business logic
+}
+```
+If a certain control message isn't relevant to a specific device, (for example if different types of devices share a bus and therefore a message-set), you simply don't add anything referencing that message.
+
+### Telemetry Messages
+Messages ending in "Tlm" are built and sent by device firmware and received, decoded and displayed by the web-ui.  Because the firmware initiates the sending of telemetry, these messages are commonly assembled in a function that is called periodically by your project code.
+
+### Init function
+Somewhere in your project you need to call `fmt_initComms()`.  A natural place is in an init function that you write in message_handlers.c.  You write this function because this is also a good place to init other resources you might want associated with comms events.
+
+## Editor Setup
+For code-following (intellisense) to work well, you need to add a few items:
+- includePaths
+  - build/pcb#/firment
+  - firment/firmware
+  - firment/firmware/port
+  - firment/protocol/nanopb
+  - pcbDetails dir
+- defines
+  - "USE_FIRMENT_COMMS"
+  - ${MCU_FAMILY} (from mcuCompileOptions.cmake)
+
+
 # Writing a new Port
 Firment provides drivers for Infineon XMC4000 STM32L4 series MCUs.  If your project isn't one of those, a new port will be required.  This port will be located in `firmware/port/`.  It should feature the following components, each discussed in more depth below: 
 - CMakeLists.txt
@@ -173,19 +274,6 @@ The steps are as follows:
  - Add a symlink hack to get gdb back to working. \
  `cd /usr/lib/x86_64-linux-gnu && sudo ln -s libncursesw.so.6 libncursesw.so.5`
 
-# Integrating Firment into a project
-This workflow assumes there is a port that covers the MCU family your project uses.
-The example in firment/example is a good reference.
-
-## CMakeLists.txt
-
-## Cmake Config
-
-## Optional Firment Components
-
-## PCB Details
-
-## Firmware
 
 # Using Firment
 This assumes you are making changes to your message definitions in the .proto files, which requires:
