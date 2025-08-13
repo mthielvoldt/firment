@@ -55,6 +55,7 @@ void comm_handleTelemetry(void)
         .which_sub = Top_WaveformTlm_tag,
         .sub = {
             .WaveformTlm = {
+                .shape = WaveShape_SINE,
                 .currentMa = telem.currentMa,
                 .voltageV = telem.voltage}}});
 
