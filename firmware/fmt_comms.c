@@ -127,8 +127,14 @@ bool fmt_initComms(void)
   ASSERT_ARM_OK(crc->Initialize());
   ASSERT_ARM_OK(crc->PowerControl(ARM_POWER_FULL));
 #endif
-  if (fmt_linkTransport != NULL)
-    ASSERT_SUCCESS( fmt_linkTransport(sendQueue, acceptMsgIfValid));
+
+  /* fmt_initTransport does the appropriate init for the transport selected in
+  comm_pcbDetails.h (spi, uart).  It assigns fmt_linkTransport to a transport-specific function*/
+
+  if (fmt_linkTransport == NULL)
+    ASSERT_SUCCESS(fmt_initTransport());
+
+  ASSERT_SUCCESS(fmt_linkTransport(sendQueue, acceptMsgIfValid));
   return true;
 }
 
