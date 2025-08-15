@@ -9,11 +9,13 @@ interface Props {
   xLabels: AxisLabel[];
   yLabels: AxisLabel[];
   traces: Trace[];
+  yScale: number;
+  yOffset: number;
 };
 
 let wglp: WebglPlot;
 
-function updateGridlines(xLabels: AxisLabel[], yLabels: AxisLabel[]) {
+function updateGridlines({xLabels, yLabels, yScale, yOffset}: Props) {
   const xGrid = new WebglLine(gridColor, 2 * xLabels.length);
 
   let rising = true;
@@ -28,6 +30,8 @@ function updateGridlines(xLabels: AxisLabel[], yLabels: AxisLabel[]) {
   }
 
   const yGrid = new WebglLine(gridColor, 2 * yLabels.length);
+  yGrid.scaleY = yScale;
+  yGrid.offsetY = yOffset;
   let leftToRight = true;
   for (let gridLineIndex = 0; gridLineIndex < yLabels.length; gridLineIndex++) {
     const point0Index = gridLineIndex * 2;
@@ -44,7 +48,7 @@ function updateGridlines(xLabels: AxisLabel[], yLabels: AxisLabel[]) {
   wglp && wglp.addAuxLine(yGrid);
 }
 
-function updateDataLines(traces: Trace[], numPoints: number) {
+function updateDataLines({traces, numPoints, yScale, yOffset}: Props) {
   if (!wglp) return;
 
   wglp.removeDataLines();
@@ -52,6 +56,8 @@ function updateDataLines(traces: Trace[], numPoints: number) {
   traces.forEach((trace, traceIdx) => {
     const color = getPlotColors(traceIdx);
     const line = new WebglLine(color, numPoints);
+    line.scaleY = yScale;
+    line.offsetY = yOffset;
     wglp.addLine(line);
     line.arrangeX();
     line.replaceArrayY(trace.data);
@@ -59,8 +65,8 @@ function updateDataLines(traces: Trace[], numPoints: number) {
 }
 
 function updateView(props: Props) {
-  updateGridlines(props.xLabels, props.yLabels);
-  updateDataLines(props.traces, props.numPoints);
+  updateGridlines(props);
+  updateDataLines(props);
   wglp?.update();
 }
 

@@ -11,11 +11,13 @@ import { AxisLabel } from "./axisTools";
 interface Props {
   xLabels: AxisLabel[];
   yLabels: AxisLabel[];
+  yScale: number;
+  yOffset: number;
 };
 
 
 
-export function PlotLabels({ xLabels, yLabels }: Props) {
+export function PlotLabels({ xLabels, yLabels, yScale, yOffset }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
 
   let axisLabels: {top: number, left: number, text: string }[] = [];
@@ -34,7 +36,10 @@ export function PlotLabels({ xLabels, yLabels }: Props) {
 
   const CLEARANCE_FOR_X_LABELS_PX = 8;
   yLabels.forEach((yLabel) => {
-    const top = Math.floor((-yLabel.position + 1) * heightPx / 2);
+    // convert data to gl units
+    const position_gl = (yLabel.position * yScale) + yOffset;
+    // convert to pixels
+    const top = Math.floor((-position_gl + 1) * heightPx / 2);
     axisLabels.push({
       top,
       left: 0,
