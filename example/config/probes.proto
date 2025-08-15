@@ -21,4 +21,6 @@ enum TestPointId {
   CHAN_A_PLUS = 4;
   CHAN_A_PLUS_INV = 5;
   CHAN_B = 6;
+  CHAN_B_AS_INT = 7;
+  CHAN_B_TIMES2 = 8;
 }

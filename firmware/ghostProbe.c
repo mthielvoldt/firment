@@ -21,11 +21,11 @@ void gp_init(uint32_t periodicCallFrequencyHz)
   periodicFreqHz = periodicCallFrequencyHz;
 }
 
-void gp_initTestPoint(TestPointId id, void *src, srcType_t type)
+void gp_initTestPoint(TestPointId id, void *src, srcType_t type, converter_t converterFn)
 {
   if (id < _TestPointId_ARRAYSIZE)
   {
-    testPoints[id] = (const testPoint_t){.src = src, .type = type};
+    testPoints[id] = (const testPoint_t){.src = src, .type = type, .converter = converterFn};
   }
   else
   {
@@ -83,20 +83,28 @@ static ProbeSignal readTestPoint(TestPointId id)
   ProbeSignal signal;
   signal.id = id;
   testPoint_t pad = testPoints[id];
-  switch (pad.type)
+
+  if (pad.converter)
   {
-  case SRC_TYPE_FLOAT:
-    signal.value = *(float *)pad.src;
-    break;
-  case SRC_TYPE_INT8:
-    signal.value = *(int8_t *)pad.src;
-    break;
-  case SRC_TYPE_INT16:
-    signal.value = *(int16_t *)pad.src;
-    break;
-  case SRC_TYPE_INT32:
-    signal.value = *(int32_t *)pad.src;
-    break;
+    signal.value = pad.converter(pad.src);
+  }
+  else
+  {
+    switch (pad.type)
+    {
+    case SRC_TYPE_FLOAT:
+      signal.value = *(float *)pad.src;
+      break;
+    case SRC_TYPE_INT8:
+      signal.value = *(int8_t *)pad.src;
+      break;
+    case SRC_TYPE_INT16:
+      signal.value = *(int16_t *)pad.src;
+      break;
+    case SRC_TYPE_INT32:
+      signal.value = *(int32_t *)pad.src;
+      break;
+    }
   }
   return signal;
 }

@@ -17,9 +17,12 @@ typedef enum _srcType {
   SRC_TYPE_INT32,
 } srcType_t;
 
+typedef float (*converter_t)(void *rawValue);
+
 typedef struct _testPoint {
   void *src;
   srcType_t type;
+  converter_t converter;
 } testPoint_t;
 
 /** Init GhostProbe
@@ -27,7 +30,7 @@ typedef struct _testPoint {
  */
 void gp_init(uint32_t periodicCallFrequencyHz);
 
-void gp_initTestPoint(TestPointId id, void *src, srcType_t type);
+void gp_initTestPoint(TestPointId id, void *src, srcType_t type, converter_t converterFn);
 
 /** Called by generated fmt_rx.pb.c 
  * See fmt_rx.in.c 
