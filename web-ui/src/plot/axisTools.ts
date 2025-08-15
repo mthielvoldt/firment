@@ -1,6 +1,7 @@
+import { Trace } from "./plotModel";
 
 export interface AxisLabel {
-  position: number;
+  position: number; // Same units as the data.
   text: string;
 };
 
@@ -40,25 +41,59 @@ export function calculateXGrid(numPoints: number, canvasLeftDataPos: number) {
   return xLabels;
 }
 
+export function getGlobalMinMax(traces: Trace[]): { min: number; max: number } {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  traces.forEach(trace => {
+    trace.data.forEach(value => {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    });
+  });
+
+  if (min === Number.POSITIVE_INFINITY) min = NaN;
+  if (max === Number.NEGATIVE_INFINITY) max = NaN;
+
+  return { min, max };
+}
+
+/**
+ * @function calculateYGrid
+ * @param minValue the global minimum across all visible trace slices
+ * @param maxValue the global maximum across all visible trace slices
+ * @returns the text and y-position in GL-units. 
+ */
 export function calculateYGrid(minValue: number, maxValue: number) {
-  // WebGL units (2.0 = whole canvas - from -1:1)
-  const rangeHeight = (maxValue - minValue);
-  const gridStep = getNearestStepSize(rangeHeight / minGridlineCountY);
-  const numGridLines = Math.ceil(rangeHeight / gridStep) + 1;
-  const firstLinePos =
-    Math.ceil(maxValue / gridStep) * gridStep;  // top of window.
+
+  // Work in data units at first to have gridlines land on sensible data values.
+  const exactRange_dat = (maxValue - minValue);
+  const gridStep_dat = getNearestStepSize(exactRange_dat / minGridlineCountY);
+  const numGridLines = Math.ceil(exactRange_dat / gridStep_dat) + 1;
   
+  // The window will be from one gridline above maxValue to one gridline below
+  // minValue.  Calculate scale and offset to convert data into gl frame. 
+  const viewRange_dat = (numGridLines - 1) * gridStep_dat;
+  const topLinePos_dat =
+    Math.ceil(maxValue / gridStep_dat) * gridStep_dat;  // top of window.
   
+  const yScale = (2 / viewRange_dat);
+
+  // 1.0(top_gl) = (top_dat * scale) + offset.  Algebra gets you the next line.
+  const yOffset = 1.0 - (topLinePos_dat * yScale);
+
+  console.debug({gridStep_dat, numGridLines, viewRange_dat, topLinePos_dat, yScale})
+
   const yLabels: AxisLabel[] = [];
   for (let gridLineIndex = 0; gridLineIndex < numGridLines; gridLineIndex++) {
-    const yPosGl = firstLinePos - gridLineIndex * gridStep;  // gl units [-1,1]
+    const linePos_dat = topLinePos_dat - gridLineIndex * gridStep_dat;
     
     yLabels.push({
-      position: yPosGl,
-      text: yPosGl.toPrecision(2)
+      position: linePos_dat,
+      text: linePos_dat.toPrecision(2)
     });
   }
-  return yLabels;
+  return {yLabels, yScale, yOffset};
 }
 
 /** Finds the greatest number that's less than the input that is in the set:

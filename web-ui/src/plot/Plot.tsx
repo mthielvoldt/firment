@@ -7,7 +7,7 @@
  * refresh the view when new data comes in.
  */
 import React, { useEffect, useState } from "react";
-import { calculateXGrid, AxisLabel, calculateYGrid } from "./axisTools";
+import { calculateXGrid, AxisLabel, calculateYGrid, getGlobalMinMax } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -21,23 +21,27 @@ import PlotCanvas from "./PlotCanvas";
 interface Grid {
   xLabels: AxisLabel[];
   yLabels: AxisLabel[];
+  yScale: number;
+  yOffset: number;
 };
 interface PlotData {
   grid: Grid;
   traces: model.Trace[];
 };
 
-const emptyGrid: Grid = { xLabels: [], yLabels: [] };
+const emptyGrid: Grid = { xLabels: [], yLabels: [], yScale: 1, yOffset: 0 };
 const emptyPlot: PlotData = { grid: emptyGrid, traces: [] };
 let traceLenAtLastUpdate = 0;
 
 
-function getNewGrid(numPoints: number, canvasLeftDataPos: number): Grid {
-  const xLabels =
-    calculateXGrid(numPoints, canvasLeftDataPos);
-  const yLabels =
-    calculateYGrid(-1, 1.1);
-  return { xLabels, yLabels };
+function getNewGrid(numPoints: number, canvasLeftDataPos: number,
+  traces: model.Trace[]): Grid {
+
+  const xLabels = calculateXGrid(numPoints, canvasLeftDataPos);
+  const { min, max } = getGlobalMinMax(traces);
+  const { yLabels, yScale, yOffset } = calculateYGrid(min, max);
+  // console.debug({min, max, yScale, yOffset});
+  return { xLabels, yLabels, yScale, yOffset };
 }
 
 
@@ -61,6 +65,8 @@ export default function Plot({ }) {
     };
   }, []);
 
+  // Drives updates on a fixed interval.  This interval gets replaced when the
+  // record or numPoints changes.
   useEffect(() => {
     const timerId = setInterval(() => {
       const traceLen = model.getTraceLen(recordId);
@@ -68,7 +74,7 @@ export default function Plot({ }) {
         traceLenAtLastUpdate = traceLen;
         const { traces, indexOfFirstPt } =
           model.getRecordSlice(recordId, numPoints);
-        const grid = getNewGrid(numPoints, indexOfFirstPt);
+        const grid = getNewGrid(numPoints, indexOfFirstPt, traces);
         setPlotData({ grid, traces });
       }
     }, 100);
@@ -96,11 +102,15 @@ export default function Plot({ }) {
           numPoints={numPoints}
           xLabels={plotData.grid.xLabels}
           yLabels={plotData.grid.yLabels}
+          yScale = {plotData.grid.yScale}
+          yOffset={plotData.grid.yOffset}
           traces={plotData.traces}
         />
         <PlotLabels
           xLabels={plotData.grid.xLabels}
           yLabels={plotData.grid.yLabels}
+          yScale = {plotData.grid.yScale}
+          yOffset={plotData.grid.yOffset}
         />
       </div>
       <PlotStats traces={plotData.traces} />
