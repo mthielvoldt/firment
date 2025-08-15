@@ -23,9 +23,10 @@ Here, we calculate the values and mirror them in this static variable so we can
 probe the values with ghostProbe. */
 float chanAOut = 0.0F;
 float chanBOut = 0.0F;
-float chanAInv;
-float chanAOffset;
-float chanAOffsetInv;
+float chanAInv, chanAOffset, chanAOffsetInv;
+int16_t chanB1000xInt;
+
+static float floatTimes2(void *rawValue);
 
 void ctl_init(float waveformUpdateFreq)
 {
@@ -38,11 +39,13 @@ void ctl_init(float waveformUpdateFreq)
   wave_add(&channelB);
   wave_setFrequency(1, 0.15);
 
-  gp_initTestPoint(TestPointId_CHAN_A, &chanAOut, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_CHAN_A_INV, &chanAInv, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_CHAN_A_PLUS, &chanAOffset, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_CHAN_A_PLUS_INV, &chanAOffsetInv, SRC_TYPE_FLOAT);
-  gp_initTestPoint(TestPointId_CHAN_B, &chanBOut, SRC_TYPE_FLOAT);
+  gp_initTestPoint(TestPointId_CHAN_A, &chanAOut, SRC_TYPE_FLOAT, NULL);
+  gp_initTestPoint(TestPointId_CHAN_A_INV, &chanAInv, SRC_TYPE_FLOAT, NULL);
+  gp_initTestPoint(TestPointId_CHAN_A_PLUS, &chanAOffset, SRC_TYPE_FLOAT, NULL);
+  gp_initTestPoint(TestPointId_CHAN_A_PLUS_INV, &chanAOffsetInv, SRC_TYPE_FLOAT, NULL);
+  gp_initTestPoint(TestPointId_CHAN_B, &chanBOut, SRC_TYPE_FLOAT, NULL);
+  gp_initTestPoint(TestPointId_CHAN_B_AS_INT, &chanB1000xInt, SRC_TYPE_INT16, NULL);
+  gp_initTestPoint(TestPointId_CHAN_B_TIMES2, &chanBOut, SRC_TYPE_FLOAT, floatTimes2);
 
   // Init pins that drive phase gates in a way that they won't turn things on
   #ifdef PHASE_U_HI_ID
@@ -71,6 +74,7 @@ void ctl_updateVoltageISR(void)
   chanAOffset = chanAOut + 0.1F;
   chanAOffsetInv = -chanAOffset;
   chanBOut = wave_getValue(&channelB);
+  chanB1000xInt = chanBOut * 1000;
 }
 
 // This is just a prototype.  
@@ -81,4 +85,9 @@ telem_t ctl_getTelem(void)
     .voltage = chanAOut,
     .currentMa = 5
   };
+}
+
+float floatTimes2(void *rawValue)
+{
+  return *(float*)rawValue * 2;
 }
