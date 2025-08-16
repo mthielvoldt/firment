@@ -104,6 +104,15 @@ static ProbeSignal readTestPoint(TestPointId id)
     case SRC_TYPE_INT32:
       signal.value = *(int32_t *)pad.src;
       break;
+    case SRC_TYPE_UINT8:
+      signal.value = *(uint8_t *)pad.src;
+      break;
+    case SRC_TYPE_UINT16:
+      signal.value = *(uint16_t *)pad.src;
+      break;
+    case SRC_TYPE_UINT32:
+      signal.value = *(uint32_t *)pad.src;
+      break;
     }
   }
   return signal;
