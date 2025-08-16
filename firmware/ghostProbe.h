@@ -15,6 +15,9 @@ typedef enum _srcType {
   SRC_TYPE_INT8,
   SRC_TYPE_INT16,
   SRC_TYPE_INT32,
+  SRC_TYPE_UINT8,
+  SRC_TYPE_UINT16,
+  SRC_TYPE_UINT32,
 } srcType_t;
 
 typedef float (*converter_t)(volatile void *rawValue);
