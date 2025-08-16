@@ -26,7 +26,7 @@ float chanBOut = 0.0F;
 float chanAInv, chanAOffset, chanAOffsetInv;
 int16_t chanB1000xInt;
 
-static float floatTimes2(void *rawValue);
+static float floatTimes2(volatile void *rawValue);
 
 void ctl_init(float waveformUpdateFreq)
 {
@@ -87,7 +87,7 @@ telem_t ctl_getTelem(void)
   };
 }
 
-float floatTimes2(void *rawValue)
+float floatTimes2(volatile void *rawValue)
 {
   return *(float*)rawValue * 2;
 }
