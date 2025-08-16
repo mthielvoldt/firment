@@ -21,7 +21,7 @@ void gp_init(uint32_t periodicCallFrequencyHz)
   periodicFreqHz = periodicCallFrequencyHz;
 }
 
-void gp_initTestPoint(TestPointId id, void *src, srcType_t type, converter_t converterFn)
+void gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn)
 {
   if (id < _TestPointId_ARRAYSIZE)
   {
