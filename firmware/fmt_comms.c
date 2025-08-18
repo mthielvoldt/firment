@@ -12,11 +12,10 @@
 
 #include <pb_encode.h>
 #include <pb_decode.h>
-#include <cmsis_gcc.h> // __BKPT()
 #include <stdint.h>
 #include <stdbool.h>
 
-static uint32_t txDropCount = 0, rxDropCount = 0, badCrcCount = 0;
+static FirmentErrorTlm errCounts = {};
 
 // Initialize with the start sequence in header.
 static uint8_t sendQueueStore[MAX_PACKET_SIZE_BYTES * SEND_QUEUE_LENGTH];
@@ -47,12 +46,12 @@ static void acceptMsgIfValid(const uint8_t rxPacket[])
     bool success = enqueueBack(rxQueue, rxPacket);
     if (!success)
     {
-      rxDropCount++;
+      errCounts.rxQueueFull++;
     }
   }
   else
   {
-    badCrcCount++;
+    errCounts.crcMismatch++;
   }
 }
 
@@ -70,8 +69,7 @@ static bool fmt_sendMsg_prod(Top message)
     bool enqueueSuccess = enqueueBack(sendQueue, txPacket);
     if (!enqueueSuccess)
     {
-      txDropCount++;
-      // __BKPT(4);
+      errCounts.sendQueueFull++;
     }
 
     // Kick off Tx in case it had paused.  Does nada if Spi HW busy.
@@ -79,7 +77,7 @@ static bool fmt_sendMsg_prod(Top message)
   }
   else // message possibly bigger than PAYLOAD_SIZE_BYTES?
   {
-    __BKPT(2); // TODO: Increment err counter, Send error message.
+    errCounts.encodeFail++;
   }
 
   return success;
@@ -101,7 +99,7 @@ static bool fmt_getMsg_prod(Top *message)
     success = pb_decode(&stream, Top_fields, message);
     if (!success)
     {
-      __BKPT(5);
+      errCounts.decodeFail++;
     }
   }
   return success;
@@ -138,6 +136,24 @@ bool fmt_initComms(void)
   return true;
 }
 
+void reportCommsErrors(void)
+{
+  static FirmentErrorTlm prevErrCounts = {};
+  const transportErrCount_t transportErrs = *fmt_getTransportErrCount();
+  errCounts.armRxError = transportErrs.armRxError;
+  errCounts.dataLost = transportErrs.dataLost;
+  errCounts.modeFault = transportErrs.modeFault;
+  errCounts.unhandledArmEvent = transportErrs.unhandledArmEvent;
+
+  if (memcmp(&prevErrCounts, &errCounts, sizeof(FirmentErrorTlm)) != 0)
+  {
+    prevErrCounts = errCounts;
+    fmt_sendMsg((Top){
+        .which_sub = Top_FirmentErrorTlm_tag,
+        .sub = {.FirmentErrorTlm = errCounts}});
+  }
+}
+
 #if FMT_BUILTIN_CRC
 static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES]) {}
 static bool checkCRCMatch(const uint8_t packet[]) { return true; }
@@ -151,7 +167,7 @@ static void addCRC(uint8_t packet[MAX_PACKET_SIZE_BYTES])
   *(uint16_t *)(&packet[crcPosition]) = computedCRC;
   if (result != ARM_DRIVER_OK)
   {
-    __BKPT(0);
+    errCounts.crcComputeFail++;
   }
 }
 

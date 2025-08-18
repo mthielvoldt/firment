@@ -5,6 +5,8 @@
 
 bool fmt_initComms(void);
 
+void reportCommsErrors(void);
+
 /** fmt_sendMsg
  * Queues a message for transmit.
  * Should only be called from a single context - not thread-safe.

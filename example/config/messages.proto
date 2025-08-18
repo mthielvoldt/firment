@@ -45,9 +45,10 @@ message Top {
     RunScanCtl RunScanCtl = 5;
     ImageData ImageData = 6;
     PageStatus PageStatus = 7;
-    WaveformCtl WaveformCtl = 8;
-    WaveformTlm WaveformTlm = 9;
-    Reset Reset = 10;
-    Version Version = 11;
+    FirmentErrorTlm FirmentErrorTlm = 8;
+    Version Version = 9;
+    WaveformCtl WaveformCtl = 12;
+    WaveformTlm WaveformTlm = 13;
+    Reset Reset = 14;
   }
 }

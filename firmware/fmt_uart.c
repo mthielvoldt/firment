@@ -27,12 +27,11 @@
 #include "fmt_uart_frame.h" // this replaces fmt_sizes.h
 #include <fmt_uart_port.h> // port_initUart() port_getUartEventIRQn()
 #include <core_port.h>
-#include <cmsis_gcc.h>
 
 static queue_t *sendQueue = NULL;
 static ARM_DRIVER_USART *uart = NULL;
 static uint8_t rxPacket[UART_PACKET_SIZE] = {0};
-static uint32_t rxErrorCount = 0;
+static transportErrCount_t uartErrCount = {};
 static bool initialized = false;
 
 static void uartEventHandlerISR(uint32_t event);
@@ -67,6 +66,10 @@ bool fmt_initUart(const uartCfg_t *config)
 
   initialized = true;
   return true;
+}
+
+const transportErrCount_t* uart_getErrCount(void) {
+  return &uartErrCount;
 }
 
 bool uart_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback)
@@ -110,9 +113,8 @@ void uartEventHandlerISR(uint32_t event)
     rxParams_t nextSegment;
     if (rxErrors(event))
     {
-      rxErrorCount++;
+      uartErrCount.armRxError++;
       nextSegment = getStartCode();
-      // __BKPT(0);
     }
     else
     {
@@ -130,7 +132,7 @@ void uartEventHandlerISR(uint32_t event)
 
   // If this function was called for an unhandled reason, let's learn about it.
   if (!eventHandled)
-    __BKPT(1);
+    uartErrCount.unhandledArmEvent++;
 }
 
 static inline bool rxErrors(uint32_t event)

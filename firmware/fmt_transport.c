@@ -12,6 +12,7 @@
 
 void (*fmt_startTxChain)(void) = NULL;
 bool (*fmt_linkTransport)(queue_t *sendQueue, rxCallback_t rxCallback) = NULL;
+const transportErrCount_t *(*fmt_getTransportErrCount)(void);
 
 #include <comm_pcbDetails.h>
 #if defined(FMT_USES_SPI)
@@ -40,6 +41,7 @@ bool fmt_initTransport(void)
 {
   fmt_startTxChain = spi_startTxChain;
   fmt_linkTransport = spi_linkTransport;
+  fmt_getTransportErrCount = spi_getErrCount;
   return fmt_initSpi(spiConfig);
 }
 
@@ -61,6 +63,7 @@ bool fmt_initTransport(void)
 {
   fmt_startTxChain = uart_startTxChain;
   fmt_linkTransport = uart_linkTransport;
+  fmt_getTransportErrCount = uart_getErrCount;
   return fmt_initUart(&config);
 }
 
