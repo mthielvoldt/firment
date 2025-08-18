@@ -79,3 +79,5 @@ target_include_directories(MCUPort
     ${HAL_DIR}/Inc  # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h
     ${CMSIS_FAMILY_DIR}/Include # fmt_rx.pb.c > fmt_spi.h > RTE_Device.h > xmc_device.h > XMC4700.h
 )
+
+target_compile_definitions(MCUPort PUBLIC "${MCU_FAMILY}")
