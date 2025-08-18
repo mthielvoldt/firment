@@ -45,7 +45,6 @@ elseif(PCB STREQUAL "3")
     ${CMAKE_CURRENT_SOURCE_DIR}/firmware/STM32G431XX_FLASH.ld.in)
 endif()
 
-add_compile_definitions("${MCU_FAMILY}")
 
 message(STATUS "PCB: ${PCB}")
 message(STATUS "MCU: ${MCU_VARIANT}")
