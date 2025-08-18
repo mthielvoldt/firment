@@ -61,6 +61,19 @@ message Log {
   float value = 3;
 }
 
+message FirmentErrorTlm {
+  int32 armRxError = 1;
+  int32 dataLost = 2;
+  int32 modeFault = 3;
+  int32 unhandledArmEvent = 4;
+  int32 sendQueueFull = 5;
+  int32 rxQueueFull = 6;
+  int32 encodeFail = 7;
+  int32 decodeFail = 8;
+  int32 crcMismatch = 9;
+  int32 crcComputeFail = 10;
+}
+
 message ImageData {
   uint32 pageIndex = 1;
   uint32 pageCount = 2;

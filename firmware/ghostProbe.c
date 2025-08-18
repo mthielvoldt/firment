@@ -1,6 +1,5 @@
 #include "ghostProbe.h"
 #include "fmt_comms.h"
-#include <cmsis_gcc.h> // __BKPT()
 
 // RunScanCtl has 4 bytes for isContinuous and freq, leaving the rest for the
 // testPointIds.  Each testPointId takes 2 bytes.  They come at the end.
@@ -21,16 +20,14 @@ void gp_init(uint32_t periodicCallFrequencyHz)
   periodicFreqHz = periodicCallFrequencyHz;
 }
 
-void gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn)
+bool gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn)
 {
   if (id < _TestPointId_ARRAYSIZE)
   {
     testPoints[id] = (const testPoint_t){.src = src, .type = type, .converter = converterFn};
+    return true;
   }
-  else
-  {
-    __BKPT(6);
-  }
+  return false;
 }
 
 void handleRunScanCtl(RunScanCtl scanCtl)

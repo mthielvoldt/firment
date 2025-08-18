@@ -73,6 +73,9 @@ void comm_handleTelemetry(void)
     break;
   }
   case 400:
+  {
+    reportCommsErrors();
+  }
     break;
   case CALLS_PER_FULL_ROTATION:
     count = 0;

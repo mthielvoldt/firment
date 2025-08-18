@@ -33,7 +33,7 @@ typedef struct _testPoint {
  */
 void gp_init(uint32_t periodicCallFrequencyHz);
 
-void gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn);
+bool gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn);
 
 /** Called by generated fmt_rx.pb.c 
  * See fmt_rx.in.c 

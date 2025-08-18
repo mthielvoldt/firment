@@ -19,6 +19,7 @@ bool fmt_initUart(const uartCfg_t *config);
 
 bool uart_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback);
 void uart_startTxChain(void);
+const transportErrCount_t* uart_getErrCount(void);
 
 
 #endif

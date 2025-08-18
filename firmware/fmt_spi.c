@@ -7,7 +7,6 @@
 #include "fmt_sizes.h"
 #include <fmt_spi_port.h> // port_initSpiModule()  port_getSpiEventIRQn()
 #include <core_port.h>    // NVIC_...()
-#include <cmsis_gcc.h>    // __BKPT()
 
 // Dependencies 3rd party
 #include <string.h> // memset()
@@ -18,6 +17,7 @@ static ARM_DRIVER_SPI *spi;
 static uint8_t clearToSendIocId; // An Interrupt-on-Change config.
 static uint8_t msgWaitingIocId;
 static rxCallback_t rxCallback = NULL;
+static transportErrCount_t spiErrCount = {};
 
 /* Declarations of private functions */
 static void spiEventHandlerISR(uint32_t event);
@@ -71,6 +71,10 @@ bool fmt_initSpi(spiCfg_t cfg)
   fmt_enableIoc(cfg.msgWaitingIocId);
 
   return true;
+}
+
+const transportErrCount_t* spi_getErrCount(void) {
+  return &spiErrCount;
 }
 
 bool spi_linkTransport(queue_t *_sendQueue, rxCallback_t _rxCallback)
@@ -178,12 +182,12 @@ static void spiEventHandlerISR(uint32_t event)
         but send/receive/transfer operation has not been started
         and indicates that data is lost. Occurs also in master mode
         when driver cannot transfer data fast enough. */
-    __BKPT(0); /* TODO: Handle this error */
+    spiErrCount.dataLost++;
     break;
   case ARM_SPI_EVENT_MODE_FAULT:
     /*  Occurs in master mode when Slave Select is deactivated and
         indicates Master Mode Fault. */
-    __BKPT(1); /* TODO: Handle this error */
+    spiErrCount.modeFault++;
     break;
   }
 }

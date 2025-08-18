@@ -33,5 +33,6 @@ typedef struct
 bool fmt_initSpi(spiCfg_t config);
 bool spi_linkTransport(queue_t *_sendQueue, rxCallback_t rxCallback);
 void spi_startTxChain(void);
+const transportErrCount_t* spi_getErrCount(void);
 
 #endif // fmt_spi_H

@@ -3,7 +3,6 @@
 #include "fmt_comms.h"  // fmt_sendMsg
 #include "fmt_flash.h"
 #include <stdbool.h>
-#include <cmsis_gcc.h>
 
 static void sendPageStatus(uint32_t pageIndex, PageStatusEnum status)
 {
@@ -113,11 +112,6 @@ static bool imageDataMsgValid(ImageData *msg)
   err.b.prematureNewPage =
       msg->pageIndex != activePage && chunksPending != NO_CHUNKS_PROCESSED;
   err.b.pageIndexTooBig = msg->pageIndex >= PAGES_COUNT_MAX;
-
-  if (err.overall)
-  {
-    __BKPT(6);
-  }
 
   return err.overall == 0;
 }
