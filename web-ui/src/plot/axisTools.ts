@@ -102,6 +102,9 @@ export function calculateYGrid(minValue: number, maxValue: number) {
    * Examples: input=>return 777=>500  45=>20  0.0345=>0.02
    */
 function getNearestStepSize(input: number) {
+  if (input === 0 || !Number.isFinite(input))
+    return 0.2;
+
   input = (input > 0) ? input : -input;
   let output = 1;
 
