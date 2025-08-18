@@ -118,7 +118,10 @@ bool port_initUartModule(const uartCfg_t *config)
       .Mode = DMA_NORMAL,
       .Priority = DMA_PRIORITY_LOW,
   };
-  ASSERT_EQUAL(HAL_DMA_Init(hdma), HAL_OK);
+  // DeInit in case DMA was initialized earlier by now-defunct comms code.
+  // HAL_DMA_Init() is called later by the ARM driver's Control(), 
+  // At that time, hdma->Init set above will be used.
+  ASSERT_EQUAL(HAL_DMA_DeInit(hdma), HAL_OK);
 
   // __HAL_LINKDMA(huart, hdmarx, *hdma);
   huart->hdmarx = hdma;
