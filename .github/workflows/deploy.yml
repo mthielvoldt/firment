@@ -113,7 +113,7 @@ jobs:
           key: venv-${{ hashFiles('protocol/nanopb_py_env.cmake') }}
 
       - name: Cmake Build
-        run: . build-xmc.sh
+        run: . generate.sh 1
 
       - name: Save venv to cache
         if: steps.restore-venv.outputs.cache-hit != 'true'
@@ -142,9 +142,9 @@ jobs:
           name: ui-and-images
           path: |
             example/web-ui/dist
-            example/build/xmc/build_time.txt
-            example/build/xmc/mgt-boot/app_offset_*
-            example/build/xmc/mgt-boot/factory.bin
+            example/build/pcb1/build_time.txt
+            example/build/pcb1/mgt-boot/app_offset_*
+            example/build/pcb1/mgt-boot/factory.bin
           compression-level: 0
 
       - name: Upload UI Artifact for GH Pages
