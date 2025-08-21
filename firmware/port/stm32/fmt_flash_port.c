@@ -31,6 +31,7 @@
  */
 #define DOUBLEWORDS_PER_WRITE_BLOCK 32
 
+static unsigned getBankContainingAddress(uint32_t address);
 static int getPageContainingAddress(uint32_t address);
 static int flash_erase(uint32_t start_address, uint32_t len);
 
@@ -89,10 +90,10 @@ int fmt_flash_write(uint32_t address, const uint8_t *data, uint32_t len)
     in the comments preceeding this function's definition.*/
     // HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST_AND_LAST, page_adr, (uint32_t)buffer);
 
-    // TODO: Get fast row programming working, and replace this loop. 
+    // TODO: Get fast row programming working, and replace this loop.
     for (int i = 0; i < DOUBLEWORDS_PER_WRITE_BLOCK; i++)
     {
-      HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, page_adr + (8*i), buffer[i]);
+      HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, page_adr + (8 * i), buffer[i]);
     }
 
     // Prepare for next page.
@@ -109,7 +110,9 @@ static int flash_erase(uint32_t start_address, uint32_t len)
 
   int start_page = getPageContainingAddress(start_address);
   int end_page = getPageContainingAddress(end_address);
-  if (start_page < 0 || end_page < 0 || len == 0)
+  int start_bank = getBankContainingAddress(start_address);
+  int end_bank = getBankContainingAddress(end_address);
+  if (start_page < 0 || end_page < 0 || start_bank != end_bank || len == 0)
   {
     return -1;
   }
@@ -117,7 +120,7 @@ static int flash_erase(uint32_t start_address, uint32_t len)
 
   FLASH_EraseInitTypeDef eraseInit = {
       .TypeErase = FLASH_TYPEERASE_PAGES,
-      .Banks = FLASH_BANK_1,
+      .Banks = start_bank,
       .NbPages = page_count,
       .Page = start_page, // is page zero at bottom of this bank, or absolute number?
   };
@@ -127,7 +130,48 @@ static int flash_erase(uint32_t start_address, uint32_t len)
   return 0;
 }
 
+#if defined(stm32g4)
+
+static unsigned getBankContainingAddress(uint32_t address)
+{
+  return FLASH_BANK_1;
+}
+
 static int getPageContainingAddress(uint32_t address)
 {
-  return (address - FLASH_BASE) / FLASH_PAGE_SIZE;
+  return (address > FLASH_BASE) ? (address - FLASH_BASE) / FLASH_PAGE_SIZE : -1;
 }
+
+#elif defined(stm32l4)
+
+static unsigned getBankContainingAddress(uint32_t address)
+{
+  unsigned bank = 0;
+  if (address >= FLASH_BASE && address <= FLASH_BANK1_END)
+  {
+    bank = 1;
+  }
+  if (address > FLASH_BANK1_END && address <= FLASH_BANK2_END)
+  {
+    bank = 2;
+  }
+  return bank;
+}
+
+static int getPageContainingAddress(uint32_t address)
+{
+  int page = -1;
+  int bank = getBankContainingAddress(address);
+
+  if (bank == 1)
+  {
+    page = (address - FLASH_BASE) / FLASH_PAGE_SIZE;
+  }
+  if (bank == 2)
+  {
+    page = (address - (FLASH_BANK1_END + 1)) / FLASH_PAGE_SIZE;
+  }
+  return page;
+}
+
+#endif
