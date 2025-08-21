@@ -78,7 +78,6 @@ bool port_initUartModule(const uartCfg_t *config)
 {
   hwInfo_t info = getHWInfo(config->driverId);
   UART_HandleTypeDef *huart = info.huart;
-  DMA_HandleTypeDef *hdma = info.hdma;
 
   /*
   Initialize huart->Init with a minimal valid config because the CMSIS
@@ -107,6 +106,8 @@ bool port_initUartModule(const uartCfg_t *config)
   __HAL_RCC_DMAMUX1_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
 
+  DMA_HandleTypeDef *hdma = info.hdma;
+  
   hdma->Instance = DMA1_Channel1;
   hdma->Init = (const DMA_InitTypeDef){
       .Request = dmaRequest,

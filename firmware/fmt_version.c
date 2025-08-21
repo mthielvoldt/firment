@@ -11,7 +11,6 @@ void fmt_setBuildIdGetter(uint32_t (*getter)(void))
 bool fmt_sendVersion(void)
 {
   static uint32_t callCount = 0;
-  Version version;
 
   Top msg = {
       .which_sub = Top_Version_tag,
