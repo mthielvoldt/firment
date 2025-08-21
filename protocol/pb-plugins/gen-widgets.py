@@ -20,6 +20,8 @@ float_fields = (
 integer_fields = (
   FieldDescriptor.TYPE_INT32,
   FieldDescriptor.TYPE_INT64,
+  FieldDescriptor.TYPE_UINT32,
+  FieldDescriptor.TYPE_UINT64,
   FieldDescriptor.TYPE_SINT32,
   FieldDescriptor.TYPE_SINT64,
   FieldDescriptor.TYPE_FIXED32,

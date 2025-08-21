@@ -10,6 +10,9 @@ void fmt_setBuildIdGetter(uint32_t (*getter)(void))
 
 bool fmt_sendVersion(void)
 {
+  static uint32_t callCount = 0;
+  Version version;
+
   Top msg = {
       .which_sub = Top_Version_tag,
       .sub = {
@@ -17,6 +20,7 @@ bool fmt_sendVersion(void)
               .major = VERSION_MAJOR,
               .minor = VERSION_MINOR,
               .patch = VERSION_PATCH,
+              .upTime = ++callCount,
           },
       },
   };
