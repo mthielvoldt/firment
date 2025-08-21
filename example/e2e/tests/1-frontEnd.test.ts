@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  const port = process.env.CI ? '4174' : '5173';
+  const port = process.env.CI ? '4173' : '5173';
   await page.goto(`http://localhost:${port}/firment/`);
 });
 

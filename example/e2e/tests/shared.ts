@@ -13,7 +13,7 @@ async function lessThan(locator: Locator, rhvalue: number) {
 }
 
 export async function connectedAndReset(page: Page) {
-  const port = process.env.CI ? '4174' : '5173';
+  const port = process.env.CI ? '4173' : '5173';
   await page.goto(`http://localhost:${port}/firment/`);
   await expect(page.getByText(/Active/)).toBeVisible();
 
