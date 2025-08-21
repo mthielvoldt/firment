@@ -5,10 +5,11 @@ import * as fs from 'fs';
 import { send } from 'process';
 
 function getBuildIdData() {
+  const pcb = process.env.PCB_ID;
   const appBinary = path.resolve(__dirname,
-    "../../build/xmc/mgt-boot/app_offset_signed.bin")
+    `../../build/pcb${pcb}/mgt-boot/app_offset_signed.bin`)
   const buildTimeFile = path.resolve(__dirname,
-    '../../build/xmc/build_time.txt');
+    `../../build/pcb${pcb}/build_time.txt`);
   const appBuildId = fs.readFileSync(buildTimeFile, 'ascii');
   return { appBinary, appBuildId }
 }

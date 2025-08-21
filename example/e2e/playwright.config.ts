@@ -36,7 +36,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // following sorts webGL error. Not sure if it's all necessary.
         // TODO: determine individual effects of headless, no-sandbox, use-angle
@@ -80,11 +80,17 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
+  webServer: process.env.CI ? {
     command: 'cd ../web-ui && npm run preview', //'npm run start' for prod build
     url: 'http://localhost:4173/firment/',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     stdout: 'ignore',
     stderr: 'pipe',
-  },
+  } : {
+    command: 'cd ../web-ui && npm run dev',
+    url: 'http://localhost:5173/firment/',
+    reuseExistingServer: true,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  }
 });
