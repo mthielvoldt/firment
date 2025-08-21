@@ -186,8 +186,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
 
-      - name: Install browsers if chache miss
-        if: steps.restore-browsers.outputs.cache-hit != 'true'
+      - name: Install browsers
         run: npx playwright install chromium --only-shell --with-deps
 
       - name: Save playwright browsers to cache
