@@ -168,6 +168,7 @@ jobs:
         with:
           name: ui-and-images
           path: example
+
       - name: Restore example UI node_modules from cache
         id: restore-example-ui-node
         uses: actions/cache/restore@v4
@@ -175,9 +176,23 @@ jobs:
           path: example/web-ui/node_modules
           key: node-${{ hashFiles('example/web-ui/package-lock.json') }}
 
-      - name: Install example UI node_modules if cache miss
-        if: steps.restore-example-ui-node.outputs.cache-hit != 'true'
+      - name: Restore example/e2e/node_modules from cache
+        id: restore-example-e2e-node
+        uses: actions/cache/restore@v4
+        with:
+          path: example/e2e/node_modules
+          key: node-${{ hashFiles('example/e2e/package-lock.json') }}
+
+      - name: Install example/e2e/node_modules if cache miss
+        if: steps.restore-example-e2e-node.outputs.cache-hit != 'true'
         run: npm ci
+
+      - name: Save example/e2e/node_modules to cache
+        if: steps.restore-example-e2e-node.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: example/e2e/node_modules
+          key: node-${{ hashFiles('example/web-ui/package-lock.json') }}
 
       - name: Restore playwright browsers from cache
         id: restore-browsers
