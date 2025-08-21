@@ -174,7 +174,10 @@ jobs:
         with:
           path: example/web-ui/node_modules
           key: node-${{ hashFiles('example/web-ui/package-lock.json') }}
-      - run: npm ci
+
+      - name: Install example UI node_modules if cache miss
+        if: steps.restore-example-ui-node.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Restore playwright browsers from cache
         id: restore-browsers
@@ -183,7 +186,9 @@ jobs:
           path: ~/.cache/ms-playwright
           key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
 
-      - run: npx playwright install chromium --only-shell --with-deps
+      - name: Install browsers if chache miss
+        if: steps.restore-browsers.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --only-shell --with-deps
 
       - name: Save playwright browsers to cache
         if: steps.restore-browsers.outputs.cache-hit != 'true'
@@ -192,7 +197,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: browsers-${{ hashFiles('example/e2e/package-lock.json') }}
 
-      - run: npx playwright test
+      - run: PCB_ID=1 npx playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
