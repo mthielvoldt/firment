@@ -11,7 +11,9 @@ header = """\
 // Generated File, do not track.
 // Implements react modules for each message defined in .proto files.
 import { useState, useEffect } from "react";
-import { setMessageHandler, sendMessage } from "../mqclient";"""
+import { setMessageHandler, sendMessage } from "../mqclient";
+
+"""
 
 float_fields = (
   FieldDescriptor.TYPE_FLOAT,
@@ -31,6 +33,8 @@ integer_fields = (
 )
 
 enums = {}
+enum_strings = ""
+enums_used = set()
 
 def get_message_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProto]):
   if message.name.endswith("Ctl"):
@@ -139,10 +143,11 @@ def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       {{{message_name}State.{field.name} && <p>{field.name}</p>}}
       '''
     if field.type == FieldDescriptor.TYPE_ENUM:
+      add_table_for_enum(enums, field)
       initial_state[field.name] = 0   
       field_strings += f'''
       <div className="field">
-        <p>{field.name + " "}<span>{{{message_name}State.{field.name}}}</span></p>
+        <p>{field.name + " "}<span>{{{field.type_name[1:]}[{message_name}State.{field.name}]}}</span></p>
       </div>
       '''
   # enum_name = ""
@@ -165,6 +170,20 @@ export function {message_name}({{}}) {{
 }}
 '''
 
+def add_table_for_enum(enums: Dict[str, EnumDescriptorProto], field: FieldDescriptorProto):
+  global enum_strings
+  enum_name = field.type_name[1:]
+  if enum_name in enums_used:
+    return
+  enums_used.add(enum_name)
+  enum_items = enums[enum_name].value
+
+  item_lines = ""
+  for item in enum_items:
+    item_lines += f"\n  {item.name} = {item.number},"
+
+  enum_strings += f"enum {enum_name} {{{item_lines}\n}};\n"
+
 def get_options_from_enum(enums, field: FieldDescriptorProto):
   options = ""
   for value in enums[field.type_name[1:]].value:
@@ -172,7 +191,7 @@ def get_options_from_enum(enums, field: FieldDescriptorProto):
       <option value="{value.number}">{value.name}</option>'''
   return options
   
-def digest_proto(proto: FileDescriptorProto):
+def get_widgets_from_proto_file(proto: FileDescriptorProto):
   ret = ""
 
   for message in proto.message_type:
@@ -183,15 +202,14 @@ def digest_proto(proto: FileDescriptorProto):
     ret += "/*"
     ret += str(enums)
     # ret += str(type(enums["WaveShape"]))
-    ret += str(proto)
+    # ret += str(proto)
     # ret += str(type(proto))
     # ret += str(type(proto.enum_type))
     ret += "*/"
-
   return ret
 
 def generate_widgets(request: CodeGeneratorRequest) -> str:
-  body = "\n\n"
+  widget_functions = ""
 
   # Find all the enums in all files (whether generated or not)
   for file in request.proto_file:
@@ -199,10 +217,10 @@ def generate_widgets(request: CodeGeneratorRequest) -> str:
 
   for file_name in request.file_to_generate:
     proto = next(file for file in request.proto_file if file.name == file_name)
-    body += digest_proto(proto)
+    widget_functions += get_widgets_from_proto_file(proto)
 
   # body += request.source_file_descriptors + "\n"
-  return header + body
+  return header + enum_strings + widget_functions
 
 if __name__ == "__main__":
   request = CodeGeneratorRequest.FromString(sys.stdin.buffer.read())
