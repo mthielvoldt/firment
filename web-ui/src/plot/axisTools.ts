@@ -82,7 +82,7 @@ export function calculateYGrid(minValue: number, maxValue: number) {
   // 1.0(top_gl) = (top_dat * scale) + offset.  Algebra gets you the next line.
   const yOffset = 1.0 - (topLinePos_dat * yScale);
 
-  console.debug({gridStep_dat, numGridLines, viewRange_dat, topLinePos_dat, yScale})
+  // console.debug({gridStep_dat, numGridLines, viewRange_dat, topLinePos_dat, yScale})
 
   const yLabels: AxisLabel[] = [];
   for (let gridLineIndex = 0; gridLineIndex < numGridLines; gridLineIndex++) {
