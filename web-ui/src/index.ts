@@ -5,5 +5,9 @@ import { Log } from './Log';
 import Reset from './Reset';
 import Version from './Version';
 import * as widgets from './generated/widgets.pb';
+import { setMessageHandler, sendMessage } from './mqclient';
 
-export {BrokerAddress, Image, Plot, Log, Reset, Version, widgets };
+export {
+  BrokerAddress, Image, Plot, Log, Reset, Version, widgets,
+  setMessageHandler, sendMessage
+};
