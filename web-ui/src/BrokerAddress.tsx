@@ -12,7 +12,7 @@ const statuses: ConnectOptions = {
   disconnected: { colors: "problem-colors", text: "Not Connected" }
 };
 
-export default function BrokerAddress({ }) {
+export default function BrokerAddress({ showBrokerUrl = false }) {
   const [address, setAddress] = useState("listpalette.com");
   const [connectStatus, setConnectStatus] = useState<keyof ConnectOptions>("disconnected");
   let staleTimeout: NodeJS.Timeout;
@@ -53,11 +53,13 @@ export default function BrokerAddress({ }) {
 
   return (
     <form onSubmit={handleSubmit}>
+      {showBrokerUrl && (
       <label>
-        Broker IP Address:
+        Broker URL:
         <input type="text" value={address}
           onChange={(e) => setAddress(e.currentTarget.value)} />
       </label>
+      )}
       <span className={"pill " + statuses[connectStatus].colors}>
         {statuses[connectStatus].text}
       </span>
