@@ -9,7 +9,7 @@ function App() {
     <>
       <div className='row-container'>
         <h1>Firment Function Generator Example</h1>
-        <BrokerAddress />
+        <BrokerAddress showBrokerUrl={true}/>
       </div>
       <div className="row-container">
         <div className='widget-column'>

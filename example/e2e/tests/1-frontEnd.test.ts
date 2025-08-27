@@ -15,7 +15,7 @@ test('Successfully connects', async ({page}) => {
 });
 
 test('Fails for bad URL', async ({ page }) => {
-  const ipInput = page.getByLabel("Broker IP Address:")
+  const ipInput = page.getByLabel("Broker URL:")
   await ipInput.fill("bogus-url.com");
   ipInput.press('Enter');
 
