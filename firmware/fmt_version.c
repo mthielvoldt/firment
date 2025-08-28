@@ -12,17 +12,20 @@ void fmt_setBuildIdGetter(uint32_t (*getter)(void))
 bool fmt_sendVersion(void)
 {
   static uint32_t callCount = 0;
+
+  // Note: deviceId is part of the MCU's Id. Uniqueness not guaranteed.
   uint32_t deviceId = getDeviceId().dblWords[0] & 0xFFFFFFFF;
 
   Top msg = {
       .which_sub = Top_Version_tag,
       .sub = {
           .Version = {
+              .project = PROJECT_STR,
               .major = VERSION_MAJOR,
               .minor = VERSION_MINOR,
               .patch = VERSION_PATCH,
               .upTime = ++callCount,
-              .deviceId = deviceId, // shorten: readability.
+              .deviceId = deviceId,
           },
       },
   };
