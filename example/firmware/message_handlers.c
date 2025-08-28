@@ -63,9 +63,10 @@ void comm_handleTelemetry(void)
 
     break;
   }
-  case 1:
+  case 100:
   {
     fmt_sendVersion();
+    break;
   }
   case 200:
   {
@@ -75,8 +76,8 @@ void comm_handleTelemetry(void)
   case 400:
   {
     reportCommsErrors();
-  }
     break;
+  }
   case CALLS_PER_FULL_ROTATION:
     count = 0;
     break;

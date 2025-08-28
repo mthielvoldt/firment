@@ -22,9 +22,8 @@
 
 #include <fmt_esp_spi.h>
 #include <fmt_esp_uart.h>
-#include <pb.h>
-#include <firment_msg.pb.h>
-
+#include <pb_decode.h>
+#include <messages.pb.h>
 
 #define MAX_PAYLOAD_BYTES 64
 #define MQTT_BUFFER_SIZE (100 * MAX_PAYLOAD_BYTES)
@@ -41,6 +40,8 @@ static enum fmtTransport_e {
 static uint8_t mqttBuffer[MQTT_BUFFER_SIZE];
 static uint32_t mqttWritePos = 0;
 static uint32_t lastResetTimeUs = 0;
+static char topicHqBound[36] = "";
+static char topicEdgeBound[36] = "";
 
 static const char *TAG = "mqtt5_example";
 
@@ -48,7 +49,6 @@ static bool unpackAndSendToEdge(uint8_t *packed, int len);
 static size_t appendCRC(uint8_t *packet);
 static bool sendToActiveTransport(uint8_t *packet, size_t packetSize);
 enum fmtTransport_e checkForTransportChange(esp_err_t *rxStatus, uint8_t *rxPacket);
-
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -135,12 +135,12 @@ static void print_data(esp_mqtt_event_t *event)
   // ESP_LOGI(TAG, "TOPIC=%.*s", event->topic_len, event->topic);
   // ESP_LOGI(TAG, "DATA=%.*s", event->data_len, event->data);
   char *transportMsg[] = {
-    [FMT_UNKNOWN] = "UNKNOWN",
-    [FMT_SPI] = "SPI", 
-    [FMT_UART] = "UART", 
+      [FMT_UNKNOWN] = "UNKNOWN",
+      [FMT_SPI] = "SPI",
+      [FMT_UART] = "UART",
   };
   ESP_LOGI(TAG, "Edge-bound via %s, len=%d Dat=%02x %02x %02x %02x",
-          transportMsg[fmtTransport],
+           transportMsg[fmtTransport],
            event->data_len,
            event->data[0], event->data[1], event->data[2], event->data[3]);
 }
@@ -200,7 +200,7 @@ static void mqtt5_event_handler(void *handler_args, esp_event_base_t base, int32
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
     setup_users(client);
     print_user_property(event->property->user_property);
-    subscribe(client, "edge-bound", 0);
+    // subscribe(client, "edge-bound", 0);
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "DISCONNECTED");
@@ -249,7 +249,7 @@ static bool unpackAndSendToEdge(uint8_t *packed, int len)
   while (
       msgPos + msgSize <= len && // prevent reading past buffer.
       msgSize > 1 &&             // quit if we encounter 0-length msg.
-      success)                             // quit if send buffer fills up.
+      success)                   // quit if send buffer fills up.
   {
     memcpy(packet, &packed[msgPos], msgSize);
     packetSize = appendCRC(packet);
@@ -267,10 +267,10 @@ static bool unpackAndSendToEdge(uint8_t *packed, int len)
 static size_t appendCRC(uint8_t *packet)
 {
   // Size must be a multiple of 2 (for 16-bit CRC).  Pad with byte if needed.
-    uint32_t crcPosition = getCRCPosition(packet);
-    uint16_t crc = crc16_le(0x00, packet, crcPosition);
-    *(uint16_t *)(&packet[crcPosition]) = crc;
-    return crcPosition + CRC_SIZE_BYTES;
+  uint32_t crcPosition = getCRCPosition(packet);
+  uint16_t crc = crc16_le(0x00, packet, crcPosition);
+  *(uint16_t *)(&packet[crcPosition]) = crc;
+  return crcPosition + CRC_SIZE_BYTES;
 }
 
 static bool sendToActiveTransport(uint8_t *packet, size_t packetSize)
@@ -395,8 +395,31 @@ void logMsgContents(uint8_t msg[])
 uint32_t usSinceTx(void) { return esp_timer_get_time() - lastResetTimeUs; }
 void resetTxTimer(void) { lastResetTimeUs = esp_timer_get_time(); }
 
+bool isVersionMessage(uint8_t *rxPacket)
+{
+  return ((rxPacket[1] >> 3) == Top_Version_tag); // Version tag must be <= 15
+}
+
+void setTopicPrefix(const uint8_t *packet)
+{
+  // decode
+  Top message;
+  pb_istream_t stream = pb_istream_from_buffer(&packet[1], packet[LENGTH_POSITION]);
+  bool success = pb_decode(&stream, Top_fields, &message);
+  if (success)
+  {
+    snprintf(topicHqBound, sizeof(topicHqBound), "%s/%lu/hq-bound",
+             message.sub.Version.project, message.sub.Version.deviceId);
+    snprintf(topicEdgeBound, sizeof(topicEdgeBound), "%s/%lu/edge-bound",
+             message.sub.Version.project, message.sub.Version.deviceId);
+
+    subscribe(client, topicEdgeBound, 0);
+  }
+}
+
 void handleEdgeMsg(uint8_t rxPacket[])
 {
+  static char helloBuffer[MAX_PACKET_SIZE_BYTES];
 
   // Assumes length < 127. TODO: permit larger.
   int msgLength = rxPacket[0] + 1; // +1 is for the message size prefix.
@@ -404,14 +427,29 @@ void handleEdgeMsg(uint8_t rxPacket[])
   // Empty messages will have msgLength == 1 for prefix => Drop these.
   if (msgLength > 1 && (mqttWritePos + msgLength < MQTT_BUFFER_SIZE))
   {
-    memcpy(mqttBuffer + mqttWritePos, rxPacket, msgLength);
-    mqttWritePos += msgLength;
-    // logMsgContents(rxPacket);
+    if (isVersionMessage(rxPacket))
+    {
+      if (topicHqBound[0] == '\0')
+        setTopicPrefix(rxPacket);
+
+      memcpy(helloBuffer, rxPacket, msgLength);
+      esp_mqtt_client_publish(
+          client, "hello-from-edge", helloBuffer, msgLength, 1, 1);
+    }
+
+    // Enqueue all messages for tx if topic (project/deviceId) is set.
+    if (topicHqBound[0])
+    {
+      memcpy(mqttBuffer + mqttWritePos, rxPacket, msgLength);
+      mqttWritePos += msgLength;
+    }
   }
+
+  // publish all queued messages when a timer expires
   if (usSinceTx() > MQTT_PUB_PERIOD_US && (mqttWritePos > 0))
   {
     esp_mqtt_client_publish(
-        client, "hq-bound", (char *)mqttBuffer, mqttWritePos, 1, 1);
+        client, topicHqBound, (char *)mqttBuffer, mqttWritePos, 1, 1);
     mqttWritePos = 0;
     resetTxTimer();
   }
