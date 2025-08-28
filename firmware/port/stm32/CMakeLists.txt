@@ -44,6 +44,7 @@ add_library(MCUPort
   ${HAL_SRC_PREFIX}_uart.c
   ${HAL_SRC_PREFIX}_uart_ex.c
   ../common/flash_common.c
+  deviceId_port.c
   fmt_crc_port.c
   fmt_flash_port.c
   fmt_periodic_port.c
