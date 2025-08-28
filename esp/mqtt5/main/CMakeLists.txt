@@ -4,7 +4,10 @@ idf_component_register(
     "fmt_esp_spi.c"
     "fmt_esp_uart.c"
     "../firmware/fmt_uart_frame.c"
+    "../example/build/pcb3/firment/firment_msg.pb.c"
   INCLUDE_DIRS 
     "." 
     "../firmware"
+    "../protocol/nanopb"
+    "../example/build/pcb3/firment"
 )

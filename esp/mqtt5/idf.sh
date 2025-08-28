@@ -4,6 +4,8 @@ docker run \
   --name idf \
   -v $PWD:/project \
   -v $PWD/../../firmware:/project/firmware \
+  -v $PWD/../../protocol/nanopb:/project/protocol/nanopb \
+  -v $PWD/../../example/build/pcb3/firment:/project/example/build/pcb3/firment \
   -w /project \
   -u $UID \
   -e HOME=/tmp \
