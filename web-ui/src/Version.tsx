@@ -2,10 +2,16 @@ import { useState, useEffect } from "react";
 import { setMessageHandler } from "./mqclient";
 
 
-export default function Version({}) {
-  const [VersionState, setVersionState] = useState(
-    {'major': 0, 'minor':0, 'patch':0, 'buildId':0, 'upTime': 0});
-  useEffect( () => {
+export default function Version({ }) {
+  const [VersionState, setVersionState] = useState({
+    major: 0,
+    minor: 0,
+    patch: 0,
+    buildId: 0,
+    upTime: 0,
+    deviceId: 0,
+  });
+  useEffect(() => {
     setMessageHandler("Version", setVersionState);
   }, []);
 
@@ -19,6 +25,8 @@ export default function Version({}) {
         </dd>
         <dt>Build Id</dt>
         <dd data-testid="fw-build-id">{VersionState.buildId}</dd>
+        <dt>Device Id</dt>
+        <dd data-testid="mcu-id">{VersionState.deviceId}</dd>
         <dt>Up Time</dt>
         <dd data-testid="fw-up-time">{VersionState.upTime}</dd>
       </dl>
