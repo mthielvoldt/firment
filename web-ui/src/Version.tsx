@@ -10,6 +10,7 @@ export default function Version({ }) {
     buildId: 0,
     upTime: 0,
     deviceId: 0,
+    project: "",
   });
   useEffect(() => {
     setMessageHandler("Version", setVersionState);
@@ -19,6 +20,8 @@ export default function Version({ }) {
     <div className="widget">
       <h4>FW Version</h4>
       <dl className="telemetry">
+        <dt>Project</dt>
+        <dd data-testid="fw-project">{VersionState.project}</dd>
         <dt>Semantic Version</dt>
         <dd data-testid="fw-semver">
           {VersionState.major}.{VersionState.minor}.{VersionState.patch}

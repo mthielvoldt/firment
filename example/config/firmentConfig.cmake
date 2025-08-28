@@ -6,6 +6,9 @@ set(APP_FW_CONFIG_DIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/config)
 # PCB should be set on cmake invocation via cmake ... -DPCB=<num>. 
 set(PCB_DIR ${APP_FW_CONFIG_DIR}/pcb${PCB})
 
+## Project handle (8 characters or fewer)
+set(PROJECT_STR "fmt-ex")
+
 ## Optional modules
 set(ENABLE_WAVEFORM 1)
 set(ENABLE_GHOST_PROBE 1)
