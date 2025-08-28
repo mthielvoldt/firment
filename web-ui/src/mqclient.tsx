@@ -10,11 +10,13 @@ let client: MqttClient;
  * right widget's setState function, passing it that message's data.*/
 let messageHandlers: { [index: string]: ({ }) => void } = {}
 let ranOnce = false;
+let activeTopicPrefix = "";
 
 export function setupMq(
   brokerHost: string,
   onSubscribe: () => void,
-  onMessage: () => void) {
+  onMessage: () => void,
+  onHelloMessage: (versionData: pb.Version) => void) {
   if (ranOnce) {
     teardownMq();
   }
@@ -32,13 +34,13 @@ export function setupMq(
   client = mqtt.connect(options);
 
   client.on("connect", () => {
-    client.subscribe("hq-bound", (err) => {
+    client.subscribe("hello-from-edge", (err) => {
       if (!err) {
-        console.log("Subscribed to 'hq-bound'");
+        console.log("Subscribed to hello-from-edge");
         onSubscribe();
       }
-      else { console.error("Failed to subscribe to hq-bound."); }
-    })
+      else { console.error("Failed to subscribe to hello-from-edge."); }
+    });
   });
 
   client.on("error", (error) => {
@@ -55,8 +57,7 @@ export function setupMq(
   });
 
 
-  client.on("message", (_, buffer) => {
-    onMessage();
+  client.on("message", (topic, buffer) => {
     // Parse the protobuf buffer
     let msgsDecoded = 0;
     const reader = Reader.create(buffer);
@@ -68,12 +69,19 @@ export function setupMq(
         // call the state updater for the widget this message addresses. 
         const subMsgType = Object.keys(message)[0];
         const newState = Object.values(message)[0];
-        if (messageHandlers.hasOwnProperty(subMsgType)) {
-          messageHandlers[subMsgType](newState);
-          msgsDecoded++
+
+        if (topic === "hello-from-edge") {
+          onHelloMessage(newState);
         }
-        else
-          console.warn("message handler not found for message, ", subMsgType);
+        else {
+          onMessage();
+          if (messageHandlers.hasOwnProperty(subMsgType)) {
+            messageHandlers[subMsgType](newState);
+            msgsDecoded++
+          }
+          else
+            console.warn("message handler not found for message, ", subMsgType);
+        }
       }
       catch (error) {
         console.error(error);
@@ -104,9 +112,23 @@ export function setMessageHandler(messageName: string, callback: MessageHandler)
 export function sendMessage(message_name: string, state_obj: object, verbose = true) {
   let message = { [message_name]: state_obj }
   const packet: Uint8Array = pb.Top.encodeDelimited(message).finish();
-  client.publish("edge-bound", packet as Buffer);
+  client.publish(`${activeTopicPrefix}/edge-bound`, packet as Buffer);
   if (verbose)
     console.log(JSON.stringify(message), "packet: ", packet);
+}
+
+export function selectDevice(topicPrefix: string) {
+  if (activeTopicPrefix !== "") {
+    client.unsubscribe(`${activeTopicPrefix}/hq-bound`)
+  }
+  activeTopicPrefix = topicPrefix;
+  const newHqBound = `${topicPrefix}/hq-bound`
+  client.subscribe(newHqBound, (err) => {
+    if (!err) {
+      console.log(`Subscribed to ${newHqBound}`);
+    }
+    else { console.error(`Failed to subscribe to ${newHqBound}`); }
+  });
 }
 
 function packMessages(messages: Uint8Array[]) {
@@ -124,7 +146,7 @@ function packMessages(messages: Uint8Array[]) {
 
 export function sendPacked(messageArray: Uint8Array[], verbose = true) {
   const packedMqttMessage = packMessages(messageArray);
-  client.publish("edge-bound", packedMqttMessage as Buffer)
+  client.publish(`${activeTopicPrefix}/edge-bound`, packedMqttMessage as Buffer)
   if (verbose)
     console.log(`Sent ${messageArray.length} in ${packedMqttMessage.length} bytes`);
 }
