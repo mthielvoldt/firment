@@ -4,13 +4,13 @@ idf_component_register(
     "fmt_esp_spi.c"
     "fmt_esp_uart.c"
     "../firmware/fmt_uart_frame.c"
-    "../example/build/pcb3/firment/firment_msg.pb.c"
-    "../example/build/pcb3/firment/messages.pb.c"
+    "../example/build/pb/firment_msg.pb.c"
+    "../example/build/pb/messages.pb.c"
     "../protocol/nanopb/pb_decode.c"
     "../protocol/nanopb/pb_common.c"
   INCLUDE_DIRS 
     "." 
     "../firmware"
     "../protocol/nanopb"
-    "../example/build/pcb3/firment"
+    "../example/build/pb"
 )
