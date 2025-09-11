@@ -5,7 +5,7 @@ docker run \
   -v $PWD:/project \
   -v $PWD/../../firmware:/project/firmware \
   -v $PWD/../../protocol/nanopb:/project/protocol/nanopb \
-  -v $PWD/../../example/build/pcb3/firment:/project/example/build/pcb3/firment \
+  -v $PWD/../../example/build/pb:/project/example/build/pb \
   -w /project \
   -u $UID \
   -e HOME=/tmp \
