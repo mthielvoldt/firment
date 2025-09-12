@@ -1,4 +1,5 @@
 add_library(MCUPort
+  deviceId_port.c
   fmt_flash_mock.c
   gpio_spy.c
   ioc_spy.c
