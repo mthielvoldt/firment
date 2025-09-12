@@ -11,6 +11,8 @@ test('Title is correct', async ({ page }) => {
 });
 
 test('Successfully connects', async ({page}) => {
+  await expect(page.getByText(/Connected/)).toBeVisible();
+  await page.getByLabel('Device:Select a device...').selectOption('fmt-ex/4325468');
   await expect(page.getByText(/Active/)).toBeVisible();
 });
 

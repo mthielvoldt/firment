@@ -15,6 +15,7 @@ async function lessThan(locator: Locator, rhvalue: number) {
 export async function connectedAndReset(page: Page) {
   const port = process.env.CI ? '4173' : '5173';
   await page.goto(`http://localhost:${port}/firment/`);
+  await page.getByLabel('Device:Select a device...').selectOption('fmt-ex/4325468');
   await expect(page.getByText(/Active/)).toBeVisible();
 
   const upTimeLocator = page.getByTestId('fw-up-time');
