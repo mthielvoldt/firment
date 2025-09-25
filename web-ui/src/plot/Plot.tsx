@@ -17,7 +17,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { Window, Grid } from "./plotTypes";
-import { calculateXGrid, calculateYGrid, getGlobalMinMax } from "./axisTools";
+import { calculateXGrid, calculateYGrid } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -32,12 +32,20 @@ const defaultWindow: Window = { xOffset: -1, xScale: 0.002, yOffset: 0, yScale: 
 const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
 
-function getNewGrid(numPoints: number, canvasLeftDataPos: number,
-  traces: model.Trace[]): Grid {
+function getNewGrid(indexOffset: number, window: Window): Grid {
 
-  const xLabels = calculateXGrid(numPoints, canvasLeftDataPos);
-  const { min, max } = getGlobalMinMax(traces);
+  const canvasLeftDataPos = (window.xOffset + 1) / window.xScale + indexOffset;
+  const numPointsVisible = 2 / window.xScale;
+  const xLabels = calculateXGrid(numPointsVisible, canvasLeftDataPos);
+
+  // Old way, with auto-scale doing everything. 
+  // const { min, max } = getGlobalMinMax(traces);
+  const min = -1;
+  const max = 1;
+
+  // grid should always fill the window. 
   const yLabels = calculateYGrid(min, max);
+
   console.debug(yLabels);
   return { xLabels, yLabels };
 }
@@ -79,7 +87,7 @@ export default function Plot({ }) {
         traceLenAtLastUpdate = traceLen;
         const { traces: newTraces, indexOfFirstPt } =
           model.getRecordSlice(recordId, numPoints);
-        const newGrid = getNewGrid(numPoints, indexOfFirstPt, newTraces);
+        const newGrid = getNewGrid(indexOfFirstPt, window);
         setGrid(newGrid);
         setTraces(newTraces);
       }
