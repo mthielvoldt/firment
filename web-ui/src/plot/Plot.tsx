@@ -56,11 +56,16 @@ export default function Plot({ }) {
   const [window, setWindow] = useState(defaultWindow);
   const [grid, setGrid] = useState(emptyGrid);
 
-  function handleZoom(xOffset: number, yOffset: number, xAdjust: number, yAdjust: number) {
+  function handleZoom(ptrDownX_gl: number, ptrDownY_gl: number, xAdjust: number, yAdjust: number) {
     const xScale = xAdjust * window.xScale;
     const yScale = yAdjust * window.yScale;
-    console.log(`New Center at ${xOffset}, ${yOffset}`);
-    setWindow({ xOffset, yOffset, xScale, yScale });
+
+    // Transform to the data center. 
+    const newXOffset = window.xOffset - ptrDownX_gl;
+    const newYOffset = window.yOffset - ptrDownY_gl;
+    console.log(`New Center at ${newXOffset}, ${newYOffset}`);
+
+    setWindow({ xOffset: newXOffset, yOffset: newYOffset, xScale, yScale });
   }
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
