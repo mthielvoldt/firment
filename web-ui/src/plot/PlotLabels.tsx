@@ -26,9 +26,15 @@ export function PlotLabels(props: Props) {
   function setNewCenter(e: React.PointerEvent<HTMLDivElement>) {
     if (!divRef.current) return;
     const divRect = divRef.current.getBoundingClientRect();
-    const xOffset = (e.clientX - divRect.left) / divRect.width;
-    const yOffset = (e.clientY - divRect.top) / divRect.height;
-    props.zoomHandler(xOffset, yOffset, 1, 1);
+
+    const xOffsetPx = e.clientX - divRect.left;
+    const yOffsetPx = e.clientY - divRect.top;
+    // convert to Gl units
+    const ptrDownX_gl = (xOffsetPx * 2 / divRect.width) - 1;
+    const ptrDownY_gl = (-yOffsetPx * 2 / divRect.height) + 1;
+
+    console.log(`ptr: ${ptrDownX_gl}, ${ptrDownY_gl}`)
+    props.zoomHandler(ptrDownX_gl, ptrDownY_gl, 1, 1);
   }
 
   props.grid.xLabels.forEach((xLabel) => {
