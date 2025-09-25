@@ -28,7 +28,7 @@ import { setMessageHandler } from "../mqclient";
 // import { default as setMessageHandler } from "./mockSignal";
 import PlotCanvas from "./PlotCanvas";
 
-const defaultWindow: Window = { xOffset: -1, xScale: 0.002, yOffset: 0, yScale: 1 }
+const defaultWindow: Window = { xOffset: -1, xScale: 0.002, yOffset: -0.5, yScale: 0.1 }
 const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
 
@@ -38,10 +38,9 @@ function getNewGrid(indexOffset: number, window: Window): Grid {
   const numPointsVisible = 2 / window.xScale;
   const xLabels = calculateXGrid(numPointsVisible, canvasLeftDataPos);
 
-  // Old way, with auto-scale doing everything. 
-  // const { min, max } = getGlobalMinMax(traces);
-  const min = -1;
-  const max = 1;
+  // const { min, max } = getGlobalMinMax(traces);  // The old way
+  const min = (-window.yOffset - 1) / window.yScale; // (-.5) * 10 = -5
+  const max = (-window.yOffset + 1) / window.yScale; // (1.5) * 10 = 15
 
   // grid should always fill the window. 
   const yLabels = calculateYGrid(min, max);
