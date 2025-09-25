@@ -28,7 +28,7 @@ import { setMessageHandler } from "../mqclient";
 // import { default as setMessageHandler } from "./mockSignal";
 import PlotCanvas from "./PlotCanvas";
 
-const defaultWindow: Window = { xOffset: 100, xScale: 0.01, yScale: 1, yOffset: 0 }
+const defaultWindow: Window = { xOffset: -1, xScale: 0.002, yOffset: 0, yScale: 1 }
 const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
 

@@ -51,7 +51,7 @@ function updateGridlines(grid: Grid, window: Window) {
 
 function updateDataLines(traces: Trace[], numPoints: number, window: Window) {
   if (!wglp) return;
-  const {yScale, yOffset} = window;
+  const {xScale, yScale, xOffset, yOffset} = window;
 
   wglp.removeDataLines();
   
@@ -60,6 +60,8 @@ function updateDataLines(traces: Trace[], numPoints: number, window: Window) {
     const line = new WebglLine(color, numPoints);
     line.scaleY = yScale;
     line.offsetY = yOffset;
+    line.scaleX = xScale;
+    line.offsetX = xOffset;
 
     /** Takes  */
     // line.offsetX = -1; // -1 / gScaleX; 
