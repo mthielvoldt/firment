@@ -5,9 +5,19 @@
  * The data is delivered by MQTT message over WebSockets.  mqclient.tsx provides
  * an interface through setMessageHandler to register a state updater function to
  * refresh the view when new data comes in.
+ * 
+ * This component is responsible to its children for: 
+ * - Calculating new scales and offsets, which determine the window.
+ * - Calculating appropriate grid lines for that window. 
+ * 
+ * Props are passed to children with GL (-1, 1) coordinates, meaning <Plot>
+ * does not need to know about pixels (width, height) at all.
+ * All Pixel-GL translations are done by <PlotLabels>
+ * 
  */
 import React, { useEffect, useState } from "react";
-import { calculateXGrid, AxisLabel, calculateYGrid, getGlobalMinMax } from "./axisTools";
+import { Window, Grid } from "./plotTypes";
+import { calculateXGrid, calculateYGrid, getGlobalMinMax } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -18,38 +28,33 @@ import { setMessageHandler } from "../mqclient";
 // import { default as setMessageHandler } from "./mockSignal";
 import PlotCanvas from "./PlotCanvas";
 
-interface Grid {
-  xLabels: AxisLabel[];
-  yLabels: AxisLabel[];
-  yScale: number;
-  yOffset: number;
-};
-interface PlotData {
-  grid: Grid;
-  traces: model.Trace[];
-};
-
-const emptyGrid: Grid = { xLabels: [], yLabels: [], yScale: 1, yOffset: 0 };
-const emptyPlot: PlotData = { grid: emptyGrid, traces: [] };
+const defaultWindow: Window = { xOffset: 100, xScale: 0.01, yScale: 1, yOffset: 0 }
+const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
-
 
 function getNewGrid(numPoints: number, canvasLeftDataPos: number,
   traces: model.Trace[]): Grid {
 
   const xLabels = calculateXGrid(numPoints, canvasLeftDataPos);
   const { min, max } = getGlobalMinMax(traces);
-  const { yLabels, yScale, yOffset } = calculateYGrid(min, max);
-  // console.debug({min, max, yScale, yOffset});
-  return { xLabels, yLabels, yScale, yOffset };
+  const yLabels = calculateYGrid(min, max);
+  console.debug(yLabels);
+  return { xLabels, yLabels };
 }
-
-
 
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
-  const [plotData, setPlotData] = useState(emptyPlot);
+  const [traces, setTraces] = useState<model.Trace[]>([]);
+  const [window, setWindow] = useState(defaultWindow);
+  const [grid, setGrid] = useState(emptyGrid);
+
+  function handleZoom(xOffset: number, yOffset: number, xAdjust: number, yAdjust: number) {
+    const xScale = xAdjust * window.xScale;
+    const yScale = yAdjust * window.yScale;
+    console.log(`New Center at ${xOffset}, ${yOffset}`);
+    setWindow({ xOffset, yOffset, xScale, yScale });
+  }
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
   useEffect(() => {
@@ -72,10 +77,11 @@ export default function Plot({ }) {
       const traceLen = model.getTraceLen(recordId);
       if (traceLen > traceLenAtLastUpdate) {
         traceLenAtLastUpdate = traceLen;
-        const { traces, indexOfFirstPt } =
+        const { traces: newTraces, indexOfFirstPt } =
           model.getRecordSlice(recordId, numPoints);
-        const grid = getNewGrid(numPoints, indexOfFirstPt, traces);
-        setPlotData({ grid, traces });
+        const newGrid = getNewGrid(numPoints, indexOfFirstPt, newTraces);
+        setGrid(newGrid);
+        setTraces(newTraces);
       }
     }, 100);
     return () => {
@@ -100,20 +106,17 @@ export default function Plot({ }) {
       <div className="canvas-container">
         <PlotCanvas
           numPoints={numPoints}
-          xLabels={plotData.grid.xLabels}
-          yLabels={plotData.grid.yLabels}
-          yScale = {plotData.grid.yScale}
-          yOffset={plotData.grid.yOffset}
-          traces={plotData.traces}
+          traces={traces}
+          grid={grid}
+          window={window}
         />
         <PlotLabels
-          xLabels={plotData.grid.xLabels}
-          yLabels={plotData.grid.yLabels}
-          yScale = {plotData.grid.yScale}
-          yOffset={plotData.grid.yOffset}
+          grid={grid}
+          window={window}
+          zoomHandler={handleZoom}
         />
       </div>
-      <PlotStats traces={plotData.traces} />
+      <PlotStats traces={traces} />
       <label>
         Record:
         <input type="number" className="" value={recordId}

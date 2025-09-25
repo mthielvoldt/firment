@@ -1,14 +1,17 @@
 import { Trace } from "./plotModel";
-
-export interface AxisLabel {
-  position: number; // Same units as the data.
-  text: string;
-};
+import { AxisLabel } from "./plotTypes";
 
 // Default gridline parameters.
 const minGridlineCountX = 8;
 const minGridlineCountY = 5;
 
+/** calculateXGrid
+ * Takes X scale and offset.  Returns 
+ * @function calculateXGrid
+ * @param xScale 
+ * @param xOffset 
+ * @returns array of labels (position_gl, text)
+ */
 export function calculateXGrid(numPoints: number, canvasLeftDataPos: number) {
   // WebGL units (2.0 = whole canvas - from -1:1)
   const CANVAS_WIDTH = 2;
@@ -73,14 +76,13 @@ export function calculateYGrid(minValue: number, maxValue: number) {
   
   // The window will be from one gridline above maxValue to one gridline below
   // minValue.  Calculate scale and offset to convert data into gl frame. 
-  const viewRange_dat = (numGridLines - 1) * gridStep_dat;
   const topLinePos_dat =
     Math.ceil(maxValue / gridStep_dat) * gridStep_dat;  // top of window.
-  
-  const yScale = (2 / viewRange_dat);
 
   // 1.0(top_gl) = (top_dat * scale) + offset.  Algebra gets you the next line.
-  const yOffset = 1.0 - (topLinePos_dat * yScale);
+  // const viewRange_dat = (numGridLines - 1) * gridStep_dat;
+  // const yScale = (2 / viewRange_dat);
+  // const yOffset = 1.0 - (topLinePos_dat * yScale);
 
   // console.debug({gridStep_dat, numGridLines, viewRange_dat, topLinePos_dat, yScale})
 
@@ -93,7 +95,7 @@ export function calculateYGrid(minValue: number, maxValue: number) {
       text: linePos_dat.toPrecision(2)
     });
   }
-  return {yLabels, yScale, yOffset};
+  return yLabels;
 }
 
 /** Finds the greatest number that's less than the input that is in the set:
