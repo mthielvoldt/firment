@@ -38,20 +38,12 @@ const defaultWindow: Window = {
 const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
 
-function getNewGrid({ xValuesOffset, xOffset, xScale, yOffset, yScale }: Window) {
-
-  const canvasLeftDataPos = (xOffset + 1) / xScale + xValuesOffset;
-  const numPointsVisible = 2 / xScale;
-  const xLabels = calculateXGrid(numPointsVisible, canvasLeftDataPos);
-
-  // const { min, max } = getGlobalMinMax(traces);  // The old way
-  const min = (-yOffset - 1) / yScale; // (-.5) * 10 = -5
-  const max = (-yOffset + 1) / yScale; // (1.5) * 10 = 15
-
+function getNewGrid(window: Window) {
   // grid should always fill the window. 
-  const yLabels = calculateYGrid(min, max);
+  const xLabels = calculateXGrid(window.xScale, window.xOffset);
+  const yLabels = calculateYGrid(window.yScale, window.yOffset);
 
-  console.debug(yLabels);
+  // console.debug(yLabels);
   return { xLabels, yLabels } as Grid;
 }
 
