@@ -55,17 +55,28 @@ export default function Plot({ }) {
   const [traces, setTraces] = useState<model.Trace[]>([]);
   const [window, setWindow] = useState(defaultWindow);
   const [grid, setGrid] = useState(emptyGrid);
+  let startXScale = defaultWindow.xScale
+  let startYScale = defaultWindow.yScale;
 
-  function handleZoom(ptrDownX_gl: number, ptrDownY_gl: number, xAdjust: number, yAdjust: number) {
-    const xScale = xAdjust * window.xScale;
-    const yScale = yAdjust * window.yScale;
+  function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
+    setWindow((prev) => {
+      const xOffset = prev.xOffset - ptrDownX_gl;
+      const yOffset = prev.yOffset - ptrDownY_gl;
+      startXScale = prev.xScale;
+      startYScale = prev.yScale;
+      console.log(`New Center at ${xOffset}, ${yOffset}`);
+      return { ...prev, xOffset, yOffset };
+    });
+  }
 
-    // Transform to the data center. 
-    const newXOffset = window.xOffset - ptrDownX_gl;
-    const newYOffset = window.yOffset - ptrDownY_gl;
-    console.log(`New Center at ${newXOffset}, ${newYOffset}`);
-
-    setWindow({ xOffset: newXOffset, yOffset: newYOffset, xScale, yScale });
+  function setScales(xAdjust: number, yAdjust: number) {
+    setWindow(prev => {
+      const xScale = xAdjust * startXScale;
+      const yScale = yAdjust * startYScale;
+      const xOffset = 
+      console.log(`Scale Adjust: ${xAdjust}, ${yAdjust}`)
+      return { ...prev, xScale, yScale };
+    });
   }
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
@@ -125,7 +136,8 @@ export default function Plot({ }) {
         <PlotLabels
           grid={grid}
           window={window}
-          zoomHandler={handleZoom}
+          setCenter={setCenter}
+          setScales={setScales}
         />
       </div>
       <PlotStats traces={traces} />
