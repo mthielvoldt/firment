@@ -1,5 +1,6 @@
 
 export interface Window {
+  xValuesOffset: number;
   xOffset: number;
   yOffset: number;
   xScale: number;

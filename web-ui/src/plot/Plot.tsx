@@ -28,31 +28,38 @@ import { setMessageHandler } from "../mqclient";
 // import { default as setMessageHandler } from "./mockSignal";
 import PlotCanvas from "./PlotCanvas";
 
-const defaultWindow: Window = { xOffset: -1, xScale: 0.002, yOffset: -0.5, yScale: 0.1 }
+const defaultWindow: Window = {
+  xValuesOffset: 0,
+  xOffset: -1,
+  xScale: 0.002,
+  yOffset: -0.5,
+  yScale: 0.1
+};
 const emptyGrid: Grid = { xLabels: [], yLabels: [] };
 let traceLenAtLastUpdate = 0;
 
-function getNewGrid(indexOffset: number, window: Window): Grid {
+function getNewGrid({ xValuesOffset, xOffset, xScale, yOffset, yScale }: Window) {
 
-  const canvasLeftDataPos = (window.xOffset + 1) / window.xScale + indexOffset;
-  const numPointsVisible = 2 / window.xScale;
+  const canvasLeftDataPos = (xOffset + 1) / xScale + xValuesOffset;
+  const numPointsVisible = 2 / xScale;
   const xLabels = calculateXGrid(numPointsVisible, canvasLeftDataPos);
 
   // const { min, max } = getGlobalMinMax(traces);  // The old way
-  const min = (-window.yOffset - 1) / window.yScale; // (-.5) * 10 = -5
-  const max = (-window.yOffset + 1) / window.yScale; // (1.5) * 10 = 15
+  const min = (-yOffset - 1) / yScale; // (-.5) * 10 = -5
+  const max = (-yOffset + 1) / yScale; // (1.5) * 10 = 15
 
   // grid should always fill the window. 
   const yLabels = calculateYGrid(min, max);
 
   console.debug(yLabels);
-  return { xLabels, yLabels };
+  return { xLabels, yLabels } as Grid;
 }
 
 export default function Plot({ }) {
   const [numPoints, setNumPoints] = useState(1000);
   const [recordId, setRecordId] = useState(0);
   const [traces, setTraces] = useState<model.Trace[]>([]);
+  // Grid updates whenever window updates: TODO: merge these states.
   const [window, setWindow] = useState(defaultWindow);
   const [grid, setGrid] = useState(emptyGrid);
 
@@ -60,8 +67,10 @@ export default function Plot({ }) {
     setWindow((prev) => {
       const xOffset = prev.xOffset - ptrDownX_gl;
       const yOffset = prev.yOffset - ptrDownY_gl;
-      console.log(`New Center at ${xOffset}, ${yOffset}`);
-      return { ...prev, xOffset, yOffset };
+      console.debug(`New Center at ${xOffset}, ${yOffset}`);
+      const newWindow = { ...prev, xOffset, yOffset };
+      setGrid(getNewGrid(newWindow));
+      return newWindow;
     });
   }
 
@@ -71,8 +80,9 @@ export default function Plot({ }) {
       const yScale = prev.yScale * yAdjust;
       const xOffset = prev.xOffset * xAdjust;
       const yOffset = prev.yOffset * yAdjust;
-      console.log(`Scale Adjust: ${xAdjust}, ${yAdjust}`)
-      return { xOffset, yOffset, xScale, yScale };
+      const newWindow = { ...prev, xOffset, yOffset, xScale, yScale };
+      setGrid(getNewGrid(newWindow));
+      return newWindow;
     });
   }
 
@@ -99,9 +109,13 @@ export default function Plot({ }) {
         traceLenAtLastUpdate = traceLen;
         const { traces: newTraces, indexOfFirstPt } =
           model.getRecordSlice(recordId, numPoints);
-        const newGrid = getNewGrid(indexOfFirstPt, window);
-        setGrid(newGrid);
         setTraces(newTraces);
+        // Update window and grid to reflect new indexOfFirstPt
+        setWindow(prevWindow => {
+          const newWindow = { ...prevWindow, xValuesOffset: indexOfFirstPt };
+          setGrid(getNewGrid(newWindow));
+          return newWindow;
+        })
       }
     }, 100);
     return () => {
