@@ -59,10 +59,8 @@ export function PlotLabels(props: Props) {
 
   const CLEARANCE_FOR_X_LABELS_PX = 8;
   props.grid.yLabels.forEach((yLabel) => {
-    // convert data to gl units
-    const position_gl = (yLabel.position * props.window.yScale) + props.window.yOffset;
     // convert to pixels
-    const top = Math.floor((-position_gl + 1) * heightPx / 2);
+    const top = Math.floor((-yLabel.position + 1) * heightPx / 2);
     axisLabels.push({
       top,
       left: 0,

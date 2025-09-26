@@ -13,12 +13,13 @@ interface Props {
 
 let wglp: WebglPlot;
 
-function updateGridlines(grid: Grid, window: Window) {
+function updateGridlines(grid: Grid) {
   const {xLabels, yLabels} = grid;
-  const {yScale, yOffset} = window;
+  // const {yScale, yOffset, xScale, xOffset} = window;
 
   const xGrid = new WebglLine(gridColor, 2 * xLabels.length);
-
+  // xGrid.scaleX = xScale;
+  // xGrid.offsetX = xOffset;
   let rising = true;
   for (let gridLineIndex = 0; gridLineIndex < xLabels.length; gridLineIndex++) {
     const point0Index = gridLineIndex * 2;
@@ -31,8 +32,8 @@ function updateGridlines(grid: Grid, window: Window) {
   }
 
   const yGrid = new WebglLine(gridColor, 2 * yLabels.length);
-  yGrid.scaleY = yScale;
-  yGrid.offsetY = yOffset;
+  // yGrid.scaleY = yScale;
+  // yGrid.offsetY = yOffset;
   let leftToRight = true;
   for (let gridLineIndex = 0; gridLineIndex < yLabels.length; gridLineIndex++) {
     const point0Index = gridLineIndex * 2;
@@ -67,13 +68,13 @@ function updateDataLines(traces: Trace[], numPoints: number, window: Window) {
     // line.offsetX = -1; // -1 / gScaleX; 
     wglp.addLine(line);
     // line.arrangeX();  // REMOVE: forces numPoints == visblePoints.
-    line.lineSpaceX(0, 1);
+    line.lineSpaceX(window.xValuesOffset, 1);
     line.replaceArrayY(trace.data);
   })
 }
 
 function updateView(props: Props) {
-  updateGridlines(props.grid, props.window);
+  updateGridlines(props.grid);
   updateDataLines(props.traces, props.numPoints, props.window);
   wglp?.update();
 }
