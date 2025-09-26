@@ -19,7 +19,6 @@ interface Props {
 
 export function PlotLabels(props: Props) {
   const divRef = useRef<HTMLDivElement>(null);
-  const dragOrigin = useRef<{ x: number, y: number } | null>(null);
 
   let axisLabels: { top: number, left: number, text: string }[] = [];
   const widthPx = (divRef.current) ? divRef.current.clientWidth : 0;
@@ -29,7 +28,6 @@ export function PlotLabels(props: Props) {
     if (!divRef.current) return;
     const divRect = divRef.current.getBoundingClientRect();
 
-    dragOrigin.current = { x: e.clientX, y: e.clientY };
     (e.target as HTMLDivElement).setPointerCapture(e.pointerId);
 
     const xOffsetPx = e.clientX - divRect.left;
@@ -43,19 +41,15 @@ export function PlotLabels(props: Props) {
   }
 
   function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    if (!divRef.current || !dragOrigin.current) return;
-    dragOrigin.current = null;
     (e.target as HTMLDivElement).releasePointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!dragOrigin.current) return;
-    const deltaX = e.clientX - dragOrigin.current.x;
-    const deltaY = e.clientY - dragOrigin.current.y;
-    console.log(`deltas ${deltaX}, ${deltaY}}`);
+    if (e.buttons !== 1) return;
+    console.log(`deltas ${e.movementX}, ${e.movementY}}`);
     
-    const xAdjust = 2**(deltaX/20);
-    const yAdjust = 2**(deltaY/20);
+    const xAdjust = 2**(e.movementX/20);
+    const yAdjust = 2**(e.movementY/20);
     props.setScales(xAdjust, yAdjust);
   }
 
