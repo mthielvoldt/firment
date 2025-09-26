@@ -35,8 +35,6 @@ export function PlotLabels(props: Props) {
     // convert to Gl units
     const ptrDownX_gl = (xOffsetPx * 2 / divRect.width) - 1;
     const ptrDownY_gl = (-yOffsetPx * 2 / divRect.height) + 1;
-
-    console.log(`ptr: ${ptrDownX_gl}, ${ptrDownY_gl}`)
     props.setCenter(ptrDownX_gl, ptrDownY_gl);
   }
 
@@ -45,9 +43,7 @@ export function PlotLabels(props: Props) {
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (e.buttons !== 1) return;
-    console.log(`deltas ${e.movementX}, ${e.movementY}}`);
-    
+    if (e.buttons !== 1) return;  
     const xAdjust = 2**(e.movementX/20);
     const yAdjust = 2**(e.movementY/20);
     props.setScales(xAdjust, yAdjust);
