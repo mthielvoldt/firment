@@ -55,15 +55,11 @@ export default function Plot({ }) {
   const [traces, setTraces] = useState<model.Trace[]>([]);
   const [window, setWindow] = useState(defaultWindow);
   const [grid, setGrid] = useState(emptyGrid);
-  let startXScale = defaultWindow.xScale
-  let startYScale = defaultWindow.yScale;
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
     setWindow((prev) => {
       const xOffset = prev.xOffset - ptrDownX_gl;
       const yOffset = prev.yOffset - ptrDownY_gl;
-      startXScale = prev.xScale;
-      startYScale = prev.yScale;
       console.log(`New Center at ${xOffset}, ${yOffset}`);
       return { ...prev, xOffset, yOffset };
     });
@@ -71,11 +67,12 @@ export default function Plot({ }) {
 
   function setScales(xAdjust: number, yAdjust: number) {
     setWindow(prev => {
-      const xScale = xAdjust * startXScale;
-      const yScale = yAdjust * startYScale;
-      const xOffset = 
+      const xScale = prev.xScale * xAdjust;
+      const yScale = prev.yScale * yAdjust;
+      const xOffset = prev.xOffset * xAdjust;
+      const yOffset = prev.yOffset * yAdjust;
       console.log(`Scale Adjust: ${xAdjust}, ${yAdjust}`)
-      return { ...prev, xScale, yScale };
+      return { xOffset, yOffset, xScale, yScale };
     });
   }
 
