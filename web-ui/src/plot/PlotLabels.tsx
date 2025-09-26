@@ -11,21 +11,26 @@ import { Grid, Window } from "./plotTypes";
 interface Props {
   grid: Grid;
   window: Window;
-  zoomHandler: (xOffset: number, yOffset: number, xAdjust: number, yAdjust: number) => void;
+  setCenter: (ptrDownX_gl: number, ptrDownY_gl: number) => void;
+  setScales: (xAdjust: number, yAdjust: number) => void;
 };
 
 
 
 export function PlotLabels(props: Props) {
   const divRef = useRef<HTMLDivElement>(null);
+  const dragOrigin = useRef<{ x: number, y: number } | null>(null);
 
   let axisLabels: { top: number, left: number, text: string }[] = [];
   const widthPx = (divRef.current) ? divRef.current.clientWidth : 0;
   const heightPx = (divRef.current) ? divRef.current.clientHeight : 0;
 
-  function setNewCenter(e: React.PointerEvent<HTMLDivElement>) {
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!divRef.current) return;
     const divRect = divRef.current.getBoundingClientRect();
+
+    dragOrigin.current = { x: e.clientX, y: e.clientY };
+    (e.target as HTMLDivElement).setPointerCapture(e.pointerId);
 
     const xOffsetPx = e.clientX - divRect.left;
     const yOffsetPx = e.clientY - divRect.top;
@@ -34,7 +39,24 @@ export function PlotLabels(props: Props) {
     const ptrDownY_gl = (-yOffsetPx * 2 / divRect.height) + 1;
 
     console.log(`ptr: ${ptrDownX_gl}, ${ptrDownY_gl}`)
-    props.zoomHandler(ptrDownX_gl, ptrDownY_gl, 1, 1);
+    props.setCenter(ptrDownX_gl, ptrDownY_gl);
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (!divRef.current || !dragOrigin.current) return;
+    dragOrigin.current = null;
+    (e.target as HTMLDivElement).releasePointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!dragOrigin.current) return;
+    const deltaX = e.clientX - dragOrigin.current.x;
+    const deltaY = e.clientY - dragOrigin.current.y;
+    console.log(`deltas ${deltaX}, ${deltaY}}`);
+    
+    const xAdjust = 2**(deltaX/20);
+    const yAdjust = 2**(deltaY/20);
+    props.setScales(xAdjust, yAdjust);
   }
 
   props.grid.xLabels.forEach((xLabel) => {
@@ -74,7 +96,9 @@ export function PlotLabels(props: Props) {
     <div
       ref={divRef}
       className="plot-labels-div"
-      onPointerDown={setNewCenter}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerMove={onPointerMove}
     >
       {labels}
     </div>
