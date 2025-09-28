@@ -1,6 +1,6 @@
 
 import { useRef } from "react";
-import { Grid, Window } from "./plotTypes";
+import { Grid } from "./plotTypes";
 
 /** Labels are text elements overlaid on a canvas, which is managed elsewhere.
  * there are 2 groups of labels: one for x-axis labels, one for y.  
@@ -10,7 +10,6 @@ import { Grid, Window } from "./plotTypes";
 
 interface Props {
   grid: Grid;
-  window: Window;
   setCenter: (ptrDownX_gl: number, ptrDownY_gl: number) => void;
   setScales: (xAdjust: number, yAdjust: number) => void;
 };

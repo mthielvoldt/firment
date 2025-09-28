@@ -2,17 +2,17 @@ import { useEffect, useRef } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { gridColor, getPlotColors } from "./plotColors";
 import { Record } from "./plotModel";
-import { Grid, Window } from "./plotTypes";
+import { Grid, View } from "./plotTypes";
 
 interface Props {
   record: Record;
   grid: Grid;
-  view: Window;
+  view: View;
 };
 
 let wglp: WebglPlot;
 
-function updateView(grid: Grid, view: Window) {
+function updateView(grid: Grid, view: View) {
   const { xLabels, yLabels } = grid;
   // const {yScale, yOffset, xScale, xOffset} = view;
 
@@ -57,7 +57,7 @@ function updateView(grid: Grid, view: Window) {
   wglp?.update();
 }
 
-function replaceDataLines(record: Record, view: Window) {
+function replaceDataLines(record: Record, view: View) {
   if (!wglp) return;
   const { xScale, yScale, xOffset, yOffset } = view;
 
