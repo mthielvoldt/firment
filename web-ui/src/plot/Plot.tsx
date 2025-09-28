@@ -7,8 +7,8 @@
  * refresh the view when new data comes in.
  * 
  * This component is responsible to its children for: 
- * - Calculating new scales and offsets, which determine the window.
- * - Calculating appropriate grid lines for that window. 
+ * - Calculating new scales and offsets, which determine the view.
+ * - Calculating appropriate grid lines for that view. 
  * 
  * Props are passed to children with GL (-1, 1) coordinates, meaning <Plot>
  * does not need to know about pixels (width, height) at all.
@@ -16,7 +16,7 @@
  * 
  */
 import React, { useEffect, useState } from "react";
-import { Window, Grid } from "./plotTypes";
+import { View, Grid } from "./plotTypes";
 import { calculateXGrid, calculateYGrid, lastVisibleIndex } from "./axisTools";
 
 import * as model from "./plotModel";
@@ -28,7 +28,7 @@ import { setMessageHandler } from "../mqclient";
 // import { default as setMessageHandler } from "./mockSignal";
 import PlotCanvas from "./PlotCanvas";
 
-const defaultWindow: Window = {
+const defaultWindow: View = {
   xValuesOffset: 0,
   xOffset: -1,
   xScale: 0.002,
@@ -38,22 +38,11 @@ const defaultWindow: Window = {
 const emptyRecord: model.Record = { id: NaN, traces: [], traceLen: 0, indexOffset: 0 };
 let traceLenAtLastUpdate = 0;
 
-function getNewGrid(window: Window) {
-  // grid should always fill the window. 
-  const xLabels = calculateXGrid(window.xScale, window.xOffset);
-  const yLabels = calculateYGrid(window.yScale, window.yOffset);
-
-  // console.debug(yLabels);
-  return { xLabels, yLabels } as Grid;
-}
-
 export default function Plot({ }) {
   const [following, setFollowing] = useState(true);
   const [recordId, setRecordId] = useState(0);
   const [record, setRecord] = useState(emptyRecord);
-  // Grid updates whenever window updates: TODO: merge these states.
-  const [window, setWindow] = useState(defaultWindow);
-  const [grid, setGrid] = useState(getNewGrid(defaultWindow));
+  const [view, setView] = useState(defaultWindow);
 
   // One-time setup: canvas, Plot and line objects, handler for new data.
   useEffect(() => {
@@ -87,43 +76,41 @@ export default function Plot({ }) {
     }
   }, [recordId]);
 
-  if (following && isScrollNeeded(record, window)) {
-    // Update window and grid to reflect new indexOfFirstPt
+  if (following && isScrollNeeded(record, view)) {
+    // Update view and grid to reflect new indexOfFirstPt
     console.debug("Scrolling");
-    setWindow(prevWindow => {
-      const xOffset = -(record.indexOffset + record.traceLen) * window.xScale;
-      const newWindow = { ...prevWindow, xOffset };
-      setGrid(getNewGrid(newWindow));
-      return newWindow;
+    setView(prevWindow => {
+      const xOffset = -(record.indexOffset + record.traceLen) * view.xScale;
+      return { ...prevWindow, xOffset };
     })
   }
+  
+  const grid: Grid = {
+    xLabels: calculateXGrid(view.xScale, view.xOffset),
+    yLabels: calculateYGrid(view.yScale, view.yOffset)
+  };
 
-  function isScrollNeeded(record: model.Record, window: Window) {
+  function isScrollNeeded(record: model.Record, view: View) {
     const lastData = record.indexOffset + record.traceLen;
-    const lastVisble = lastVisibleIndex(window.xScale, window.xOffset);
+    const lastVisble = lastVisibleIndex(view.xScale, view.xOffset);
     return lastData > lastVisble;
   }
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
-    setWindow((prev) => {
+    setView((prev) => {
       const xOffset = prev.xOffset - ptrDownX_gl;
       const yOffset = prev.yOffset - ptrDownY_gl;
-      console.debug(`New Center at ${xOffset}, ${yOffset}`);
-      const newWindow = { ...prev, xOffset, yOffset };
-      setGrid(getNewGrid(newWindow));
-      return newWindow;
+      return { ...prev, xOffset, yOffset };
     });
   }
 
   function setScales(xAdjust: number, yAdjust: number) {
-    setWindow(prev => {
+    setView(prev => {
       const xScale = prev.xScale * xAdjust;
       const yScale = prev.yScale * yAdjust;
       const xOffset = prev.xOffset * xAdjust;
       const yOffset = prev.yOffset * yAdjust;
-      const newWindow = { ...prev, xOffset, yOffset, xScale, yScale };
-      setGrid(getNewGrid(newWindow));
-      return newWindow;
+      return { ...prev, xOffset, yOffset, xScale, yScale };
     });
   }
 
@@ -139,11 +126,10 @@ export default function Plot({ }) {
         <PlotCanvas
           record={record}
           grid={grid}
-          view={window}
+          view={view}
         />
         <PlotLabels
           grid={grid}
-          window={window}
           setCenter={setCenter}
           setScales={setScales}
         />

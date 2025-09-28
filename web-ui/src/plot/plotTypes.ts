@@ -1,5 +1,5 @@
 
-export interface Window {
+export interface View {
   xValuesOffset: number;
   xOffset: number;
   yOffset: number;
