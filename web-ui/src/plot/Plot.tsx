@@ -17,7 +17,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { Window, Grid } from "./plotTypes";
-import { calculateXGrid, calculateYGrid } from "./axisTools";
+import { calculateXGrid, calculateYGrid, lastVisibleIndex } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -35,7 +35,7 @@ const defaultWindow: Window = {
   yOffset: -0.5,
   yScale: 0.1
 };
-const emptyGrid: Grid = { xLabels: [], yLabels: [] };
+const emptyRecord: model.Record = { id: NaN, traces: [], traceLen: 0, indexOffset: 0 };
 let traceLenAtLastUpdate = 0;
 
 function getNewGrid(window: Window) {
@@ -48,12 +48,61 @@ function getNewGrid(window: Window) {
 }
 
 export default function Plot({ }) {
-  const [numPoints, setNumPoints] = useState(1000);
+  const [following, setFollowing] = useState(true);
   const [recordId, setRecordId] = useState(0);
-  const [traces, setTraces] = useState<model.Trace[]>([]);
+  const [record, setRecord] = useState(emptyRecord);
   // Grid updates whenever window updates: TODO: merge these states.
   const [window, setWindow] = useState(defaultWindow);
-  const [grid, setGrid] = useState(emptyGrid);
+  const [grid, setGrid] = useState(getNewGrid(defaultWindow));
+
+  // One-time setup: canvas, Plot and line objects, handler for new data.
+  useEffect(() => {
+    // Model: register function that mutates data model on message rx.
+    const clearHandler = setMessageHandler("ProbeSignals",
+      model.handleProbeSignals);
+
+    console.log("call Plot effect");
+    // cleanup
+    return () => {
+      console.log("cleanup Plot effect");
+      clearHandler();
+    };
+  }, []);
+
+  // Drives updates on a fixed interval.  This interval gets replaced when the
+  // record or numPoints changes.
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      const traceLen = model.getTraceLen(recordId);
+
+      if (traceLen > traceLenAtLastUpdate) {
+        traceLenAtLastUpdate = traceLen;
+        const newRecord =
+          model.getRecordSlice(recordId, Infinity, traceLen);
+        setRecord(newRecord);
+      }
+    }, 100);
+    return () => {
+      clearInterval(timerId);
+    }
+  }, [recordId]);
+
+  if (following && isScrollNeeded(record, window)) {
+    // Update window and grid to reflect new indexOfFirstPt
+    console.debug("Scrolling");
+    setWindow(prevWindow => {
+      const xOffset = -(record.indexOffset + record.traceLen) * window.xScale;
+      const newWindow = { ...prevWindow, xOffset };
+      setGrid(getNewGrid(newWindow));
+      return newWindow;
+    })
+  }
+
+  function isScrollNeeded(record: model.Record, window: Window) {
+    const lastData = record.indexOffset + record.traceLen;
+    const lastVisble = lastVisibleIndex(window.xScale, window.xOffset);
+    return lastData > lastVisble;
+  }
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
     setWindow((prev) => {
@@ -78,63 +127,19 @@ export default function Plot({ }) {
     });
   }
 
-  // One-time setup: canvas, Plot and line objects, handler for new data.
-  useEffect(() => {
-    // Model: register function that mutates data model on message rx.
-    const clearHandler = setMessageHandler("ProbeSignals",
-      model.handleProbeSignals);
-
-    console.log("call Plot effect");
-    // cleanup
-    return () => {
-      console.log("cleanup Plot effect");
-      clearHandler();
-    };
-  }, []);
-
-  // Drives updates on a fixed interval.  This interval gets replaced when the
-  // record or numPoints changes.
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      const traceLen = model.getTraceLen(recordId);
-      if (traceLen > traceLenAtLastUpdate) {
-        traceLenAtLastUpdate = traceLen;
-        const { traces: newTraces, indexOfFirstPt } =
-          model.getRecordSlice(recordId, numPoints);
-        setTraces(newTraces);
-        // Update window and grid to reflect new indexOfFirstPt
-        setWindow(prevWindow => {
-          const newWindow = { ...prevWindow, xValuesOffset: indexOfFirstPt };
-          setGrid(getNewGrid(newWindow));
-          return newWindow;
-        })
-      }
-    }, 100);
-    return () => {
-      clearInterval(timerId);
-    }
-  }, [recordId, numPoints])
-
-
   function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
     traceLenAtLastUpdate = 0;
     const newRecordId = Number.parseInt(e.currentTarget.value);
     setRecordId(newRecordId);
   }
 
-  function changeNumPoints(e: React.ChangeEvent<HTMLInputElement>) {
-    e.preventDefault();
-    setNumPoints(Number.parseInt(e.currentTarget.value));
-  }
-
   return (
     <div className="widget plot-div">
       <div className="canvas-container">
         <PlotCanvas
-          numPoints={numPoints}
-          traces={traces}
+          record={record}
           grid={grid}
-          window={window}
+          view={window}
         />
         <PlotLabels
           grid={grid}
@@ -143,16 +148,16 @@ export default function Plot({ }) {
           setScales={setScales}
         />
       </div>
-      <PlotStats traces={traces} />
+      <PlotStats traces={record.traces} />
       <label>
         Record:
         <input type="number" className="" value={recordId}
           onChange={changeRecordId} />
       </label>
       <label>
-        Num Points:
-        <input type="number" className="" value={numPoints} step={numPoints / 2}
-          onChange={changeNumPoints} />
+        Follow:
+        <input type="checkbox" className="" checked={following}
+          onChange={e => setFollowing(e.currentTarget.checked)} />
       </label>
     </div>
   );
