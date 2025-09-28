@@ -15,7 +15,7 @@
  * All Pixel-GL translations are done by <PlotLabels>
  * 
  */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Grid } from "./plotTypes";
 import { calculateXGrid, calculateYGrid, lastVisibleIndex } from "./axisTools";
 
@@ -36,9 +36,9 @@ const defaultWindow: View = {
   yScale: 0.1
 };
 const emptyRecord: model.Record = { id: NaN, traces: [], traceLen: 0, indexOffset: 0 };
-let traceLenAtLastUpdate = 0;
 
 export default function Plot({ }) {
+  const fetchCount = useRef(0);
   const [following, setFollowing] = useState(true);
   const [recordId, setRecordId] = useState(0);
   const [record, setRecord] = useState(emptyRecord);
@@ -62,19 +62,32 @@ export default function Plot({ }) {
   // record or numPoints changes.
   useEffect(() => {
     const timerId = setInterval(() => {
-      const traceLen = model.getTraceLen(recordId);
 
-      if (traceLen > traceLenAtLastUpdate) {
-        traceLenAtLastUpdate = traceLen;
+      // Auto-Update the record ID if following and probes are moved.
+      if (following) {
+        const activeRecordId = model.getActiveRecordId();
+        if (recordId !== activeRecordId) {
+          fetchCount.current = 0;
+          clearInterval(timerId); // prevent getting another record slice.
+          setRecordId(activeRecordId);
+          return; 
+        }
+      }
+
+      const traceLen = model.getTraceLen(recordId);
+      if (traceLen > fetchCount.current) {
+        fetchCount.current = traceLen;
         const newRecord =
           model.getRecordSlice(recordId, Infinity, traceLen);
         setRecord(newRecord);
       }
-    }, 100);
+    }, 500);
+    console.debug("New Interval. ID: ", timerId);
+    
     return () => {
       clearInterval(timerId);
     }
-  }, [recordId]);
+  }, [recordId, following]);
 
   if (following && isScrollNeeded(record, view)) {
     // Update view and grid to reflect new indexOfFirstPt
@@ -116,8 +129,9 @@ export default function Plot({ }) {
   }
 
   function changeRecordId(e: React.ChangeEvent<HTMLInputElement>) {
-    traceLenAtLastUpdate = 0;
+    fetchCount.current = 0;
     const newRecordId = Number.parseInt(e.currentTarget.value);
+    setFollowing(false);
     setRecordId(newRecordId);
   }
 

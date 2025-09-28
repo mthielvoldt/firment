@@ -25,7 +25,6 @@ export interface Record {
   id: number;
 }
 
-// An array of Records.
 let data: Trace[][] = [];
 let lastSignals: ProbeSignal[] = [];
 
@@ -90,4 +89,8 @@ export function getRecordSlice(
 
 export function getTraceLen(record: number): number {
   return (data[record]) ? data[record][0].data.length : 0;
+}
+
+export function getActiveRecordId() {
+  return data.length - 1;
 }
