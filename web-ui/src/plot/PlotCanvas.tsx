@@ -1,21 +1,20 @@
 import { useEffect, useRef } from "react";
 import { WebglPlot, WebglLine } from "webgl-plot";
 import { gridColor, getPlotColors } from "./plotColors";
-import { Trace } from "./plotModel";
+import { Record } from "./plotModel";
 import { Grid, Window } from "./plotTypes";
 
 interface Props {
-  numPoints: number;
-  traces: Trace[];
+  record: Record;
   grid: Grid;
-  window: Window;
+  view: Window;
 };
 
 let wglp: WebglPlot;
 
-function updateGridlines(grid: Grid) {
-  const {xLabels, yLabels} = grid;
-  // const {yScale, yOffset, xScale, xOffset} = window;
+function updateView(grid: Grid, view: Window) {
+  const { xLabels, yLabels } = grid;
+  // const {yScale, yOffset, xScale, xOffset} = view;
 
   const xGrid = new WebglLine(gridColor, 2 * xLabels.length);
   // xGrid.scaleX = xScale;
@@ -45,46 +44,49 @@ function updateGridlines(grid: Grid) {
     leftToRight = !leftToRight;
   }
 
-  wglp && wglp.removeAuxLines();
-  wglp && wglp.addAuxLine(xGrid);
-  wglp && wglp.addAuxLine(yGrid);
+  wglp?.removeAuxLines();
+  wglp?.addAuxLine(xGrid);
+  wglp?.addAuxLine(yGrid);
+
+  wglp?.linesData.forEach((line) => {
+    line.scaleY = view.yScale;
+    line.offsetY = view.yOffset;
+    line.scaleX = view.xScale;
+    line.offsetX = view.xOffset;
+  })
+  wglp?.update();
 }
 
-function updateDataLines(traces: Trace[], numPoints: number, window: Window) {
+function replaceDataLines(record: Record, view: Window) {
   if (!wglp) return;
-  const {xScale, yScale, xOffset, yOffset} = window;
+  const { xScale, yScale, xOffset, yOffset } = view;
 
   wglp.removeDataLines();
-  
-  traces.forEach((trace, traceIdx) => {
+
+  record.traces.forEach((trace, traceIdx) => {
     const color = getPlotColors(traceIdx);
-    const line = new WebglLine(color, numPoints);
+    const line = new WebglLine(color, trace.data.length);
     line.scaleY = yScale;
     line.offsetY = yOffset;
     line.scaleX = xScale;
     line.offsetX = xOffset;
 
-    /** Takes  */
-    // line.offsetX = -1; // -1 / gScaleX; 
     wglp.addLine(line);
-    // line.arrangeX();  // REMOVE: forces numPoints == visblePoints.
-    line.lineSpaceX(window.xValuesOffset, 1);
+    line.lineSpaceX(view.xValuesOffset, 1);
     line.replaceArrayY(trace.data);
   })
+  wglp.update();
 }
 
-function updateView(props: Props) {
-  updateGridlines(props.grid);
-  updateDataLines(props.traces, props.numPoints, props.window);
-  wglp?.update();
-}
 
-export default function PlotCanvas(props: Props) {
+
+export default function PlotCanvas({ record, grid, view }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const prevRecord = useRef({ end: NaN, id: NaN });
 
   useEffect(() => {
     if (canvas.current) {
-      console.log("new wglp. window.devicePixelRatio ", window.devicePixelRatio, 
+      console.log("new wglp. devicePixelRatio: ", window.devicePixelRatio,
         "clientWidth: ", canvas.current.clientWidth);
       canvas.current.width = canvas.current.clientWidth;
       canvas.current.height = canvas.current.clientHeight;
@@ -99,8 +101,25 @@ export default function PlotCanvas(props: Props) {
   }, []);
 
   useEffect(() => {
-    updateView(props);
-  }, [props]);
+    if (isIncrementalUpdate(record)) {
+      // extendDataLines(record);
+      // prevRecord.current = {id: record.id, end: record.indexOffset + record.traceLen };
+    }
+    else {
+      replaceDataLines(record, view);
+      console.debug(`Replace data; len: ${record.traceLen}`)
+    }
+  }, [record]);
+
+  useEffect(() => {
+    updateView(grid, view);
+  }, [view])
+
+  function isIncrementalUpdate(record: Record) {
+    const continues = record.indexOffset == prevRecord.current.end;
+    const sameId = record.id == prevRecord.current.id;
+    return (continues && sameId);
+  }
 
 
   return (

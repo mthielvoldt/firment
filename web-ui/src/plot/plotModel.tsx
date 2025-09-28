@@ -21,6 +21,8 @@ export interface Trace {
 export interface Record {
   traces: Trace[];
   traceLen: number;
+  indexOffset: number;
+  id: number;
 }
 
 // An array of Records.
@@ -56,38 +58,34 @@ export function handleProbeSignals(signals: ProbeSignals) {
 }
 
 /*
- * getSlicedRecord(recordId, numPoints, lastPoint?)
+ * getSlicedRecord(recordId, maxLength, lastPoint?)
  * - returns Record {traces, traceLen} | {[], 0} if recordId not found. 
- * - 0-pads returned traces as needed to fill numPoints.
- * - lastPoint not provided: gives latest numPoints. 
+ * - if desiredEnd is not provided: returns latest data. 
  */
 export function getRecordSlice(
   record: number,
-  numPoints: number,
+  maxLength = Infinity,
   desiredEnd = Infinity) {
 
   let traces: Trace[] = [];
   let traceLen = 0;
-  let indexOfFirstPt = 0;
+  let sliceStart = 0;
 
   if (data[record] && data[record].length) {
     traceLen = data[record][0].data.length; // guaranteed to have at least one trace.
     
     let sliceEnd = Math.min(traceLen, desiredEnd);
-    let sliceStart = Math.max(0, (sliceEnd - numPoints));
-    indexOfFirstPt = sliceEnd - numPoints;
-    const padding = (indexOfFirstPt < 0) ?
-      Array(-indexOfFirstPt).fill(0) : [];
+    sliceStart = Math.max(0, (sliceEnd - maxLength));
 
     data[record].forEach((fullTrace) => {
       traces.push({
         testPointId: fullTrace.testPointId,
         testPointName: fullTrace.testPointName,
-        data: padding.concat(fullTrace.data.slice(sliceStart, sliceEnd))
+        data: fullTrace.data.slice(sliceStart, sliceEnd)
       });
     })
   }
-  return { traces, traceLen, indexOfFirstPt }
+  return { traces, traceLen, indexOffset: sliceStart, id: record } as Record;
 }
 
 export function getTraceLen(record: number): number {

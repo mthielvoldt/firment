@@ -16,6 +16,11 @@ function scaleOffsetToMinMax(scale: number, offset: number) {
   return { min, max };
 }
 
+export function lastVisibleIndex(scale: number, offset:number) {
+  const {max} = scaleOffsetToMinMax(scale, offset);
+  return max;
+}
+
 /** calculateXGrid
  * Takes X scale and offset.  Returns 
  * @function calculateXGrid
