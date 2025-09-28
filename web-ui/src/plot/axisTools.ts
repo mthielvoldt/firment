@@ -42,7 +42,6 @@ export function calculateXGrid(scale: number, offset: number) {
       text: linePos_dat.toString()
     });
   }
-  console.debug(xLabels);
   return xLabels;
 }
 
