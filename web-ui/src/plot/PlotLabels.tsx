@@ -43,8 +43,8 @@ export function PlotLabels(props: Props) {
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (e.buttons !== 1) return;  
-    const xAdjust = 2**(e.movementX/20);
-    const yAdjust = 2**(e.movementY/20);
+    const xAdjust = 2**(e.movementX/50);
+    const yAdjust = 2**(e.movementY/50);
     props.setScales(xAdjust, yAdjust);
   }
 

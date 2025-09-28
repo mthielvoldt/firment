@@ -84,7 +84,7 @@ export default function Plot({ }) {
       return { ...prevWindow, xOffset };
     })
   }
-  
+
   const grid: Grid = {
     xLabels: calculateXGrid(view.xScale, view.xOffset),
     yLabels: calculateYGrid(view.yScale, view.yOffset)
@@ -97,6 +97,7 @@ export default function Plot({ }) {
   }
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
+    setFollowing(false);
     setView((prev) => {
       const xOffset = prev.xOffset - ptrDownX_gl;
       const yOffset = prev.yOffset - ptrDownY_gl;
