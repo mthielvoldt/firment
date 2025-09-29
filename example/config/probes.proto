@@ -7,8 +7,6 @@ enum SampleFreq {
   FREQ_30_HZ = 30;
   FREQ_100_HZ = 100;
   FREQ_250_HZ = 250;
-  FREQ_500_HZ = 500;
-  FREQ_1_KHZ = 1000;
 }
 
 /** We use an enum to ID the messages.

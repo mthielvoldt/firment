@@ -1,14 +1,17 @@
 #include "ghostProbe.h"
 #include "fmt_comms.h"
 
-// RunScanCtl has 4 bytes for isContinuous and freq, leaving the rest for the
-// testPointIds.  Each testPointId takes 2 bytes.  They come at the end.
-#define NUM_PROBES ((RunScanCtl_size - 4) / 2)
+// RunScanCtl Breaks down like this in term of size:
+//   bool isContinuous:   1B tag 1B value
+//   SampleFreq freq:     1B tag 2B value (max is in range: 128 - 16383)
+//   testPointId probe_x: 1B tag 1B value (max < 128) 
+// Number of probes can be determined by (size - 5)/2. 
+#define NUM_PROBES ((RunScanCtl_size - 5) / 2)
 
 static testPoint_t testPoints[_TestPointId_ARRAYSIZE];
 
 static TestPointId activeTestPoints[NUM_PROBES];
-static bool running = false;
+static volatile bool running = false;
 static uint32_t numActiveProbes = 0;
 static uint32_t scanFreqDivider = 0;
 static uint32_t periodicFreqHz = 0;
@@ -32,6 +35,9 @@ bool gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, conver
 
 void handleRunScanCtl(RunScanCtl scanCtl)
 {
+  // Stop running first so we don't race gp_periodic().
+  running = false;
+
   if (scanCtl.freq > SampleFreq_SCAN_DISABLED)
   {
     /* Integer division.  If scanFreqDivider set to 0, periodic will send signals
@@ -45,15 +51,11 @@ void handleRunScanCtl(RunScanCtl scanCtl)
       TestPointId thisId = ids[i];
       if (thisId != TestPointId_DISCONNECTED)
       {
+        activeTestPoints[numActiveProbes] = thisId;
         numActiveProbes++;
-        activeTestPoints[i] = thisId;
       }
     }
     running = true;
-  }
-  else
-  {
-    running = false;
   }
 }
 
