@@ -70,7 +70,7 @@ export default function Plot({ }) {
           fetchCount.current = 0;
           clearInterval(timerId); // prevent getting another record slice.
           setRecordId(activeRecordId);
-          return; 
+          return;
         }
       }
 
@@ -91,14 +91,25 @@ export default function Plot({ }) {
 
   if (following && isScrollNeeded(record, view)) {
     // Update view and grid to reflect new indexOfFirstPt
-    console.debug("Scrolling");
-    const yRange = globalMinMaxFromTraceTails(record.traces, view.xScale);
-    const visibleY = scaleOffsetToMinMax(view.yScale, view.yOffset);
-    const newYMin= Math.min(yRange.min, visibleY.min);
-    const newYMax= Math.max(yRange.max, visibleY.max);
-    const {scale: yScale, offset: yOffset} = minMaxToScaleOffset(newYMin, newYMax);
-    const xOffset = -(record.indexOffset + record.traceLen) * view.xScale;
-    setView({ ...view, xOffset, yOffset, yScale });
+    console.debug("Scrolling. Vert: ", verticalScrollNeeded(record, view),
+      " Horz: ", horizontalScrollNeeded(record, view));
+
+    setView(view => {
+      let { yScale, yOffset, xOffset } = view;
+      if (verticalScrollNeeded(record, view)) {
+        const yRange = globalMinMaxFromTraceTails(record.traces, view.xScale);
+        const visibleY = scaleOffsetToMinMax(view.yScale, view.yOffset);
+        const newYMin = Math.min(yRange.min, visibleY.min) - 0.1 * (yRange.max - yRange.min);
+        const newYMax = Math.max(yRange.max, visibleY.max) + 0.1 * (yRange.max - yRange.min);
+        const newYView = minMaxToScaleOffset(newYMin, newYMax);
+        yScale = newYView.scale;
+        yOffset = newYView.offset;
+      }
+      if (horizontalScrollNeeded(record, view)) {
+        xOffset = -(record.indexOffset + record.traceLen) * view.xScale;
+      }
+      return { ...view, yScale, yOffset, xOffset };
+    });
   }
 
   const grid: Grid = {
