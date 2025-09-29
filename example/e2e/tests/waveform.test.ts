@@ -42,13 +42,10 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
   await waveformCtl.getByLabel('enabled').check();
   await waveformCtl.getByLabel("channel").selectOption({ index: 0 }); // CHAN_A
   await waveformCtl.getByLabel("shape").selectOption("SINE")
-  await waveformCtl.getByLabel('amplitudeV').fill('0.1');
+  await waveformCtl.getByLabel('amplitudeV').fill('0.2');
   await waveformCtl.getByLabel('frequencyHz').fill('5');
   await waveformCtl.getByLabel('offsetV').fill('0.5');
   await waveformCtl.getByRole('button', { name: 'Send' }).click();
-
-  const numPtsInput = page.getByLabel("Num Points:");
-  await numPtsInput.fill('200');
 
   // Turn on Scanning at 10Hz
   const scanCtl = page.getByLabel('RunScanCtl');
