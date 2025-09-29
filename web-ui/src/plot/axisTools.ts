@@ -16,12 +16,19 @@ export function scaleOffsetToMinMax(scale: number, offset: number) {
   return { min, max };
 }
 
+export function minMaxToScaleOffset(min: number, max: number) {
+  const scale = 2 / (max - min);
+  const offset = -((max + min) / 2) * scale;
+  return { scale, offset };
+}
+
 /** calculateXGrid
  * Takes X scale and offset.  Returns 
  * @function calculateXGrid
- * @param xScale 
- * @param xOffset 
- * @returns array of labels (position_gl, text)
+ * @param scale X-axis scale from equation: position_gl = data * scale + offset
+ * @param offset X-axis offset in same equation.  (gl units)
+ * @returns Array of x-axis labels (position, text).  Positions are in GL-units.
+ *   Labels are at "nice" visible numbers and are positioned along window top.
  */
 export function calculateXGrid(scale: number, offset: number) {
 
@@ -42,9 +49,10 @@ export function calculateXGrid(scale: number, offset: number) {
 
 /**
  * @function calculateYGrid
- * @param min the global minimum across all visible trace slices
- * @param max the global maximum across all visible trace slices
- * @returns the text and y-position in GL-units. 
+ * @param scale Y-axis scale from equation: position_gl = data * scale + offset
+ * @param offset Y-axis offset in same equation.  (gl units)
+ * @returns Array of y-axis labels (position, text).  Positions are in GL-units.
+ *   Labels are at "nice" visible numbers and are positioned along window left.
  */
 export function calculateYGrid(scale: number, offset: number) {
 
@@ -77,21 +85,18 @@ function limitsToGridlines({ min, max }: Limits, minLineCount: number) {
   return { baseValue, step, count };
 }
 
-export function getGlobalMinMax(traces: Trace[]): { min: number; max: number } {
+export function globalMinMaxFromTraceTails(traces: Trace[], xScale: number) {
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
 
   traces.forEach(trace => {
-    trace.data.forEach(value => {
+    trace.data.slice(-2/xScale).forEach(value => {
       if (value < min) min = value;
       if (value > max) max = value;
     });
   });
 
-  if (min === Number.POSITIVE_INFINITY) min = NaN;
-  if (max === Number.NEGATIVE_INFINITY) max = NaN;
-
-  return { min, max };
+  return (max >= min) ? { min, max } : {min: NaN, max: NaN} as Limits; 
 }
 
 /** Finds the greatest number that's less than the input that is in the set:
