@@ -107,7 +107,7 @@ export default function PlotCanvas({ record, grid, view }: Props) {
     }
     else {
       replaceDataLines(record, view);
-      console.debug(`Replace data; len: ${record.traceLen}`)
+      // console.debug(`Replace data; len: ${record.traceLen}`)
     }
   }, [record]);
 

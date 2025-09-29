@@ -32,8 +32,8 @@ const defaultWindow: View = {
   xValuesOffset: 0,
   xOffset: -1,
   xScale: 0.002,
-  yOffset: -0.5,
-  yScale: 0.1
+  yOffset: 0,
+  yScale: 0.8
 };
 const emptyRecord: model.Record = { id: NaN, traces: [], traceLen: 0, indexOffset: 0 };
 
@@ -69,6 +69,7 @@ export default function Plot({ }) {
         if (recordId !== activeRecordId) {
           fetchCount.current = 0;
           clearInterval(timerId); // prevent getting another record slice.
+          setView(prev => ({...prev, xOffset: -1}));
           setRecordId(activeRecordId);
           return; 
         }
@@ -83,7 +84,7 @@ export default function Plot({ }) {
       }
     }, 500);
     console.debug("New Interval. ID: ", timerId);
-    
+
     return () => {
       clearInterval(timerId);
     }
