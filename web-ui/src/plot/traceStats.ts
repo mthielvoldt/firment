@@ -25,16 +25,19 @@ export class Stats {
 
   update(newData: number[] | Float32Array) {
     this.count += newData.length;
-    this.min = Math.min(...newData, this.min || Infinity);
-    this.max = Math.max(...newData, this.max || -Infinity);
 
     /** TS complains about invoking unions of functions when those functions 
      * have generic params (which reduce does).
      * https://stackoverflow.com/questions/56884065/typed-arrays-and-union-types */
-    if (newData instanceof Float32Array)
+    if (newData instanceof Float32Array) {
       this.sum = newData.reduce((sum, item) => sum + item, this.sum);
-    else
+      this.min = newData.reduce((min, item) => Math.min(min, item), this.min || Infinity);
+      this.max = newData.reduce((max, item) => Math.max(max, item), this.max || -Infinity);
+    } else {
       this.sum = newData.reduce((sum, item) => sum + item, this.sum);
+      this.min = newData.reduce((min, item) => Math.min(min, item), this.min || Infinity);
+      this.max = newData.reduce((max, item) => Math.max(max, item), this.max || -Infinity);
+    }
   }
 
   get ave() {
