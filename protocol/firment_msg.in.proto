@@ -5,6 +5,7 @@ syntax = "proto3";
 import "probes.proto";
 import "nanopb.proto";
 
+// When changing number of probes, update NUM_PROBES in ghostProbe.c
 message RunScanCtl {
   bool isContinuous = 1;
   SampleFreq freq = 2;
@@ -13,7 +14,6 @@ message RunScanCtl {
   TestPointId probe_2 = 5;
   TestPointId probe_3 = 6;
   TestPointId probe_4 = 7;
-  TestPointId probe_5 = 8;
 }
 
 message ProbeSignal {

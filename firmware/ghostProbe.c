@@ -1,12 +1,9 @@
 #include "ghostProbe.h"
 #include "fmt_comms.h"
 
-// RunScanCtl Breaks down like this in term of size:
-//   bool isContinuous:   1B tag 1B value
-//   SampleFreq freq:     1B tag 2B value (max is in range: 128 - 16383)
-//   testPointId probe_x: 1B tag 1B value (max < 128) 
-// Number of probes can be determined by (size - 5)/2. 
-#define NUM_PROBES ((RunScanCtl_size - 5) / 2)
+// NUM_PROBES must match number of probe_x fields in RunScanCtl.
+// See firment_msg.in.proto.
+#define NUM_PROBES 5
 
 static testPoint_t testPoints[_TestPointId_ARRAYSIZE];
 
