@@ -1,6 +1,5 @@
 
 export interface View {
-  xValuesOffset: number;
   xOffset: number;
   yOffset: number;
   xScale: number;
