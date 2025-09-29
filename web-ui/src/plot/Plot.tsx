@@ -17,7 +17,7 @@
  */
 import React, { useEffect, useState, useRef } from "react";
 import { View, Grid } from "./plotTypes";
-import { calculateXGrid, calculateYGrid, scaleOffsetToMinMax } from "./axisTools";
+import { calculateXGrid, calculateYGrid, globalMinMaxFromTraceTails, scaleOffsetToMinMax, minMaxToScaleOffset } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -92,10 +92,13 @@ export default function Plot({ }) {
   if (following && isScrollNeeded(record, view)) {
     // Update view and grid to reflect new indexOfFirstPt
     console.debug("Scrolling");
-    setView(prevWindow => {
-      const xOffset = -(record.indexOffset + record.traceLen) * view.xScale;
-      return { ...prevWindow, xOffset };
-    })
+    const yRange = globalMinMaxFromTraceTails(record.traces, view.xScale);
+    const visibleY = scaleOffsetToMinMax(view.yScale, view.yOffset);
+    const newYMin= Math.min(yRange.min, visibleY.min);
+    const newYMax= Math.max(yRange.max, visibleY.max);
+    const {scale: yScale, offset: yOffset} = minMaxToScaleOffset(newYMin, newYMax);
+    const xOffset = -(record.indexOffset + record.traceLen) * view.xScale;
+    setView({ ...view, xOffset, yOffset, yScale });
   }
 
   const grid: Grid = {
@@ -104,9 +107,22 @@ export default function Plot({ }) {
   };
 
   function isScrollNeeded(record: model.Record, view: View) {
-    const lastData = record.indexOffset + record.traceLen;
-    const visible = scaleOffsetToMinMax(view.xScale, view.xOffset);
-    return (lastData > visible.max) || (lastData < visible.min);
+    return verticalScrollNeeded(record, view) || horizontalScrollNeeded(record, view);
+  }
+
+  function verticalScrollNeeded(record: model.Record, view: View) {
+    const yRange = globalMinMaxFromTraceTails(record.traces, view.xScale);
+    const visibleY = scaleOffsetToMinMax(view.yScale, view.yOffset);
+
+    // Vertical scroll needed if some Y values are outside visibleY.
+    return (yRange.max > visibleY.max || yRange.min < visibleY.min);
+  }
+  function horizontalScrollNeeded(record: model.Record, view: View) {
+    const lastX = record.indexOffset + record.traceLen;
+    const visibleX = scaleOffsetToMinMax(view.xScale, view.xOffset);
+
+    // Horizontal scroll needed if lastX is outside visibleX.
+    return (lastX > visibleX.max || lastX < visibleX.min);
   }
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
