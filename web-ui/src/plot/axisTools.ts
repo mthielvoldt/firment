@@ -10,15 +10,10 @@ interface Limits {
 const minGridlineCountX = 5;
 const minGridlineCountY = 5;
 
-function scaleOffsetToMinMax(scale: number, offset: number) {
+export function scaleOffsetToMinMax(scale: number, offset: number) {
   const min = (-offset - 1) / scale;
   const max = (-offset + 1) / scale;
   return { min, max };
-}
-
-export function lastVisibleIndex(scale: number, offset:number) {
-  const {max} = scaleOffsetToMinMax(scale, offset);
-  return max;
 }
 
 /** calculateXGrid

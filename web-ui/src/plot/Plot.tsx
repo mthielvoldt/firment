@@ -17,7 +17,7 @@
  */
 import React, { useEffect, useState, useRef } from "react";
 import { View, Grid } from "./plotTypes";
-import { calculateXGrid, calculateYGrid, lastVisibleIndex } from "./axisTools";
+import { calculateXGrid, calculateYGrid, scaleOffsetToMinMax } from "./axisTools";
 
 import * as model from "./plotModel";
 import { PlotLabels } from "./PlotLabels";
@@ -69,7 +69,6 @@ export default function Plot({ }) {
         if (recordId !== activeRecordId) {
           fetchCount.current = 0;
           clearInterval(timerId); // prevent getting another record slice.
-          setView(prev => ({...prev, xOffset: -1}));
           setRecordId(activeRecordId);
           return; 
         }
@@ -106,8 +105,8 @@ export default function Plot({ }) {
 
   function isScrollNeeded(record: model.Record, view: View) {
     const lastData = record.indexOffset + record.traceLen;
-    const lastVisble = lastVisibleIndex(view.xScale, view.xOffset);
-    return lastData > lastVisble;
+    const visible = scaleOffsetToMinMax(view.xScale, view.xOffset);
+    return (lastData > visible.max) || (lastData < visible.min);
   }
 
   function setCenter(ptrDownX_gl: number, ptrDownY_gl: number) {
