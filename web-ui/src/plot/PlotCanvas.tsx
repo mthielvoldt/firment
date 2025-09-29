@@ -72,7 +72,7 @@ function replaceDataLines(record: Record, view: View) {
     line.offsetX = xOffset;
 
     wglp.addLine(line);
-    line.lineSpaceX(view.xValuesOffset, 1);
+    line.lineSpaceX(0, 1);
     line.replaceArrayY(trace.data);
   })
   wglp.update();

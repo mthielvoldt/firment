@@ -29,7 +29,6 @@ import { setMessageHandler } from "../mqclient";
 import PlotCanvas from "./PlotCanvas";
 
 const defaultWindow: View = {
-  xValuesOffset: 0,
   xOffset: -1,
   xScale: 0.002,
   yOffset: 0,
@@ -161,6 +160,13 @@ export default function Plot({ }) {
     setFollowing(false);
     setRecordId(newRecordId);
   }
+  function zoomToFit() {
+    const xScale = 2 / (record.traceLen + record.indexOffset);
+    const xOffset = -1;
+    const yRange = globalMinMaxFromTraceTails(record.traces, xScale);
+    const {scale: yScale, offset: yOffset} = minMaxToScaleOffset(yRange.min, yRange.max);
+    setView({ xScale, xOffset, yScale, yOffset });
+  }
 
   return (
     <div className="widget plot-div">
@@ -187,6 +193,8 @@ export default function Plot({ }) {
         <input type="checkbox" className="" checked={following}
           onChange={e => setFollowing(e.currentTarget.checked)} />
       </label>
+      <input type="button" className="" value="Fit"
+          onClick={zoomToFit} />
     </div>
   );
 }
