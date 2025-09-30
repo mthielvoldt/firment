@@ -78,6 +78,7 @@ export default function BrokerAddress({ showBrokerUrl = false }) {
           Broker URL:
           <input type="text" value={address}
             onChange={(e) => setAddress(e.currentTarget.value)} />
+          <br/>
         </label>
       )}
       <label>
