@@ -127,26 +127,26 @@ def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       initial_state[field.name] = 0  
       field_strings += f'''
       <dt>{field.name}</dt>
-      <dd>{{{message_name}State.{field.name}}}</dd>
+      <dd data-testid="tlm-{field.name}">{{{message_name}State.{field.name}}}</dd>
       '''
     if field.type in float_fields:
       initial_state[field.name] = 0.0  
       field_strings += f'''
       <dt>{field.name}</dt>
-      <dd>{{{message_name}State.{field.name}.toPrecision(4)}}</dd>
+      <dd data-testid="tlm-{field.name}">{{{message_name}State.{field.name}.toPrecision(4)}}</dd>
       '''
     if field.type == FieldDescriptor.TYPE_BOOL:
       initial_state[field.name] = False
       field_strings += f'''
       <dt>{field.name}</dt>
-      <dd>{{{message_name}State.{field.name} ? "x" : ""}}</dd>
+      <dd data-testid="tlm-{field.name}">{{{message_name}State.{field.name} ? "x" : ""}}</dd>
       '''
     if field.type == FieldDescriptor.TYPE_ENUM:
       add_table_for_enum(enums, field)
       initial_state[field.name] = 0   
       field_strings += f'''
       <dt>{field.name}</dt>
-      <dd>{{{field.type_name[1:]}[{message_name}State.{field.name}]}}</dd>
+      <dd data-testid="tlm-{field.name}">{{{field.type_name[1:]}[{message_name}State.{field.name}]}}</dd>
       '''
   # enum_name = ""
   # enum = next(enum for enum in proto.enum_type if enum.name == enum_name)

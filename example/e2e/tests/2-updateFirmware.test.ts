@@ -16,6 +16,7 @@ function getBuildIdData() {
 
 test.beforeEach(async ({ page }) => {
   await connectedAndReset(page);
+  await page.getByText('FW Update').click();
 });
 
 test('Build Id is visible', async ({ page }) => {
