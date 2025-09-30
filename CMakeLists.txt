@@ -137,7 +137,7 @@ add_custom_command(
     ${UI_SRC_DIR}/App.css
     ${UI_SRC_DIR}/BrokerAddress.tsx
     ${UI_SRC_DIR}/updatePage.ts.in
-    ${UI_SRC_DIR}/Image.tsx 
+    ${UI_SRC_DIR}/FWUpdate.tsx 
     ${UI_SRC_DIR}/index.ts
     ${UI_SRC_DIR}/Log.tsx
     ${UI_SRC_DIR}/mockSignal.tsx

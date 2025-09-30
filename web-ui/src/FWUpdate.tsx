@@ -7,7 +7,7 @@ let timeoutId: ReturnType<typeof setTimeout>;
 let activePageIndex = 0;
 let pages: ArrayBuffer[] = [];
 
-export default function Image({ }) {
+export default function FWUpdate({ }) {
   const [progress, setProgress] = useState("No upload yet");
   const [image, setImage] = useState(new ArrayBuffer());
 
@@ -102,20 +102,18 @@ export default function Image({ }) {
   }
 
   return (
-    <form className="widget"
-      aria-label="FW Update"
-      onSubmit={handleSubmit}>
-      <p className="widget-head">
-        <span>FW Update</span>
-        <button type="submit">Send Image</button>
-      </p>
-      <label>Choose an image file
+    <details className="widget">
+      <summary>FW Update</summary>
+    <form aria-label="FW Update" onSubmit={handleSubmit}>
+      <label>Choose an image file<br />
         <input type="file" name="image-file" accept=".bin"
           onChange={handleFileChange} />
       </label>
+      <br />
+      <button type="submit">Send Image</button>
       <p data-testid="upload-progress">{progress}</p>
-
     </form>
+    </details>
   )
 
 

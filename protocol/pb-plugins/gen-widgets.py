@@ -103,13 +103,13 @@ export function {message.name}({{}}) {{
   }}
 
   return (
-    <form className="widget" aria-label="{message.name}" onSubmit={{handleSubmit}}>
-      <p className="widget-head">
-        <span >{message.name} </span>
+    <details className="widget">
+      <summary>{message.name}</summary>
+      <form aria-label="{message.name}" onSubmit={{handleSubmit}}>
+        {field_strings}
         <button type="submit">Send</button>
-      </p>
-      {field_strings}
-    </form>
+      </form>
+    </details>
   );
 }}
 '''
@@ -126,29 +126,27 @@ def get_tlm_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
     if field.type in integer_fields:
       initial_state[field.name] = 0  
       field_strings += f'''
-      <div className="field">
-        <p>{field.name + " "}<span>{{{message_name}State.{field.name}}}</span></p>
-      </div>
+      <dt>{field.name}</dt>
+      <dd>{{{message_name}State.{field.name}}}</dd>
       '''
     if field.type in float_fields:
       initial_state[field.name] = 0.0  
       field_strings += f'''
-      <div className="field">
-        <p>{field.name + " "}<span>{{{message_name}State.{field.name}.toPrecision(4)}}</span></p>
-      </div>
+      <dt>{field.name}</dt>
+      <dd>{{{message_name}State.{field.name}.toPrecision(4)}}</dd>
       '''
     if field.type == FieldDescriptor.TYPE_BOOL:
       initial_state[field.name] = False
       field_strings += f'''
-      {{{message_name}State.{field.name} && <p>{field.name}</p>}}
+      <dt>{field.name}</dt>
+      <dd>{{{message_name}State.{field.name} ? "x" : ""}}</dd>
       '''
     if field.type == FieldDescriptor.TYPE_ENUM:
       add_table_for_enum(enums, field)
       initial_state[field.name] = 0   
       field_strings += f'''
-      <div className="field">
-        <p>{field.name + " "}<span>{{{field.type_name[1:]}[{message_name}State.{field.name}]}}</span></p>
-      </div>
+      <dt>{field.name}</dt>
+      <dd>{{{field.type_name[1:]}[{message_name}State.{field.name}]}}</dd>
       '''
   # enum_name = ""
   # enum = next(enum for enum in proto.enum_type if enum.name == enum_name)
@@ -162,10 +160,12 @@ export function {message_name}({{}}) {{
   }}, []);
 
   return (
-    <div className="widget">
-      <h4>{message_name}</h4>
-      {field_strings}
-    </div>
+    <details className="widget">
+      <summary>{message_name}</summary>
+      <dl className='telemetry'>
+        {field_strings}
+      </dl>
+    </details>
   );
 }}
 '''

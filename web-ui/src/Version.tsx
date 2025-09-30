@@ -17,12 +17,12 @@ export default function Version({ }) {
   }, []);
 
   return (
-    <div className="widget">
-      <h4>FW Version</h4>
+    <details className="widget">
+      <summary>FW Meta</summary>
       <dl className="telemetry">
         <dt>Project</dt>
         <dd data-testid="fw-project">{VersionState.project}</dd>
-        <dt>Semantic Version</dt>
+        <dt>Version</dt>
         <dd data-testid="fw-semver">
           {VersionState.major}.{VersionState.minor}.{VersionState.patch}
         </dd>
@@ -33,6 +33,6 @@ export default function Version({ }) {
         <dt>Up Time</dt>
         <dd data-testid="fw-up-time">{VersionState.upTime}</dd>
       </dl>
-    </div>
+    </details>
   );
 }

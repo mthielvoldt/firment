@@ -34,9 +34,9 @@ export function Log({}) {
     <p key={message.id}>{message.text}</p>)
 
   return (
-    <div className="widget">
-      <h4>Log</h4>
+    <details className="widget">
+      <summary>Log</summary>
       {messages}
-    </div>
+    </details>
   )
 }
