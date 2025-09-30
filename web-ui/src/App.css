@@ -5,15 +5,19 @@
 
 .row-container {
   display: flex;
-  justify-content: space-between;
+  flex-flow: row wrap;
 }
 
 .widget-column {
-  flex-basis: 20%;
+  flex-basis: 25%;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .plot-column {
-  flex-basis: 60%;
+  flex-basis: 50%;
+  flex-grow: 1; /* grow to fill next row when wrapping */
+  flex-shrink: 1;
 }
 
 .widget {
@@ -34,9 +38,13 @@
   border-color: #0070f3;
 }
 
-.widget-head span {
-  margin: 0 0 1rem 0;
+summary, .widget-head {
   font-size: 1.2rem;
+  margin: 0 0 10px 0;
+}
+
+span {
+  margin-right: 5px;
 }
 
 .field p {
