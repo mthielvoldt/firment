@@ -15,6 +15,11 @@ async function lessThan(locator: Locator, rhvalue: number) {
 export async function connectedAndReset(page: Page) {
   const port = process.env.CI ? '4173' : '5173';
   await page.goto(`http://localhost:${port}/firment/`);
+
+  // Open the FW Meta widget to see the uptime.
+  await page.getByText('FW Meta').click();
+
+  // Connect to the device.
   await page.getByLabel('Device:Select a device...').selectOption('fmt-ex/4325468');
   await expect(page.getByText(/Active/)).toBeVisible();
 

@@ -3,13 +3,16 @@ import { connectedAndReset } from './shared';
 
 test.beforeEach(async ({ page }) => {
   await connectedAndReset(page);
+  await page.getByText('WaveformTlm').click();
+  await page.getByText('WaveformCtl').click();
+  await page.getByText('RunScanCtl').click();
 });
 
 
 test('WaveformCtl can enable and disable channel A', async ({ page }) => {
 
   // page.on("console", msg => console.log(msg.text()));
-  const voltageV = page.getByText("voltageV");
+  const voltageV = page.getByTestId("tlm-voltageV");
   const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
 
   await waveformCtl.getByLabel("channel").selectOption({ index: 0 });
