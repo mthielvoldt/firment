@@ -24,7 +24,7 @@ int main(void)
 
 
   ctl_init(WAVE_UPDATE_FREQ);
-  gp_init(GHOST_PROBE_CALL_FREQ);
+  gp_init(GP_STREAM_FREQ, GP_SNAP_FREQ);
 
   for (uint32_t count = 0;;)
   {
@@ -43,5 +43,12 @@ static void periodicA(void)
   comm_handleTelemetry();
   fmt_handleRx();
   ctl_updateVoltageISR();
-  gp_periodic();
+  gp_snapPeriodic();
+
+  static uint32_t tenCounter = 0;
+  if (++tenCounter == 10U)
+  {
+    tenCounter = 0;
+    gp_streamPeriodic();
+  }
 }
