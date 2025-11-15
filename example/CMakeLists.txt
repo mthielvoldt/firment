@@ -26,6 +26,7 @@ project(spi_example VERSION ${VERSION_SEM} LANGUAGES C ASM)
 
 include(config/cryptOptions.cmake)      # no deps
 include(config/firmentConfig.cmake)     # no deps
+include(config/ghostProbeConfig.cmake)  # after firmentConfig
 include(config/mcuCompileOptions.cmake) # after firmentConfig
 include(config/partitions.cmake)        # after mcuCompileOptions
 

@@ -1,11 +1,19 @@
 syntax = "proto3";
 
-enum SampleFreq {
-  SCAN_DISABLED = 0;
+enum StreamFreq {
+  STREAM_DISABLED = 0;
   FREQ_2_HZ = 2;
   FREQ_10_HZ = 10;
   FREQ_30_HZ = 30;
   FREQ_100_HZ = 100;
+}
+
+enum SnapFreq {
+  SNAP_DISABLED = 0;
+  FREQ_1KHZ = 1000;
+  FREQ_3KHZ = 3000;
+  FREQ_10KHZ = 10000;
+  FREQ_30KHZ = 30000;
 }
 
 /** We use an enum to ID the messages.

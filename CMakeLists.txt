@@ -35,8 +35,21 @@ add_library(FirmentFW
 # Generate the version header for the firmware
 configure_file(firmware/fmt_version.h.in fmt_version.h)
 
+# Set up variables for configuring ghostProbeConfig.h and firment_msg.proto
+if(ENABLE_GHOST_PROBE)
+  math(EXPR LAST_PROBE "${GP_NUM_PROBES} - 1")
+  foreach(PROBE RANGE ${LAST_PROBE})
+    math(EXPR PROTOBUF_FIELD "${PROBE} + 3")
+    set(PROBE_${PROBE}_DEFINITION "TestPointId probe_${PROBE} = ${PROTOBUF_FIELD};")
+  endforeach()
+else()
+  set(GP_NUM_PROBES 0)
+endif()
+
+configure_file(${FIRMENT_DIR}/firmware/ghostProbeConfig.in.h ghostProbeConfig.h)
+
 # Generate firment.proto with field size/length values filled in from vars from
-# firmentConfig.cmake (in project's config dir)
+# firmentConfig.cmake and ghostProbeConfig.cmake
 configure_file(protocol/firment_msg.in.proto ${PB_OUT_DIR}/firment_msg.proto)
 
 # Generate fmt_update.h containing memory region info shared with bootloader.

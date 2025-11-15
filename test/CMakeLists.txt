@@ -8,6 +8,7 @@ include(${PROJECT_CONFIG_DIR}/version.cmake) # -> VERSION_SEM
 project(firment_test  VERSION ${VERSION_SEM} LANGUAGES CXX C)
 
 include(${PROJECT_CONFIG_DIR}/firmentConfig.cmake)
+include(${PROJECT_CONFIG_DIR}/ghostProbeConfig.cmake)
 include(mcuCompileOptions.cmake)  # omits cortex-m4 compiler flags for test.
 include(${PROJECT_CONFIG_DIR}/partitions.cmake)
 
@@ -41,6 +42,7 @@ add_executable(testFirment
   ../firmware/test/stub_comms.c
   ../firmware/test/updateTest.cpp
   ../firmware/test/versionTest.cpp
+  ../firmware/test/ghostProbeTest.cpp
   ../esp/mqtt5/test/espSpiTest.cpp
 )
 

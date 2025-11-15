@@ -5,7 +5,8 @@ test.beforeEach(async ({ page }) => {
   await connectedAndReset(page);
   await page.getByText('WaveformTlm').click();
   await page.getByText('WaveformCtl').click();
-  await page.getByText('RunScanCtl').click();
+  await page.getByText('ScanCtl').click();
+  await page.getByText('ManualSnapCtl').click();
 });
 
 
@@ -30,7 +31,7 @@ test('WaveformCtl can enable and disable channel A', async ({ page }) => {
   await expect(voltageV).not.toHaveText(/0.000/);
 });
 
-test('ChannelA shows right stats for Sin', async ({ page }) => {
+test('Streaming ChannelA shows right stats', async ({ page }) => {
   // let errorCount = 0;
   // page.on("console", msg => {
   //   if (msg.type() === "error") {
@@ -51,11 +52,45 @@ test('ChannelA shows right stats for Sin', async ({ page }) => {
   await waveformCtl.getByRole('button', { name: 'Send' }).click();
 
   // Turn on Scanning at 10Hz
-  const scanCtl = page.getByLabel('RunScanCtl');
-  await scanCtl.getByLabel('freq').selectOption('100');
+  const scanCtl = page.getByLabel('ScanCtl');
+  await scanCtl.getByLabel('streamFreq').selectOption('100');
   await scanCtl.getByLabel('probe_0').selectOption('CHAN_A');
   await scanCtl.getByRole('button', { name: 'Send' }).click();
 
+
+  const AAvgLocator = page.getByTestId('CHAN_A-ave');
+
+  // This expect makes it clear if the element is found.
+  await expect(AAvgLocator).toBeVisible({ timeout: 2000 });
+
+  // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
+  await expect(async () => {
+    const avgAsString = await AAvgLocator.innerText();
+    const avg = Number(avgAsString);
+    expect(avg).toBeLessThan(0.6);
+    expect(avg).toBeGreaterThan(0.4);
+  }).toPass({ intervals: [1000], timeout: 4000 });
+});
+
+test('Streaming ChannelA shows right stats', async ({ page }) => {
+  // Command SINE on Channel A with range: [0.4,0.6]
+  const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
+  await waveformCtl.getByLabel('enabled').check();
+  await waveformCtl.getByLabel("channel").selectOption({ index: 0 }); // CHAN_A
+  await waveformCtl.getByLabel("shape").selectOption("SINE")
+  await waveformCtl.getByLabel('amplitudeV').fill('0.2');
+  await waveformCtl.getByLabel('frequencyHz').fill('5');
+  await waveformCtl.getByLabel('offsetV').fill('0.5');
+  await waveformCtl.getByRole('button', { name: 'Send' }).click();
+
+  // Turn on Scanning at 10Hz
+  const scanCtl = page.getByLabel('ScanCtl');
+  await scanCtl.getByLabel('snapFreq').selectOption('1000');
+  await scanCtl.getByLabel('probe_0').selectOption('CHAN_A');
+  await scanCtl.getByRole('button', { name: 'Send' }).click();
+
+  const manualSnap = page.getByLabel("ManualSnapCtl");
+  await manualSnap.getByRole('button', {name: 'Send'}).click();
 
   const AAvgLocator = page.getByTestId('CHAN_A-ave');
 

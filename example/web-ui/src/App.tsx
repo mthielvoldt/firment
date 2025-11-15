@@ -15,7 +15,8 @@ function App() {
         <div className='widget-column'>
           <h2>Commands</h2>
           <widgets.WaveformCtl />
-          <widgets.RunScanCtl />
+          <widgets.ScanCtl />
+          <widgets.ManualSnapCtl />
           <FWUpdate />
           <Reset />
         </div>
