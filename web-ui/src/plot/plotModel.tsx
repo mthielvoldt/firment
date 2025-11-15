@@ -9,6 +9,7 @@ type ProbeSignal = {  // candidate rename: ProbeSample
   value: number;
 };
 type ProbeSignals = { // SampleSet
+  recordId: number;
   probeSignals: ProbeSignal[];
 };
 export interface Trace {
@@ -26,21 +27,12 @@ export interface Record {
 }
 
 let data: Trace[][] = [];
-let lastSignals: ProbeSignal[] = [];
 
 
 export function handleProbeSignals(signals: ProbeSignals) {
   if (signals.probeSignals.length === 0) return;
 
-  const idsSame =
-    (signals.probeSignals.length == lastSignals.length) &&
-    signals.probeSignals.reduce((accum, signal, index) =>
-      accum && (signal.id == lastSignals[index].id), true);
-
-  lastSignals = signals.probeSignals;
-
-  // If probes->signals routing has changed, start new data row.
-  if (!idsSame) {
+  while (signals.recordId >= data.length) {
     const newRecord = signals.probeSignals.map((signal) => (
       {
         testPointId: signal.id,
@@ -52,7 +44,7 @@ export function handleProbeSignals(signals: ProbeSignals) {
     console.log("newRecord: ", newRecord);
   }
   signals.probeSignals.forEach((signal, index) => {
-    data[data.length - 1][index].data.push(signal.value);
+    data[signals.recordId][index].data.push(signal.value);
   })
 }
 

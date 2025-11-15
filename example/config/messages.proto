@@ -42,11 +42,13 @@ message Top {
     Log Log = 2;
     TouchParam TouchParam = 3;
     ProbeSignals ProbeSignals = 4;
-    RunScanCtl RunScanCtl = 5;
+    ScanCtl ScanCtl = 5;
     ImageData ImageData = 6;
     PageStatus PageStatus = 7;
     FirmentErrorTlm FirmentErrorTlm = 8;
     Version Version = 9;
+    ManualSnapCtl ManualSnapCtl = 10;
+
     WaveformCtl WaveformCtl = 12;
     WaveformTlm WaveformTlm = 13;
     Reset Reset = 14;

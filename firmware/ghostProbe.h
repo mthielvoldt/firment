@@ -1,7 +1,17 @@
+/** ghostProbe.h
+ * Provides remote probing of variables in firmware over the fmt_comms link.
+ * Each variable to be probed is registered as a "test point" with a unique
+ * TestPointId, type, source address, and optional converter function.
+ * 
+ * A runScanCtl message configures which test points to sample at what frequency.
+ * 
+ * See docs/GhostProbe.md for more information.
+ */
 #ifndef ghostProbe_H
 #define ghostProbe_H
 
 #include <messages.pb.h>
+#include <ghostProbeConfig.h>
 
 #include <stdint.h>
 #include <stddef.h>
@@ -26,21 +36,28 @@ typedef struct _testPoint {
   volatile void *src;
   srcType_t type;
   converter_t converter;
+  size_t size;  // redundant with type, included for access speed.
+  uint32_t id;
 } testPoint_t;
 
 /** Init GhostProbe
  * 
  */
-void gp_init(uint32_t periodicCallFrequencyHz);
+bool gp_init(uint32_t streamCallFrequencyHz, uint32_t snapCallFreqHz);
 
 bool gp_initTestPoint(TestPointId id, volatile void *src, srcType_t type, converter_t converterFn);
 
 /** Called by generated fmt_rx.pb.c 
  * See fmt_rx.in.c 
 */
-#define USE_RunScanCtl
-void handleRunScanCtl(RunScanCtl scanCtl);
+#define USE_ScanCtl
+void handleScanCtl(ScanCtl scanCtl);
 
-void gp_periodic(void);
+#define USE_ManualSnapCtl
+void handleManualSnapCtl(ManualSnapCtl _);
+
+void gp_streamPeriodic(void);
+void gp_snapPeriodic(void);
+void gp_takeSnapshot(void);
 
 #endif // ghostProbe_H

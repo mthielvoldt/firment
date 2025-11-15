@@ -11,7 +11,6 @@ set(PROJECT_STR "fmt-ex")
 
 ## Optional modules
 set(ENABLE_WAVEFORM 1)
-set(ENABLE_GHOST_PROBE 1)
 include(${FIRMENT_DIR}/cmake-tools/fmtTransport.cmake)
 
 # update_page_size is used in:
@@ -20,7 +19,6 @@ include(${FIRMENT_DIR}/cmake-tools/fmtTransport.cmake)
 set(UPDATE_PAGE_SIZE 256)
 set(DATA_MSG_PAYLOAD_SIZE_MAX 32)
 set(LOG_TEXT_MAX_SIZE      50)
-set(PROBE_SIGNAL_MAX_COUNT 6) # Todo: remove
 
 message(STATUS "Update page size: ${UPDATE_PAGE_SIZE}")
 message(STATUS "Message payload size max: ${DATA_MSG_PAYLOAD_SIZE_MAX}")

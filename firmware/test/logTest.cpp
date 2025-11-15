@@ -21,6 +21,7 @@ TEST_GROUP(fmt_log)
     fmt_setLogLevel(LOG_VERBOSE);
     UT_PTR_SET(fmt_getMsg, fmt_getMsg_test);
     UT_PTR_SET(fmt_sendMsg, fmt_sendMsg_test);
+    test_resetComms();
   }
 
   void teardown()
