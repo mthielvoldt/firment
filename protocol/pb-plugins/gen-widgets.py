@@ -92,14 +92,19 @@ def get_ctl_widget(message: DescriptorProto, enums: Dict[str, EnumDescriptorProt
       </label>
       <br/>'''
 
-  initial_state_str = str(initial_state).replace("True", "true").replace("False","false")
+  useState_line = ""
+  sentState = "{}"
+  if len(initial_state) > 0:
+    initial_state_str = str(initial_state).replace("True", "true").replace("False","false")
+    useState_line = f"const [state, setState] = useState({initial_state_str});\n"
+    sentState = "state"
+
   return f'''
 export function {message.name}({{}}) {{
-  const [state, setState] = useState({initial_state_str});
-
+  {useState_line}
   function handleSubmit(e: React.FormEvent) {{
     e.preventDefault();
-    sendMessage("{message.name}", state);
+    sendMessage("{message.name}", {sentState});
   }}
 
   return (
