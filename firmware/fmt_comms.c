@@ -61,13 +61,14 @@ static bool fmt_sendMsg_prod(Top message)
   uint8_t *txMsg = txPacket + LENGTH_SIZE_BYTES;
   pb_ostream_t ostream = pb_ostream_from_buffer(txMsg, MAX_MESSAGE_SIZE_BYTES);
 
-  bool success = pb_encode(&ostream, Top_fields, &message);
-  if (success)
+  bool enqueueOk = false;
+  bool encodeOk = pb_encode(&ostream, Top_fields, &message);
+  if (encodeOk)
   {
     txPacket[LENGTH_POSITION] = ostream.bytes_written;
     addCRC(txPacket);
-    bool enqueueSuccess = enqueueBack(sendQueue, txPacket);
-    if (!enqueueSuccess)
+    enqueueOk = enqueueBack(sendQueue, txPacket);
+    if (!enqueueOk)
     {
       errCounts.sendQueueFull++;
     }
@@ -80,7 +81,7 @@ static bool fmt_sendMsg_prod(Top message)
     errCounts.encodeFail++;
   }
 
-  return success;
+  return enqueueOk;
 }
 bool (*fmt_sendMsg)(Top message) = fmt_sendMsg_prod;
 
