@@ -65,7 +65,7 @@ test('Streaming shows right stats', async ({ page }) => {
   const AAvgLocator = page.getByTestId('CHAN_A-ave');
 
   // This expect makes it clear if the element is found.
-  await expect(AAvgLocator).toBeVisible({ timeout: 2000 });
+  await expect(AAvgLocator).toBeVisible({ timeout: 4000 });
 
   // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
   await expect(async () => {

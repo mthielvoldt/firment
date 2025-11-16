@@ -22,8 +22,11 @@ export async function connect(page: Page) {
 
   // Open the FW Meta widget to see the uptime.
   await page.getByText('FW Meta').click();
-  const uptimeLocator = page.getByTestId('fw-up-time');
 
+  // Wait for the first FW Meta message to arrive.
+  await expect(page.getByTestId('fw-semver')).not.toHaveText('0.0.0');
+
+  const uptimeLocator = page.getByTestId('fw-up-time');
   const uptimeText = await uptimeLocator.textContent();
   if (Number(uptimeText) > 10)
   {
@@ -32,8 +35,15 @@ export async function connect(page: Page) {
   }
 }
 
-export function resetTarget(page: Page) {
-  return page.getByRole("form", { name: "Reset" })
+export async function resetTarget(page: Page) {
+  
+  const uptimeLocator = page.getByTestId('fw-up-time');
+  const prevUptimeTxt = await uptimeLocator.innerText();
+  const prevUptime = Number.parseInt(prevUptimeTxt);
+
+  page.getByRole("form", { name: "Reset" })
     .getByRole("button", { name: "Send" })
     .click();
+
+  return expect(() => lessThan(uptimeLocator, prevUptime)).toPass();
 }
