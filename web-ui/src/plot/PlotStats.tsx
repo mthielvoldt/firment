@@ -9,13 +9,14 @@ export default function PlotStats({ traces }: Props) {
   let recordStats = traces.map((trace) => new Stats(trace.testPointName, trace.data));
   const legendText = recordStats.map(traceStats => traceStats.text);
 
-  function getLegendRow({ name, min, max, ave }: StatsText, i: number) {
+  function getLegendRow({ name, count, min, max, ave }: StatsText, i: number) {
     const rgbStr = "rgb(" + getColorAsString(i) + ")";
     const colorStyle = { backgroundColor: rgbStr }
     return (
       <tr key={i}>
         <td> <span className="color-box" style={colorStyle}></span> </td>
         <td>{name}</td>
+        <td data-testid={name + "-count"}>{count}</td>
         <td data-testid={name + "-min"}>{min}</td>
         <td data-testid={name + "-max"}>{max}</td>
         <td data-testid={name + "-ave"}>{ave}</td>
@@ -28,7 +29,12 @@ export default function PlotStats({ traces }: Props) {
     <table className="legend">
       <thead>
         <tr>
-          <th>Probe</th><th>Test point</th><th>min</th><th>max</th><th>ave</th>
+          <th>Probe</th>
+          <th>Test point</th>
+          <th>count</th>
+          <th>min</th>
+          <th>max</th>
+          <th>ave</th>
         </tr>
       </thead>
       <tbody>{legend}</tbody>
