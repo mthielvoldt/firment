@@ -1,12 +1,16 @@
 import { test, expect, type Page } from '@playwright/test';
-import { connectedAndReset } from './shared';
+import { connect, resetTarget } from './shared';
 
 test.beforeEach(async ({ page }) => {
-  await connectedAndReset(page);
+  await connect(page);
   await page.getByText('WaveformTlm').click();
   await page.getByText('WaveformCtl').click();
   await page.getByText('ScanCtl').click();
   await page.getByText('ManualSnapCtl').click();
+});
+
+test.afterEach(async ({page}) => {
+  await resetTarget(page);
 });
 
 
@@ -85,23 +89,22 @@ test('Snapshot shows right stats', async ({ page }) => {
 
   // Turn on Scanning at 10Hz
   const scanCtl = page.getByLabel('ScanCtl');
-  await scanCtl.getByLabel('snapFreq').selectOption('1000');
-  await scanCtl.getByLabel('probe_0').selectOption('CHAN_A');
+  await scanCtl.getByLabel('streamFreq').selectOption('STREAM_DISABLED');
+  await scanCtl.getByLabel('snapFreq').selectOption('FREQ_1KHZ');
+  await scanCtl.getByLabel('probe_0').selectOption('CHAN_A_INV');
   await scanCtl.getByRole('button', { name: 'Send' }).click();
+
+  await page.waitForTimeout(500);
 
   const manualSnap = page.getByLabel("ManualSnapCtl");
   await manualSnap.getByRole('button', {name: 'Send'}).click();
 
-  const AAvgLocator = page.getByTestId('CHAN_A-ave');
+  const signalCount = page.getByTestId('CHAN_A_INV-count');
+  const signalMin = page.getByTestId('CHAN_A_INV-min');
+  const signalMax = page.getByTestId('CHAN_A_INV-max');
 
   // This expect makes it clear if the element is found.
-  await expect(AAvgLocator).toBeVisible({ timeout: 2000 });
-
-  // Wait for average to be between 0.4 and 0.6 (it should converge on 0.5)
-  await expect(async () => {
-    const avgAsString = await AAvgLocator.innerText();
-    const avg = Number(avgAsString);
-    expect(avg).toBeLessThan(0.6);
-    expect(avg).toBeGreaterThan(0.4);
-  }).toPass({ intervals: [1000], timeout: 4000 });
+  await expect(signalCount).toHaveText('512', { timeout: 5000 });
+  await expect(signalMin).toHaveText('-0.700');
+  await expect(signalMax).toHaveText('-0.300');
 });

@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { connectedAndReset } from './shared';
+import { connect, resetTarget } from './shared';
 import * as path from 'path';
 import * as fs from 'fs';
 import { send } from 'process';
@@ -15,8 +15,12 @@ function getBuildIdData() {
 }
 
 test.beforeEach(async ({ page }) => {
-  await connectedAndReset(page);
+  await connect(page);
   await page.getByText('FW Update').click();
+});
+
+test.afterEach(async ({page}) => {
+  await resetTarget(page);
 });
 
 test('Build Id is visible', async ({ page }) => {

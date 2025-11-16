@@ -1,6 +1,7 @@
 
 export interface StatsText {
   name: string;
+  count: string;
   min: string;
   max: string;
   ave: string;
@@ -47,6 +48,7 @@ export class Stats {
   get text() {
     return {
       name: this.name,
+      count: toText(this.count),
       min: toText(this.min),
       max: toText(this.max),
       ave: toText(this.ave)
