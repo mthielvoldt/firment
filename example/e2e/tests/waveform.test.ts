@@ -31,7 +31,7 @@ test('WaveformCtl can enable and disable channel A', async ({ page }) => {
   await expect(voltageV).not.toHaveText(/0.000/);
 });
 
-test('Streaming ChannelA shows right stats', async ({ page }) => {
+test('Streaming shows right stats', async ({ page }) => {
   // let errorCount = 0;
   // page.on("console", msg => {
   //   if (msg.type() === "error") {
@@ -72,7 +72,7 @@ test('Streaming ChannelA shows right stats', async ({ page }) => {
   }).toPass({ intervals: [1000], timeout: 4000 });
 });
 
-test('Streaming ChannelA shows right stats', async ({ page }) => {
+test('Snapshot shows right stats', async ({ page }) => {
   // Command SINE on Channel A with range: [0.4,0.6]
   const waveformCtl = page.getByRole("form", { name: "WaveformCtl" });
   await waveformCtl.getByLabel('enabled').check();

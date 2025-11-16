@@ -45,10 +45,10 @@ static void periodicA(void)
   ctl_updateVoltageISR();
   gp_snapPeriodic();
 
-  static uint32_t tenCounter = 0;
-  if (++tenCounter == 10U)
+  static uint32_t callCounter = 0;
+  if (++callCounter == GP_STREAM_DIVIDER)
   {
-    tenCounter = 0;
+    callCounter = 0;
     gp_streamPeriodic();
   }
 }
