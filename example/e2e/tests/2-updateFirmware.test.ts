@@ -19,10 +19,6 @@ test.beforeEach(async ({ page }) => {
   await page.getByText('FW Update').click();
 });
 
-test.afterEach(async ({page}) => {
-  await resetTarget(page);
-});
-
 test('Build Id is visible', async ({ page }) => {
   const buildId = page.getByTestId("fw-build-id");
 
