@@ -13,6 +13,7 @@
 #define VERSION_PATCH @CMAKE_PROJECT_VERSION_PATCH@
 
 bool fmt_sendVersion(void);
+bool fmt_sendHello(void);
 void fmt_setBuildIdGetter(uint32_t (*getter)(void));
 
 #endif // fmt_version_h

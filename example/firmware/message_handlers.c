@@ -70,7 +70,7 @@ void comm_handleTelemetry(void)
   }
   case 200:
   {
-    // fmt_sendLog(LOG_INFO, "A test. ", rotations);
+    fmt_sendHello();
     break;
   }
   case 400:
