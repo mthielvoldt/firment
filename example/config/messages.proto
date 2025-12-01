@@ -38,19 +38,26 @@ message WaveformTlm {
 
 message Top {
   oneof sub {
+    // the field numbers 1-15 should be reserved for messages sent frequently
     Ack Ack = 1;
     Log Log = 2;
-    TouchParam TouchParam = 3;
     ProbeSignals ProbeSignals = 4;
-    ScanCtl ScanCtl = 5;
     ImageData ImageData = 6;
     PageStatus PageStatus = 7;
     FirmentErrorTlm FirmentErrorTlm = 8;
-    Version Version = 9;
-    ManualSnapCtl ManualSnapCtl = 10;
+    Hello Hello = 9;
+    Version Version = 11;
 
-    WaveformCtl WaveformCtl = 12;
+    // Project-specific high-volume messages
     WaveformTlm WaveformTlm = 13;
+    
+    // These are sent infrequently.  Their field numbers should be > 15.
     Reset Reset = 14;
+    TouchParam TouchParam = 16;
+    ScanCtl ScanCtl = 20;
+    ManualSnapCtl ManualSnapCtl = 21;
+    
+    // Project-specific low-volume messages.
+    WaveformCtl WaveformCtl = 50;
   }
 }

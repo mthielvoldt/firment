@@ -13,24 +13,32 @@ bool fmt_sendVersion(void)
 {
   static uint32_t callCount = 0;
 
-  // Note: deviceId is part of the MCU's Id. Uniqueness not guaranteed.
-  uint32_t deviceId = getDeviceId().dblWords[0] & 0xFFFFFFFF;
-
   Top msg = {
       .which_sub = Top_Version_tag,
-      .sub = {
-          .Version = {
-              .project = PROJECT_STR,
-              .major = VERSION_MAJOR,
-              .minor = VERSION_MINOR,
-              .patch = VERSION_PATCH,
-              .upTime = ++callCount,
-              .deviceId = deviceId,
-          },
+      .sub.Version = {
+          .major = VERSION_MAJOR,
+          .minor = VERSION_MINOR,
+          .patch = VERSION_PATCH,
+          .upTime = ++callCount,
       },
   };
   if (buildIdGetter)
     msg.sub.Version.buildId = buildIdGetter();
 
+  return fmt_sendMsg(msg);
+}
+
+bool fmt_sendHello(void)
+{
+  // Note: deviceId is part of the MCU's Id. Uniqueness not guaranteed.
+  uint32_t deviceId = getDeviceId().dblWords[0] & 0xFFFFFFFF;
+
+  Top msg = {
+      .which_sub = Top_Hello_tag,
+      .sub.Hello = {
+          .project = PROJECT_STR,
+          .deviceId = deviceId,
+      },
+  };
   return fmt_sendMsg(msg);
 }
